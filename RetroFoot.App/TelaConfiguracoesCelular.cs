@@ -91,6 +91,7 @@ public sealed partial class TelaConfiguracoes
             mod && _cfg.CartoesAmarelos ? T("Amarelos e vermelhos") : T("Só vermelhos"),
             mod && _cfg.Patrocinios ? T("patrocínios ligados") : T("patrocínios desligados"),
             T("sobem e descem {0}", k),
+            mod && _cfg.PremiacaoAmpliada ? T("premiação ampliada") : T("premiação clássica"),
             _cfg.EstrangeirosLiberados ? T("Liberado") : T("Realístico"),
         });
         return new[]
@@ -154,6 +155,7 @@ public sealed partial class TelaConfiguracoes
             Adicao(T("Acréscimos"), T("De 1 a 5 minutos no fim do 1º tempo e de 1 a 10 no fim do 2º, com golos, cartões e lesões (45'+2'). Desligados: como no Retrô."), _cfg.Acrescimos, v => _cfg.Acrescimos = v),
             Adicao(T("5 substituições"), T("A regra da FIFA: até 5 substituições por jogo. Desligado: 3, como no Retrô. Na prorrogação da Taça, mais uma."), _cfg.CincoSubstituicoes, v => _cfg.CincoSubstituicoes = v),
             Adicao(T("9 reservas"), T("Até 9 reservas no banco (20 relacionados). Desligado: 5, como no Retrô."), _cfg.NoveReservas, v => _cfg.NoveReservas = v),
+            Adicao(T("Premiação ampliada"), AjudaPremiacao, _cfg.PremiacaoAmpliada, v => _cfg.PremiacaoAmpliada = v),
         }));
         var ajudaSobem = CUi.Txt(AjudaSobem(), 14, null, FontWeight.Medium, true);
         var (sobem, _) = CUi.Escolha(OpcoesSobem, mod ? _cfg.SobemDescem : 0,

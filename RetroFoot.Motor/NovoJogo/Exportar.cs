@@ -45,6 +45,8 @@ public static class Exportar
         // o K escolhido nas Configuracoes fica no save (Regras.MarcarSobemDescem); o automatico
         // nao marca nada (o save fica igual ao do original)
         if (e.Regras.SobemDescemEscolhido > 0) Regras.Regras.MarcarSobemDescem(s, e.Regras.SobemDescem);
+        // a premiacao ampliada tambem (Regras.MarcarPremiacao); a Classica nao marca nada
+        if (e.Regras.PremiacaoAmpliada) Regras.Regras.MarcarPremiacao(s, true);
         foreach (var p in e.Partidas)
         {
             s.Jogos.Add(new S.Jogo

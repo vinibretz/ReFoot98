@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
 using RetroFoot.Motor.Ciclo;
+using RetroFoot.Motor.Mercado;
 using RetroFoot.Motor.Save;
 using RetroFoot.Motor.Temporada;
 using Mem = RetroFoot.Motor.Partida.Memoria;
@@ -54,13 +55,25 @@ public static class DemoDialogos
                 var r = new Resultado { Campeao = s.S.Divisoes[0].Equipas[0], VencedorTaca = s.S.OutrasEquipas.Count > 0 ? s.S.OutrasEquipas[0] : s.S.Divisoes[0].Equipas[1] };
                 r.Subiram[0].Add(s.S.Divisoes[1].Equipas[0]);
                 r.Desceram[0].Add(s.S.Divisoes[0].Equipas[^1]);
+                // a premiacao ampliada de exemplo (K = 2, Reais)
+                var m = Moeda.DoSave(s.S);
+                for (int d = 0; d < 4; d++)
+                    for (int i = 1; i <= 2; i++)
+                        r.Premios.Add(new Premio(d, i, s.S.Divisoes[d].Equipas[i - 1], PremiacaoAmpliada.Valor(m.PremioCampeao, d, i, 2)));
+                r.Premios.Add(new Premio(-1, 2, s.S.Divisoes[0].Equipas[2], PremiacaoAmpliada.ViceTaca(m.PremioTaca)));
                 Control? c = null;
                 c = TelaFimDeTemporada.Janela(s, r, () =>
                 {
                     dlg.Fechar(c!);
-                    Control? c2 = null;
-                    c2 = TelaFimDeTemporada.SubidasEDescidas(s, r, () => dlg.Fechar(c2!));
-                    Mostrar(c2);
+                    Control? c3 = null;
+                    c3 = TelaFimDeTemporada.PremiacaoDivisoes(s, r, () =>
+                    {
+                        dlg.Fechar(c3!);
+                        Control? c2 = null;
+                        c2 = TelaFimDeTemporada.SubidasEDescidas(s, r, () => dlg.Fechar(c2!));
+                        Mostrar(c2);
+                    });
+                    Mostrar(c3);
                 });
                 Mostrar(c);
             }),

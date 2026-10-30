@@ -61,11 +61,14 @@ public sealed class Soak
     }
 
     bool achouPoucos;
+    List<ushort>? finalistas;
     void Pulso(string o)
     {
         if (!achouPoucos && J != null)
             foreach (var e in J.M.S.Equipas)
                 if (e.Jogadores.Count < 11) { achouPoucos = true; Log.Add($"DIAG: {e.ID} com {e.Jogadores.Count} ao chegar em {o}; antes: {onde}; ultimo: {ultimo}"); }
+        // os dois finalistas da Taca (a verdade independente para o vice da premiacao ampliada)
+        if (J != null && J.M.S.OutrasEquipas.Count == 2) finalistas = J.M.S.OutrasEquipas.ToList();
         onde = o; Interlocked.Increment(ref pulso);
     }
 
@@ -164,6 +167,15 @@ public sealed class Soak
         // o K do jogo (o do save, Regras.SobemDescemDoSave) e o do jogo novo; K de cada lado
         int k = cfg.Regras.SobemDescem;
         if (J.M.Regras.SobemDescem != k) Problema($"K = {J.M.Regras.SobemDescem}, quer {k}");
+        // a premiacao (a do save, Regras.PremiacaoDoSave): a do jogo novo, e premios so na Ampliada
+        if (J.M.Regras.PremiacaoAmpliada != cfg.Regras.PremiacaoAmpliada) Problema($"premiacao ampliada = {J.M.Regras.PremiacaoAmpliada}");
+        if (cfg.Regras.PremiacaoAmpliada != (r.Premios.Count == 4 * k + 1)) Problema($"{r.Premios.Count} premios da premiacao ampliada (K = {k})");
+        if (r.Premios.FirstOrDefault(p => p.Divisao < 0) is { } vice)
+        {
+            Log.Add($"[{cfg.Nome}] finalistas {(finalistas == null ? "?" : string.Join(',', finalistas))}, taca {r.VencedorTaca}, vice premiado {vice.Equipa}");
+            if (finalistas != null && (!finalistas.Contains(vice.Equipa) || vice.Equipa == r.VencedorTaca)) Problema($"vice da Taca premiado {vice.Equipa}, finalistas {string.Join(',', finalistas)}, campeao {r.VencedorTaca}");
+        }
+        finalistas = null;
         for (int d = 0; d < 4; d++)
             if (r.Desceram[d].Count != k || r.Subiram[d + 1].Count != k) Problema($"divisao {d + 1}: {r.Desceram[d].Count} desceram, {r.Subiram[d + 1].Count} subiram da de baixo (K = {k})");
         if (Temporadas >= cfg.Temporadas) terminar = true;

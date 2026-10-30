@@ -1,0 +1,12 @@
+# Premiacao ampliada (Regras.PremiacaoAmpliada; TelaConfiguracoes, TelaFimDeTemporada) (pt-PT). Formato: chave<TAB>traducao (RetroFoot.App/Idioma.cs).
+
+Premiação ampliada	Prémios alargados
+Prêmios também para as primeiras de cada divisão e o vice da copa, proporcionais à divisão e à posição. Desligada: só campeão, copa e artilheiro, como no Retrô.	Prémios também para as primeiras de cada divisão e a finalista vencida da taça, proporcionais à divisão e à posição. Desligados: só campeão, taça e melhor marcador, como no Retrô.
+premiação ampliada	prémios alargados
+premiação clássica	prémios clássicos
+Premiação	Prémios
+Ampliada	Alargados
+Clássica	Clássicos
+Vice da copa	Finalista da taça
+Premiação das divisões	Prémios das divisões
+Os prêmios pela classificação final	Os prémios pela classificação final

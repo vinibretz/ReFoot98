@@ -87,6 +87,7 @@ public sealed partial class TelaConfiguracoes
                         Marca(T("Acréscimos"), _cfg.Acrescimos, v => _cfg.Acrescimos = v),
                         Marca(T("5 substituições (FIFA)"), _cfg.CincoSubstituicoes, v => _cfg.CincoSubstituicoes = v),
                         Marca(T("9 reservas no banco"), _cfg.NoveReservas, v => _cfg.NoveReservas = v),
+                        Marca(T("Premiação ampliada"), _cfg.PremiacaoAmpliada, v => _cfg.PremiacaoAmpliada = v),
                     },
                 });
                 var sobem = new CR95.Combo(OpcoesSobem, mod ? _cfg.SobemDescem : 0, 16) { IsEnabled = mod };

@@ -15,7 +15,13 @@ public sealed class Resultado
     public ushort Campeao, VencedorTaca;
     public List<ushort>[] Subiram = Enumerable.Range(0, 5).Select(_ => new List<ushort>()).ToArray();
     public List<ushort>[] Desceram = Enumerable.Range(0, 5).Select(_ => new List<ushort>()).ToArray();
+    // a premiacao ampliada (Regras.PremiacaoAmpliada; vazia na Classica): divisao 0..3 e
+    // posicao crescente, o campeao da 1a incluido; no fim o vice da Taca, se houve final
+    public List<Premio> Premios = new();
 }
+
+// um premio da premiacao ampliada: Divisao 0..3 (Posicao 1..K) ou -1 = vice da Taca (Posicao 2)
+public sealed record Premio(int Divisao, int Posicao, ushort Equipa, int Valor);
 
 // Comeco e fim da temporada (subida e descida, campeoes, premios, o que se zera) e as
 // contas da Taca, como o jogo classico (98.003) faz (seg05 e as rotinas de seg03 que ele chama).
@@ -175,6 +181,9 @@ public sealed class Epoca
             EventoTreinador(c, evt, ano, e.ID);
         }
 
+        // a premiacao ampliada usa a classificacao de antes da subida e descida
+        var (topo, vice) = Regras.PremiacaoAmpliada ? (PrimeirasK(), ViceDaTaca(taca)) : (null, null);
+
         SubidaEDescida(r);
         Interacao?.Chicotadas.Clear();   // 5:025a
 
@@ -184,7 +193,50 @@ public sealed class Epoca
 
         AntesDosPremios?.Invoke();
         Premios(camp, taca);
+        if (topo != null) PremiosAmpliados(r, topo, vice);
         return r;
+    }
+
+    // as K primeiras de cada divisao da 1a a 4a (a lista da divisao e a classificacao)
+    List<ushort>[] PrimeirasK()
+    {
+        int k = Regras.SobemDescem;
+        return Enumerable.Range(0, Math.Min(4, S.Divisoes.Count)).Select(d => S.Divisoes[d].Equipas.Take(k).ToList()).ToArray();
+    }
+
+    // o vice da Taca: o adversario do campeao na ultima entrada jogada da Taca do calendario
+    // dele (+0x07 = 1; golos 0xFFFF = nao jogada); null se nao houve final
+    static ushort? ViceDaTaca(Equipa taca)
+    {
+        for (int i = taca.Calendario.Count - 1; i >= 0; i--)
+        {
+            var c = taca.Calendario[i];
+            if (c.B07 == 1 && c.W0A != 0xFFFF) return c.W08;
+        }
+        return null;
+    }
+
+    // Temporada.PremiacaoAmpliada, depois dos premios do original: o campeao da 1a ja recebeu
+    // o premio dele (fica na lista, para a interface); as outras posicoes e o vice da Taca
+    // recebem agora, com Movimento tipo 3 (Premios)
+    void PremiosAmpliados(Resultado r, List<ushort>[] topo, ushort? vice)
+    {
+        var m = Moeda.DoSave(S);
+        int k = Regras.SobemDescem;
+        for (int d = 0; d < topo.Length; d++)
+            for (int i = 0; i < topo[d].Count; i++)
+            {
+                int v = PremiacaoAmpliada.Valor(m.PremioCampeao, d, i + 1, k);
+                r.Premios.Add(new Premio(d, i + 1, topo[d][i], v));
+                if (d == 0 && i == 0) continue;
+                if (MercadoJogo.Equipa(S, topo[d][i]) is { } e) MercadoJogo.Movimento(e, v, MercadoJogo.TipoPremios);
+            }
+        if (vice is ushort id && MercadoJogo.Equipa(S, id) is { } ev)
+        {
+            int v = PremiacaoAmpliada.ViceTaca(m.PremioTaca);
+            r.Premios.Add(new Premio(-1, 2, id, v));
+            MercadoJogo.Movimento(ev, v, MercadoJogo.TipoPremios);
+        }
     }
 
     // 5:0987-0a81: d0[N-2] <-> d1[0] (2x), d1[N-4] <-> d2[0] (2x), d2[N-4] <-> d3[0] (2x);

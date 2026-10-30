@@ -38,6 +38,8 @@ public sealed class Configuracoes
     public bool Acrescimos { get; set; }
     // "Sobem e descem por divisao" (Regras.SobemDescemEscolhido): 0 = automatico, 1 a 4
     public int SobemDescem { get; set; }
+    // "Premiacao" (Regras.PremiacaoAmpliada): false = Classica, true = Ampliada
+    public bool PremiacaoAmpliada { get; set; }
     // (versao Atual) 5 substituicoes como a regra da FIFA (senao 3) e banco com 9 reservas
     // (senao 5); nas duas, a prorrogacao da Taca da mais uma substituicao
     public bool CincoSubstituicoes { get; set; } = true;
@@ -76,7 +78,7 @@ public sealed class Configuracoes
     // os amarelos, os acrescimos e o K da opcao
     public TRegras RegrasPara(int n, bool forcarModificada = false) =>
         !Modificada && n == 8 && !forcarModificada ? TRegras.Original
-            : TRegras.Launcher(n) with { CartoesAmarelos = CartoesAmarelos, DesempateVitorias = true, Acrescimos = Acrescimos, SobemDescemEscolhido = SobemDescem,
+            : TRegras.Launcher(n) with { CartoesAmarelos = CartoesAmarelos, DesempateVitorias = true, Acrescimos = Acrescimos, SobemDescemEscolhido = SobemDescem, PremiacaoAmpliada = PremiacaoAmpliada,
                 SubstituicoesEscolhidas = CincoSubstituicoes ? 5 : 3, ReservasEscolhidas = NoveReservas ? 9 : 5 };
 
     // o K que vale no proximo jogo novo (o automatico ou o escolhido, ate o maximo do N)
@@ -88,10 +90,11 @@ public sealed class Configuracoes
     // as opcoes da Sessao para um save: N do save, o resto daqui
     public CicloOpcoes OpcoesDoJogo(Jogo98 s, string? pastaJogo)
     {
-        // um save com N != 8 ou com o K marcado (Regras.SobemDescemDoSave) abre sempre como
+        // um save com N != 8, com o K marcado (Regras.SobemDescemDoSave) ou com a premiacao
+        // ampliada (Regras.PremiacaoDoSave) abre sempre como
         // Modificada; o N e o K vem do save
         var doSave = TRegras.DoSave(s, TRegras.Original);
-        bool mod = Modificada || doSave.N != 8 || doSave.SobemDescemEscolhido > 0;
+        bool mod = Modificada || doSave.N != 8 || doSave.SobemDescemEscolhido > 0 || doSave.PremiacaoAmpliada;
         var regras = TRegras.DoSave(s, RegrasPara(doSave.N, mod));
         var (bosman, plop) = ListasEstrangeiros(pastaJogo);
         return CicloOpcoes.Padrao with
@@ -199,6 +202,7 @@ public sealed class Configuracoes
             c.NoveReservas = Logico(o, "noveReservas") ?? c.NoveReservas;
             if (Inteiro(o, "lancesNaJornada") is int lj && lj is >= 0 and <= 0x1F) c.LancesNaJornada = lj;
             if (Inteiro(o, "sobemDescem") is int k && k is >= 0 and <= 4) c.SobemDescem = k;
+            c.PremiacaoAmpliada = Logico(o, "premiacaoAmpliada") ?? c.PremiacaoAmpliada;
             if (Texto(o, "idioma") is IdiomaPT or IdiomaBR or IdiomaEN or IdiomaES) c.Idioma = Texto(o, "idioma")!;
             c.EstrangeirosLiberados = Texto(o, "estrangeiros") is string e ? e == "liberado" : c.EstrangeirosLiberados;
             if (Texto(o, "formatoTela") is Formato43 or Formato169) c.FormatoTela = Texto(o, "formatoTela")!;
@@ -224,6 +228,7 @@ public sealed class Configuracoes
             ["noveReservas"] = NoveReservas,
             ["lancesNaJornada"] = LancesNaJornada,
             ["sobemDescem"] = SobemDescem,
+            ["premiacaoAmpliada"] = PremiacaoAmpliada,
             ["idioma"] = Idioma,
             ["estrangeiros"] = EstrangeirosLiberados ? "liberado" : "original",
             ["formatoTela"] = FormatoTela,

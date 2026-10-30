@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
@@ -52,6 +53,9 @@ static class FimDeTemporadaCelular
             }
             else p.Children.Add(CUi.Txt("—", 18, CUi.Fraco));
             p.Children.Add(CUi.Linha_(T("Prêmio: ").TrimEnd().TrimEnd(':'), Ext(premio), CUi.Bom));
+            // (premiacao ampliada) o vice da copa no cartao da copa
+            if (copa && TelaFimDeTemporada.ViceCopa(r) is { } vice)
+                p.Children.Add(CUi.Linha_(T("Vice da copa") + ": " + (s.Equipa(vice.Equipa) is { } ev ? Dlg.Texto(ev.NomeCurto) : ""), Ext(vice.Valor), CUi.Bom));
             return CUi.Cartao_(copa ? T("Vencedor da copa") : T("Vencedor do campeonato"), p);
         }
 
@@ -121,6 +125,46 @@ static class FimDeTemporadaCelular
         void Fechar() { if (fechado) return; fechado = true; fechar(); }
         var ok = new CUi.Botao(T("OK"), true, Fechar) { HorizontalAlignment = HorizontalAlignment.Stretch };
         return new CUi.Folha(T("Subidas e descidas"), corpo, ok, T("As equipas que mudam de divisão"), fechar: Fechar);
+    }
+
+    // (premiacao ampliada) os premiados de cada divisao: uma secao por divisao, cada equipa com
+    // a posicao e o premio
+    internal static Control PremiacaoDivisoes(Sessao s, Resultado r, Action fechar)
+    {
+        var moeda = Moeda.DoSave(s.S);
+        bool fechado = false;
+        void Fechar() { if (fechado) return; fechado = true; fechar(); }
+        var grupos = TelaFimDeTemporada.GruposPremiacao(r, moeda).ToList();
+        if (CUi.Retro)
+        {
+            var lr = new List<Control>();
+            foreach (var g in grupos)
+            {
+                lr.Add(ListasCelular.LinhaR(ListasCelular.R(TelaFimDeTemporada.TituloPremio(g.Key), true)));
+                foreach (var p in g)
+                    lr.Add(ListasCelular.LinhaR(ListasCelular.Grade("34,*,Auto", ListasCelular.R(p.Posicao + "º"),
+                        ListasCelular.R(s.Equipa(p.Equipa) is { } e ? Dlg.Texto(e.NomeCurto) : ""), ListasCelular.R(FormatoDinheiro.Valor(moeda, p.Valor)))));
+            }
+            return ListasCelular.FolhaR(T("Premiação das divisões"), ListasCelular.CaixaR(lr), Fechar);
+        }
+        var corpo = new StackPanel { Spacing = 8 };
+        foreach (var g in grupos)
+        {
+            var sec = CUi.SecaoFolha(TelaFimDeTemporada.TituloPremio(g.Key));
+            if (corpo.Children.Count > 0) sec.Margin = new Thickness(0, 8, 0, 0);
+            corpo.Children.Add(sec);
+            var linhas = new List<Control>();
+            foreach (var p in g)
+            {
+                var pos = CUi.Txt(p.Posicao + "º", 14, p.Posicao == 1 ? CUi.Bom : CUi.Fraco, FontWeight.Bold);
+                var valor = CUi.Txt(FormatoDinheiro.Valor(moeda, p.Valor), 13.5, CUi.Bom, FontWeight.Bold);
+                valor.Margin = new Thickness(8, 0, 0, 0);
+                linhas.Add(CUi.Toque(ListasCelular.Grade("30,*,Auto", pos, ListasCelular.Eq(s.Equipa(p.Equipa), 14.5), valor), null, 44));
+            }
+            corpo.Children.Add(CUi.Grupo(linhas));
+        }
+        var ok = new CUi.Botao(T("OK"), true, Fechar) { HorizontalAlignment = HorizontalAlignment.Stretch };
+        return new CUi.Folha(T("Premiação das divisões"), corpo, ok, T("Os prêmios pela classificação final"), fechar: Fechar);
     }
 
     // Retro: a TPrintListDlg do computador: a divisao em negrito e, embaixo dela, cada equipa
@@ -200,6 +244,8 @@ static class FimDeTemporadaCelular
         pr.Children.Add(X(T("Prêmios"), true, 14));
         foreach (var (rot, v) in new[] { (T("Vencedor do campeonato"), moeda.PremioCampeao), (T("Vencedor da copa"), moeda.PremioTaca), (T("Artilheiro"), moeda.PremioMarcador) })
             pr.Children.Add(ListasCelular.Grade("*,Auto", X(rot, false, 14), ListasCelular.RD(FormatoDinheiro.Valor(moeda, v), false, null, 14)));
+        if (TelaFimDeTemporada.ViceCopa(r) is { } vice)
+            pr.Children.Add(ListasCelular.Grade("*,Auto", X(T("Vice da copa"), false, 14), ListasCelular.RD(FormatoDinheiro.Valor(moeda, vice.Valor), false, null, 14)));
 
         var corpo = new StackPanel { Spacing = 10 };
         corpo.Children.Add(Vencedor(s.Equipa(r.Campeao), false));

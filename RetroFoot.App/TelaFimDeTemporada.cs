@@ -34,6 +34,7 @@ public static class TelaFimDeTemporada
     public static void Mostrar(Sessao s, Resultado r)
     {
         s.EsperarDialogo<bool>(fim => Janela(s, r, () => fim(true)));
+        if (r.Premios.Any(p => p.Divisao >= 0)) s.EsperarDialogo<bool>(fim => PremiacaoDivisoes(s, r, () => fim(true)));
         if (MostrarSubidasEDescidas) s.EsperarDialogo<bool>(fim => SubidasEDescidas(s, r, () => fim(true)));
     }
 
@@ -88,6 +89,12 @@ public static class TelaFimDeTemporada
         j.Por(new Rotulo { Texto = FormatoDinheiro.Valor(moeda, moeda.PremioCampeao), Fonte = W95.Arial11 }, 448, 224, 161, 14);
         j.Por(new Rotulo { Texto = FormatoDinheiro.Valor(moeda, moeda.PremioTaca), Fonte = W95.Arial11 }, 448, 240, 161, 14);
         j.Por(new Rotulo { Texto = FormatoDinheiro.Valor(moeda, moeda.PremioMarcador), Fonte = W95.Arial11 }, 448, 256, 161, 14);
+        // (premiacao ampliada) o vice da copa, embaixo; o valor mais curto, antes do botao
+        if (ViceCopa(r) is { } vice)
+        {
+            j.Por(new Rotulo { Texto = T("Vice da copa"), Fonte = W95.MsSans11, Auto = true }, 312, 272, 123, 13);
+            j.Por(new Rotulo { Texto = FormatoDinheiro.Valor(moeda, vice.Valor), Fonte = W95.Arial11 }, 448, 272, 88, 14);
+        }
 
         // o melhor marcador: o maximo de +0x14 (com sinal, comecando em 0) e, na ordem da
         // lista DS:26FE, cada jogador com esse numero: "NOME  (EQUIPA)"
@@ -165,6 +172,9 @@ public static class TelaFimDeTemporada
             }
             else corpo.Children.Add(ClubeModerno.T("—", 20, ClubeModerno.Fraco));
             corpo.Children.Add(ClubeModerno.T(T("Prêmio: ") + Ext(premio), 12.5, ClubeModerno.Verde));
+            // (premiacao ampliada) o vice da copa no cartao da copa
+            if (copa && ViceCopa(r) is { } vice && s.Equipa(vice.Equipa) is { } ev)
+                corpo.Children.Add(ClubeModerno.T(T("Vice da copa") + ": " + Dlg.Texto(ev.NomeCurto) + " · " + Ext(vice.Valor), 12.5, ClubeModerno.Fraco));
             Grid.SetColumn(corpo, 1);
             g.Children.Add(corpo);
             var faixa = new Border { Width = 4, CornerRadius = new CornerRadius(2), Background = copa ? ClubeModerno.Prata : ClubeModerno.Ouro, Margin = new Thickness(0, 0, 14, 0) };
@@ -278,6 +288,105 @@ public static class TelaFimDeTemporada
         if (cartoes.Count == 0) grade.Children.Add(ClubeModerno.T(T("Nenhuma equipa mudou de divisão."), 14, ClubeModerno.Fraco));
         var rolar = new ScrollViewer { Content = grade, HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled };
         var j = new JanelaModerna(T("Subidas e descidas"), T("As equipas que mudam de divisão"), null, rolar, largo ? 760 : 520, largo ? 480 : 540);
+        bool fechado = false;
+        void Fechar() { if (fechado) return; fechado = true; fechar(); }
+        j.Botao(T("OK"), true, Fechar);
+        j.AoEnter = Fechar;
+        j.AoFechar = Fechar;
+        return j;
+    }
+
+    // (premiacao ampliada) o vice da copa, se houve final
+    internal static Premio? ViceCopa(Resultado r) => r.Premios.FirstOrDefault(p => p.Divisao < 0);
+
+    // os grupos da janela "Premiacao das divisoes": cada divisao e, no fim, a copa com o campeao
+    // (que ja recebe o premio do original; so aparece aqui, nao vai para Resultado.Premios) e o vice
+    internal static IEnumerable<IGrouping<int, Premio>> GruposPremiacao(Resultado r, Moeda m)
+    {
+        var l = r.Premios.ToList();
+        int i = l.FindIndex(p => p.Divisao < 0);
+        if (i >= 0) l.Insert(i, new Premio(-1, 1, r.VencedorTaca, m.PremioTaca));
+        return l.GroupBy(p => p.Divisao);
+    }
+
+    // o titulo de cada grupo da premiacao: a divisao, ou a copa (o vice, Divisao -1)
+    internal static string TituloPremio(int divisao) => divisao < 0 ? T("Copa") : T("{0}ª Divisão", divisao + 1);
+
+    // (premiacao ampliada) os premiados de cada divisao, na TPrintListDlg: a divisao em
+    // negrito e, embaixo, a posicao, a equipa e o premio
+    internal static Control PremiacaoDivisoes(Sessao s, Resultado r, Action fechar)
+    {
+        if (Celular.Ativo) return FimDeTemporadaCelular.PremiacaoDivisoes(s, r, fechar);
+        if (Visual.Moderno) return PremiacaoModerna(s, r, fechar);
+        var moeda = Moeda.DoSave(s.S);
+        var linhas = new List<byte[]>();
+        foreach (var g in TelaFimDeTemporada.GruposPremiacao(r, moeda))
+        {
+            var t = new List<byte> { 2 };
+            Formatado.Col(t, TelaFimDeTemporada.TituloPremio(g.Key), 0xB4);
+            linhas.Add(t.ToArray());
+            foreach (var p in g)
+            {
+                var l = new List<byte>();
+                Formatado.Col(l, " ", 0x14);
+                Formatado.Col(l, p.Posicao + "º", 0x1E);
+                Formatado.Col(l, s.Equipa(p.Equipa) is { } e ? Dlg.Bytes(e.NomeCurto) : Dlg.Latin1(" "), (byte)'x');
+                Formatado.Col(l, FormatoDinheiro.Valor(moeda, p.Valor), 7, 0x78);
+                linhas.Add(l.ToArray());
+            }
+        }
+        CaixaDialogo? c = null;
+        var d2 = new Dialogos(x => c = x as CaixaDialogo, _ => fechar());
+        TelaListas.Lista(d2, T("Premiação das divisões"), linhas.Count, i => linhas[i], 0);
+        return c!;
+    }
+
+    // (premiacao ampliada, Moderno) um cartao por divisao com as premiadas (posicao, logo,
+    // nome e premio), em duas colunas (tres no 16:9 quando o K grande nao cabe em duas). A
+    // altura da janela sai do numero de linhas, para caber sem rolar (a rolagem fica so de
+    // reserva, no 4:3 com K grande).
+    static Control PremiacaoModerna(Sessao s, Resultado r, Action fechar)
+    {
+        bool largo = Formato.Largo;
+        var moeda = Moeda.DoSave(s.S);
+        var grupos = TelaFimDeTemporada.GruposPremiacao(r, moeda).ToList();
+        int k = grupos.Count == 0 ? 1 : grupos.Max(g => g.Count());
+        // cartao: padding 12+12, titulo ~19, k linhas de ~28; janela: cabecalho, rodape e margens ~170
+        double cartao = 45 + k * 28, fixo = 170, maximo = 590;
+        double Altura(int cols) => fixo + (grupos.Count + cols - 1) / cols * (cartao + 10);
+        int colunas = largo && Altura(2) > maximo ? 3 : 2;
+        double largura = largo ? (colunas == 3 ? 1040 : 800) : 760;
+        double altura = Math.Min(maximo, Altura(colunas));
+        var grade = new Avalonia.Controls.Primitives.UniformGrid { Columns = colunas };
+        foreach (var g in grupos)
+        {
+            var p = new StackPanel { Spacing = 4 };
+            p.Children.Add(ClubeModerno.T(TelaFimDeTemporada.TituloPremio(g.Key), 15, ClubeModerno.Texto, FontWeight.Bold));
+            foreach (var pr in g)
+            {
+                var e = s.Equipa(pr.Equipa);
+                var l = new DockPanel();
+                var valor = ClubeModerno.T(FormatoDinheiro.Valor(moeda, pr.Valor), 12.5, ClubeModerno.Verde, FontWeight.SemiBold);
+                valor.VerticalAlignment = VerticalAlignment.Center;
+                DockPanel.SetDock(valor, Dock.Right);
+                l.Children.Add(valor);
+                var pos = ClubeModerno.T(pr.Posicao + "º", 13, pr.Posicao == 1 ? ClubeModerno.Ouro : ClubeModerno.Fraco, FontWeight.Bold);
+                pos.Width = 28;
+                pos.VerticalAlignment = VerticalAlignment.Center;
+                DockPanel.SetDock(pos, Dock.Left);
+                l.Children.Add(pos);
+                var esc = new EscudoClube(e, 22) { Margin = new Thickness(0, 0, 8, 0) };
+                DockPanel.SetDock(esc, Dock.Left);
+                l.Children.Add(esc);
+                l.Children.Add(new TextBlock { Text = e != null ? Dlg.Texto(e.NomeCurto) : "", FontSize = 14, Foreground = ClubeModerno.Texto, VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, Margin = new Thickness(0, 0, 8, 0) });
+                p.Children.Add(l);
+            }
+            var c = ClubeModerno.Secao(p, 12);
+            c.Margin = new Thickness(0, 0, 10, 10);
+            grade.Children.Add(c);
+        }
+        var rolar = new ScrollViewer { Content = grade, HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled };
+        var j = new JanelaModerna(T("Premiação das divisões"), T("Os prêmios pela classificação final"), null, rolar, largura, altura);
         bool fechado = false;
         void Fechar() { if (fechado) return; fechado = true; fechar(); }
         j.Botao(T("OK"), true, Fechar);

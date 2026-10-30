@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
+using RetroFoot.Motor.Mercado;
 using RetroFoot.Motor.Save;
 using RetroFoot.Motor.Temporada;
 using Chicotada = RetroFoot.Motor.Rodada.Chicotada;
@@ -49,6 +50,17 @@ static partial class DemoCelular
             r.Desceram[1].Add(s.S.Divisoes[1].Equipas[^1]);
             Control? c = null;
             c = TelaFimDeTemporada.SubidasEDescidas(s, r, () => d.Fechar(c!));
+            mostrar(c);
+        }));
+        l.Add(("premiacao", () =>
+        {
+            var r = new Resultado();
+            var m = Moeda.DoSave(s.S);
+            for (int dv = 0; dv < 4; dv++)
+                for (int i = 1; i <= 2; i++)
+                    r.Premios.Add(new Premio(dv, i, s.S.Divisoes[dv].Equipas[i - 1], PremiacaoAmpliada.Valor(m.PremioCampeao, dv, i, 2)));
+            Control? c = null;
+            c = TelaFimDeTemporada.PremiacaoDivisoes(s, r, () => d.Fechar(c!));
             mostrar(c);
         }));
         l.Add(("arbitros", () => TelaOpcoes.Arbitros(d, s.S)));

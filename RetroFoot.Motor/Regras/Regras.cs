@@ -24,6 +24,11 @@ public readonly partial record struct Regras(int EquipasPorDivisao, int LimiteJo
     // gravada no save (MarcaSobemDescem): DoSave a le de la, nao das Configuracoes
     public int SobemDescemEscolhido { get; init; }
 
+    // a opcao "Premiacao" (so na versao Modificada; docs/premiacao.md): false = Classica (os
+    // tres premios do original), true = Ampliada (Temporada.PremiacaoAmpliada). Fica gravada no
+    // save (MarcarPremiacao): DoSave a le de la, nao das Configuracoes
+    public bool PremiacaoAmpliada { get; init; }
+
     // banco e substituicoes (so na versao Atual; 0 = como no classico: ate 5 reservas e 3
     // substituicoes). Com uma escolha, a prorrogacao da Taca da mais uma substituicao
     public int ReservasEscolhidas { get; init; }
@@ -43,7 +48,7 @@ public readonly partial record struct Regras(int EquipasPorDivisao, int LimiteJo
     // (sem marca = automatico, qualquer que seja o da base)
     public static Regras DoSave(Jogo98 s, Regras @base)
     {
-        var r = @base with { SobemDescemEscolhido = SobemDescemDoSave(s) };
+        var r = @base with { SobemDescemEscolhido = SobemDescemDoSave(s), PremiacaoAmpliada = PremiacaoDoSave(s) };
         return s.Divisoes.Count > 0 && s.Divisoes[0].Equipas.Count > 0 ? r with { EquipasPorDivisao = s.Divisoes[0].Equipas.Count } : r;
     }
 
@@ -92,6 +97,30 @@ public readonly partial record struct Regras(int EquipasPorDivisao, int LimiteJo
         var nome = s.Divisoes[4].Nome;
         if (nome.Length <= IndiceMarca || nome[0] >= IndiceMarca) return false;
         nome[IndiceMarca] = k is >= 1 and <= 4 ? (byte)(BaseMarca + k) : (byte)0;
+        return true;
+    }
+
+    // A marca da premiacao ampliada no save: o 20o byte do nome do Distrital (o penultimo do
+    // string[20], logo antes da marca do K), pelo mesmo motivo: nunca e lido. 0xA5 = Ampliada;
+    // outro valor (os saves do original e os da Classica) = Classica.
+    const int IndiceMarcaPremiacao = 19;
+    const byte MarcaPremiacao = 0xA5;
+
+    public static bool PremiacaoDoSave(Jogo98 s)
+    {
+        if (s.Divisoes.Count <= 4) return false;
+        var nome = s.Divisoes[4].Nome;
+        if (nome.Length <= IndiceMarcaPremiacao || nome[0] >= IndiceMarcaPremiacao) return false;
+        return nome[IndiceMarcaPremiacao] == MarcaPremiacao;
+    }
+
+    // grava a escolha (Classica: o byte volta a 0); false se o nome do Distrital ocupa o byte
+    public static bool MarcarPremiacao(Jogo98 s, bool ampliada)
+    {
+        if (s.Divisoes.Count <= 4) return false;
+        var nome = s.Divisoes[4].Nome;
+        if (nome.Length <= IndiceMarcaPremiacao || nome[0] >= IndiceMarcaPremiacao) return false;
+        nome[IndiceMarcaPremiacao] = ampliada ? MarcaPremiacao : (byte)0;
         return true;
     }
 

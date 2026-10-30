@@ -97,6 +97,14 @@ public class SoakTestes(ITestOutputHelper saida)
     public void CurtoSobemDescem(int n, int k) =>
         Rodar(new($"mod{n}-k{k}", Mod(n) with { SobemDescemEscolhido = k }, 1, false, true, false, 2, 1, Recarregar: 0.2));
 
+    // duas temporadas da Modificada com a premiacao ampliada (Regras.PremiacaoAmpliada), com
+    // recargas do save (a marca tem de sobreviver e cada fim de temporada premiar)
+    [Theory]
+    [InlineData(8)]
+    [InlineData(16)]
+    public void CurtoPremiacao(int n) =>
+        Rodar(new($"mod{n}-premios", Mod(n) with { PremiacaoAmpliada = true }, 1, true, true, false, 2, 1, Recarregar: 0.2));
+
     [Theory]
     [MemberData(nameof(Configs))]
     public void Longo_(string nome)

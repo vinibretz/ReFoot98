@@ -178,6 +178,7 @@ public sealed partial class TelaInicio
         if (cfg.Modificada && cfg.Patrocinios) partes.Add(T("patrocínios"));
         if (cfg.Modificada && cfg.Acrescimos) partes.Add(T("acréscimos"));
         if (cfg.Modificada) partes.Add(T("sobem e descem {0}", r.SobemDescem));
+        if (cfg.Modificada && cfg.PremiacaoAmpliada) partes.Add(T("premiação ampliada"));
         if (cfg.EstrangeirosLiberados) partes.Add(T("estrangeiros liberados"));
         return string.Join(" · ", partes);
     }

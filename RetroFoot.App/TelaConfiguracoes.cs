@@ -106,6 +106,9 @@ public sealed partial class TelaConfiguracoes : UserControl
     // as opcoes de "Sobem e descem por divisao": Automatico, 1, 2, 3 e 4 (o indice e o K; 0 = automatico)
     static string[] OpcoesSobem => new[] { T("Automático"), "1", "2", "3", "4" };
 
+    // a opcao "Premiacao ampliada" (Regras.PremiacaoAmpliada; docs/premiacao.md)
+    internal static string AjudaPremiacao => T("Prêmios também para as primeiras de cada divisão e o vice da copa, proporcionais à divisão e à posição. Desligada: só campeão, copa e artilheiro, como no Retrô.");
+
     static string AjudaSobemFixa => T("Entre as divisões e do Distrital para a 4ª divisão (por sorteio). Fica gravado no jogo novo e não muda depois. No máximo 4 e menos de metade da divisão.");
 
     // o K que vale com o N escolhido (e por que, se o escolhido passa do maximo)
@@ -142,6 +145,7 @@ public sealed partial class TelaConfiguracoes : UserControl
         if (mod) partes.Add(op.Patrocinios ? T("patrocínios ligados") : T("patrocínios desligados"));
         if (mod) partes.Add(r.Acrescimos ? T("acréscimos ligados") : T("acréscimos desligados"));
         partes.Add(T("sobem e descem {0}", r.SobemDescem));
+        if (r.PremiacaoAmpliada) partes.Add(T("premiação ampliada"));
         var t = string.Join(" · ", partes);
         return char.ToUpper(t[0]) + t[1..] + ".";
     }
@@ -167,6 +171,7 @@ public sealed partial class TelaConfiguracoes : UserControl
         var acrescimos = Interruptor(_cfg.Acrescimos);
         var cincoSubst = Interruptor(_cfg.CincoSubstituicoes);
         var noveRes = Interruptor(_cfg.NoveReservas);
+        var premiacao = Interruptor(_cfg.PremiacaoAmpliada);
         var sobem = new EscolhaModerna(Array.ConvertAll(OpcoesSobem, o => (o, (string?)null)), _cfg.SobemDescem, chips: true);
         var ajudaSobem = new TextBlock { FontSize = 13.5, Foreground = Texto, TextWrapping = TextWrapping.Wrap };
         var sobemBloco = new StackPanel { Spacing = 10, Children = { sobem, ajudaSobem, Ajuda(AjudaSobemFixa) } };
@@ -214,6 +219,8 @@ public sealed partial class TelaConfiguracoes : UserControl
         adicoes.Children.Add(LinhaInterruptor(T("Acréscimos"), T("De 1 a 5 minutos no fim do 1º tempo e de 1 a 10 no fim do 2º, com golos, cartões e lesões (45'+2'). Desligados: como no Retrô."), acrescimos));
         adicoes.Children.Add(LinhaInterruptor(T("5 substituições"), T("A regra da FIFA: até 5 substituições por jogo. Desligado: 3, como no Retrô. Na prorrogação da Taça, mais uma."), cincoSubst));
         adicoes.Children.Add(LinhaInterruptor(T("9 reservas"), T("Até 9 reservas no banco (20 relacionados). Desligado: 5, como no Retrô."), noveRes));
+        adicoes.Children.Add(Separador());
+        adicoes.Children.Add(LinhaInterruptor(T("Premiação ampliada"), AjudaPremiacao, premiacao));
         var equipasBloco = new StackPanel { Spacing = 10, Children = { equipas, ajudaEquipas } };
 
         // as paginas
@@ -357,6 +364,7 @@ public sealed partial class TelaConfiguracoes : UserControl
         acrescimos.IsCheckedChanged += (_, _) => { if (_cfg.Modificada) { _cfg.Acrescimos = acrescimos.IsChecked == true; _atualizar!(); } };
         cincoSubst.IsCheckedChanged += (_, _) => { if (_cfg.Modificada) { _cfg.CincoSubstituicoes = cincoSubst.IsChecked == true; _atualizar!(); } };
         noveRes.IsCheckedChanged += (_, _) => { if (_cfg.Modificada) { _cfg.NoveReservas = noveRes.IsChecked == true; _atualizar!(); } };
+        premiacao.IsCheckedChanged += (_, _) => { if (_cfg.Modificada) { _cfg.PremiacaoAmpliada = premiacao.IsChecked == true; _atualizar!(); } };
         sobem.Mudou += i => { if (_cfg.Modificada) { _cfg.SobemDescem = i; _atualizar!(); } };
         estrangeiros.Mudou += i => { _cfg.EstrangeirosLiberados = i == 1; _atualizar!(); };
         visual.Mudou += i => { _cfg.VisualTela = i == 1 ? Configuracoes.VisualModerno : Configuracoes.VisualClassico; _atualizar!(); };
@@ -379,6 +387,7 @@ public sealed partial class TelaConfiguracoes : UserControl
             acrescimos.IsChecked = mod && _cfg.Acrescimos;
             cincoSubst.IsChecked = mod && _cfg.CincoSubstituicoes;
             noveRes.IsChecked = mod && _cfg.NoveReservas;
+            premiacao.IsChecked = mod && _cfg.PremiacaoAmpliada;
             sobemBloco.IsEnabled = mod;
             sobemBloco.Opacity = mod ? 1 : 0.45;
             sobem.Selecionado = mod ? _cfg.SobemDescem : 0;
@@ -417,6 +426,7 @@ public sealed partial class TelaConfiguracoes : UserControl
         r.Add((T("Acréscimos"), _cfg.Modificada && _cfg.Acrescimos ? T("Ligados") : T("Desligados")));
         r.Add((T("Substituições"), _cfg.Modificada ? (_cfg.CincoSubstituicoes ? "5 (+1)" : "3 (+1)") : "3"));
         r.Add((T("Reservas"), _cfg.Modificada && _cfg.NoveReservas ? "9" : "5"));
+        r.Add((T("Premiação"), _cfg.Modificada && _cfg.PremiacaoAmpliada ? T("Ampliada") : T("Clássica")));
         int k = _cfg.SobemDescemPara(_cfg.N);
         r.Add((T("Sobem e descem"), _cfg.Modificada && _cfg.SobemDescem > 0 ? k.ToString() : T("Automático ({0})", k)));
         r.Add((T("Estrangeiros"), _cfg.EstrangeirosLiberados ? T("Liberado") : T("Realístico")));
@@ -563,6 +573,7 @@ public sealed partial class TelaConfiguracoes : UserControl
         var acrescimos = nb.Por(pRegras, new Marca { Texto = T("Acréscimos") }, 24, 84, 210, 17);
         var cincoSubstC = nb.Por(pRegras, new Marca { Texto = T("5 substituições (FIFA)") }, 244, 40, 220, 17);
         var noveResC = nb.Por(pRegras, new Marca { Texto = T("9 reservas no banco") }, 244, 62, 220, 17);
+        var premiacaoC = nb.Por(pRegras, new Marca { Texto = T("Premiação ampliada") }, 244, 84, 220, 17);
         Texto(pRegras, T("Sobem e descem por divisão:"), 24, 112, 190, 16, W95.Arial13);
         var sobem = nb.Por(pRegras, new Combo { Fonte = W95.Arial13, AlturaItem = 16 }, 218, 108, 110, 22);
         sobem.Itens.AddRange(OpcoesSobem);
@@ -605,6 +616,7 @@ public sealed partial class TelaConfiguracoes : UserControl
         acrescimos.Clique += () => { if (_cfg.Modificada) _cfg.Acrescimos = acrescimos.Marcado; };
         cincoSubstC.Clique += () => { if (_cfg.Modificada) _cfg.CincoSubstituicoes = cincoSubstC.Marcado; };
         noveResC.Clique += () => { if (_cfg.Modificada) _cfg.NoveReservas = noveResC.Marcado; };
+        premiacaoC.Clique += () => { if (_cfg.Modificada) _cfg.PremiacaoAmpliada = premiacaoC.Marcado; };
         sobem.Mudou += () =>
         {
             if (!_cfg.Modificada || sobem.Indice < 0 || sobem.Indice == _cfg.SobemDescem) return;
@@ -635,6 +647,7 @@ public sealed partial class TelaConfiguracoes : UserControl
             acrescimos.Habilitado = mod;
             cincoSubstC.Marcado = mod && _cfg.CincoSubstituicoes; cincoSubstC.Habilitado = mod;
             noveResC.Marcado = mod && _cfg.NoveReservas; noveResC.Habilitado = mod;
+            premiacaoC.Marcado = mod && _cfg.PremiacaoAmpliada; premiacaoC.Habilitado = mod;
             sobem.Indice = mod ? _cfg.SobemDescem : 0;
             sobem.IsEnabled = mod;
             sobem.Opacity = mod ? 1 : 0.5;

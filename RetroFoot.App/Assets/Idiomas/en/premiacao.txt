@@ -1,0 +1,12 @@
+# Premiacao ampliada (Regras.PremiacaoAmpliada; TelaConfiguracoes, TelaFimDeTemporada) (en). Formato: chave<TAB>traducao (RetroFoot.App/Idioma.cs).
+
+Premiação ampliada	Extended prize money
+Prêmios também para as primeiras de cada divisão e o vice da copa, proporcionais à divisão e à posição. Desligada: só campeão, copa e artilheiro, como no Retrô.	Prize money also for the top teams of every division and the cup runner-up, in proportion to the division and the position. Off: only champion, cup and top scorer, as in Retro.
+premiação ampliada	extended prize money
+premiação clássica	classic prize money
+Premiação	Prize money
+Ampliada	Extended
+Clássica	Classic
+Vice da copa	Cup runner-up
+Premiação das divisões	Division prize money
+Os prêmios pela classificação final	Prizes for the final standings
