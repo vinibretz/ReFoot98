@@ -42,7 +42,7 @@ public sealed class TelaCelular : UserControl
     // o menu do jogo (TprepareGameDlg.MainMenu1 no jogo classico), com icones Material
     static readonly (string Menu, string Icone, string[] Itens)[] Menu =
     {
-        ("RetroFoot", "M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z",
+        (TelaAcerca.Nome, "M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z",
             new[] { "Opções...", "Sair sem salvar", "menu: Sair", "Sobre..." }),
         ("Escalar", "M4 11h5V5H4v6zm0 7h5v-6H4v6zm6 0h5v-6h-5v6zm6 0h5v-6h-5v6zm-6-7h5V5h-5v6zm6-6v6h5V5h-5z",
             new[] { "3-3-4", "3-4-3", "4-2-4", "4-3-3", "4-4-2", "4-5-1", "5-2-3", "5-3-2", "5-4-1", "5-5-0", "6-3-1", "6-4-0", "5-0-5", "-", "Automático", "Melhores" }),

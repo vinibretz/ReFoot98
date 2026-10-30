@@ -45,7 +45,7 @@ public sealed partial class TelaEditorEquipas
 
     EscolhaEscudo? escudoPendente;
 
-    internal static string Requisitos => T("Qualquer imagem PNG, JPG, WEBP, SVG ou BMP. O ideal: quadrada ou quase, fundo transparente, pelo menos 128 px. O RetroFoot corta as sobras, pode tirar um fundo de cor única e centra o escudo num quadrado de 256 px, como os do jogo.");
+    internal static string Requisitos => T("Qualquer imagem PNG, JPG, WEBP, SVG ou BMP. O ideal: quadrada ou quase, fundo transparente, pelo menos 128 px. O ReFoot98 corta as sobras, pode tirar um fundo de cor única e centra o escudo num quadrado de 256 px, como os do jogo.");
 
     // ---------------------------------------------------------------- aba Escudo
     Control AbaEscudo()

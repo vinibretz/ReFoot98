@@ -26,12 +26,12 @@ public static class EscudoArquivo
             if (Path.GetExtension(arquivo).Equals(".svg", StringComparison.OrdinalIgnoreCase)) return Svg(arquivo);
             using var s = File.OpenRead(arquivo);
             using var codec = SKCodec.Create(s);
-            if (codec == null) return (null, T("Não é uma imagem que o RetroFoot consiga abrir. Use PNG, JPG, WEBP, SVG ou BMP."));
+            if (codec == null) return (null, T("Não é uma imagem que o ReFoot98 consiga abrir. Use PNG, JPG, WEBP, SVG ou BMP."));
             var info = codec.Info;
             if (info.Width > LadoMaximo * 2 || info.Height > LadoMaximo * 2)
                 return (null, T("A imagem é grande demais ({0}x{1} px).", info.Width, info.Height));
             using var bmp = SKBitmap.Decode(codec, new SKImageInfo(info.Width, info.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul));
-            if (bmp == null) return (null, T("Não é uma imagem que o RetroFoot consiga abrir. Use PNG, JPG, WEBP, SVG ou BMP."));
+            if (bmp == null) return (null, T("Não é uma imagem que o ReFoot98 consiga abrir. Use PNG, JPG, WEBP, SVG ou BMP."));
             return (Pixels(bmp), null);
         }
         catch (Exception e) { return (null, T("Não consegui abrir a imagem: {0}", e.Message)); }

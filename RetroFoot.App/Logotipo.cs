@@ -7,9 +7,10 @@ using Avalonia.Platform;
 
 namespace RetroFoot.App;
 
-// A marca do RetroFoot (Assets/Marca): o icone (o quadrado escuro com a bola e o nome), a bola
-// sozinha, o nome (TURBO verde, FOOT ouro, contorno branco, 700x135) e a capa da tela inicial
-// (o quadro verde com a bola no centro: capa-16x9 1076x605, capa-4x3 807x605)
+// A marca do ReFoot98 (Assets/Marca, gerada por scripts/gerar-marca.py): o icone (o quadrado
+// azul-petroleo com a bola em pixel art e o selo "98"), a bola sozinha, o nome (RE ouro, FOOT
+// verde, o 98 na barra de titulo azul, contorno branco, 700x135) e a capa da tela inicial (o
+// gramado com a bola no centro: capa-16x9 1076x605, capa-4x3 807x605)
 public static class Logotipo
 {
     static Bitmap? Ler(string arquivo)

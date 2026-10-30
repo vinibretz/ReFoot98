@@ -107,7 +107,7 @@ public sealed partial class TelaInicio
     {
         // (sem atrapalhar uma janela ja aberta: espera ela fechar)
         if (_sobreM.IsVisible) { DispatcherTimer.RunOnce(() => OferecerAtualizacaoCelular(nova), TimeSpan.FromSeconds(2)); return; }
-        var texto = CUi.Txt(T("A versão {0} do RetroFoot está disponível (você tem a {1}). Seus saves, equipas e configurações ficam como estão.",
+        var texto = CUi.Txt(T("A versão {0} do ReFoot98 está disponível (você tem a {1}). Seus saves, equipas e configurações ficam como estão.",
             nova.Versao.ToString(3), Atualizacao.Atual.ToString(3)), 15, null, FontWeight.Normal, true);
         var estado = CUi.Txt("", 13.5, CUi.Fraco, FontWeight.Normal, true);
         // se o Android nao deixar instalar por aqui: baixar o APK pelo navegador e abrir
@@ -134,7 +134,7 @@ public sealed partial class TelaInicio
             else
             {
                 // o Android abriu a tela da permissao: ao voltar, tocar de novo
-                estado.Text = T("Permita que o RetroFoot instale atualizações e toque em Instalar.");
+                estado.Text = T("Permita que o ReFoot98 instale atualizações e toque em Instalar.");
                 agora!.Texto = T("Instalar");
             }
             agora!.Habilitado = depois!.Habilitado = true;
@@ -161,7 +161,7 @@ public sealed partial class TelaInicio
                 agora.Habilitado = depois.Habilitado = true;
             }
         });
-        SobreporCelular(CUi.Caixa_(T("Nova versão do RetroFoot"), new StackPanel { Spacing = 10, Children = { texto, estado, navegador } }, depois, agora));
+        SobreporCelular(CUi.Caixa_(T("Nova versão do ReFoot98"), new StackPanel { Spacing = 10, Children = { texto, estado, navegador } }, depois, agora));
     }
 
     void PaginaCelular(Control cabecalho, Control corpo, Control? rodape, Action? enter, Action? esc, Control? foco)

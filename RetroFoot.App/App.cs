@@ -80,7 +80,7 @@ public class App : Application
         {
             if (camadaSair.IsVisible) return;
             void Ficar() { camadaSair.IsVisible = false; camadaSair.Children.Clear(); }
-            var f = CUi.PerguntaEmColuna(Idioma.T("Sair do RetroFoot?"), Idioma.T("O jogo em andamento que não foi salvo se perde."),
+            var f = CUi.PerguntaEmColuna(Idioma.T("Sair do ReFoot98?"), Idioma.T("O jogo em andamento que não foi salvo se perde."),
                 new (string, bool, Action)[] { (Idioma.T("Sair"), true, () => { Ficar(); Fechar(); }), (Idioma.T("Cancelar"), false, Ficar) }, Ficar);
             f.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom;
             camadaSair.Children.Add(f);

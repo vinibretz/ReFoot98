@@ -30,7 +30,7 @@ namespace RetroFoot.App;
 // RETROFOOT_OTA_URL: outra lista de releases (o mesmo JSON do GitHub), para testes.
 public static class Atualizacao
 {
-    const string Releases = "https://api.github.com/repos/vinibretz/RetroFoot/releases?per_page=20";
+    const string Releases = "https://api.github.com/repos/vinibretz/ReFoot98/releases?per_page=20";
 
     public sealed record Nova(Version Versao, string Tag, string Url, string Arquivo, long Tamanho);
 

@@ -933,7 +933,7 @@ public sealed partial class TelaEditorEquipas : UserControl
 
         var comEft = new CheckBox { Content = T("Incluir também os .EFT (formato Retrô)"), IsChecked = true, FontFamily = tema.Fonte, FontSize = 12.5, Foreground = tema.Texto };
         var ligas = new CheckBox { Content = T("Incluir os logos das ligas desses países"), IsChecked = true, FontFamily = tema.Fonte, FontSize = 12.5, Foreground = tema.Texto };
-        p.Children.Add(tema.T(T("Um patch (.zip) com as equipas em JSON e os logos delas, para aplicar noutro RetroFoot (ferramenta Patches ou Importar)."), 12, tema.Fraco));
+        p.Children.Add(tema.T(T("Um patch (.zip) com as equipas em JSON e os logos delas, para aplicar noutro ReFoot98 (ferramenta Patches ou Importar)."), 12, tema.Fraco));
         p.Children.Add(radios);
         var ln = new Grid { ColumnDefinitions = new ColumnDefinitions("110,*") };
         ln.Children.Add(tema.Linha1(T("Nome do patch"), 12, tema.Rotulo, true));
@@ -956,7 +956,7 @@ public sealed partial class TelaEditorEquipas : UserControl
                 var f = await sp.SaveFilePickerAsync(new FilePickerSaveOptions
                 {
                     Title = T("Exportar patch"), SuggestedFileName = arq, DefaultExtension = "zip",
-                    FileTypeChoices = new[] { new FilePickerFileType(T("Patch do RetroFoot")) { Patterns = new[] { "*.zip" } } },
+                    FileTypeChoices = new[] { new FilePickerFileType(T("Patch do ReFoot98")) { Patterns = new[] { "*.zip" } } },
                 });
                 if (f == null) return;
                 destino = f.TryGetLocalPath() ?? destino;

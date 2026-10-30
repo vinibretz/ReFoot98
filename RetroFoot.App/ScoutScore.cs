@@ -60,7 +60,7 @@ public static class ScoutScore
         yield return (T("Lesão (0 a 10)"), T("Chance de ser ele o lesionado quando a equipa sofre uma lesão. 0 nunca se lesiona. Cada lesão: 1 a 20 jogos fora e 10 de força a menos."));
         yield return (T("Comportamento"), T("Chance de ser ele o expulso. Fair Play nunca é expulso. Suspensão de 1 a 4 jogos; guarda-redes expulso dá penálti certo, defesa dá em 1 de 3."));
         yield return (T("Valor"), T("O valor do jogador para o jogo (força, nota, lesão, comportamento, moeda e inflação). O preço base dos leilões e os pedidos das equipas partem dele."));
-        yield return (T("Jogos, Golos, Lesões, Amar., Expuls."), T("O historial do jogador no save (golos desta época; Amar. = cartões amarelos na carreira, só com as regras do RetroFoot)."));
+        yield return (T("Jogos, Golos, Lesões, Amar., Expuls."), T("O historial do jogador no save (golos desta época; Amar. = cartões amarelos na carreira, só com as regras do ReFoot98)."));
         yield return (T("Sit."), T("S = suspenso por N jogos, A = N amarelos acumulados (o 3º suspende por 1 jogo), L = lesionado por N jogos; Estrang. = conta como estrangeiro (Bosman e PLOP não contam)."));
         yield return (T("Idade"), T("O jogo gravado não guarda a idade dos jogadores, por isso o Scout não tem filtro de idade."));
     }

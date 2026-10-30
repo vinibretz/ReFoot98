@@ -20,7 +20,7 @@ cp -f RetroFoot.App/Assets/Marca/icone-512.png "$HOME/.local/share/icons/hicolor
 cat > "$HOME/.local/share/applications/retrofoot.desktop" <<D
 [Desktop Entry]
 Type=Application
-Name=RetroFoot
+Name=ReFoot98
 Comment=Gerenciador de futebol
 Exec=$DEST/RetroFoot
 Icon=$HOME/.local/share/icons/hicolor/512x512/apps/retrofoot.png

@@ -1,41 +1,43 @@
 <p align="center">
-  <img src="RetroFoot.App/Assets/Marca/icone-256.png" alt="Ícone do RetroFoot" width="160"><br><br>
-  <img src="RetroFoot.App/Assets/Marca/nome.png" alt="RetroFoot" width="420">
+  <img src="RetroFoot.App/Assets/Marca/icone-256.png" alt="Ícone do ReFoot98" width="160"><br><br>
+  <img src="RetroFoot.App/Assets/Marca/nome.png" alt="ReFoot98" width="420">
 </p>
 
-Jogo de gestão de futebol inspirado no jogo clássico dos anos 90. Você treina um clube,
+Jogo de gestão de futebol: uma atualização moderna do clássico de 98. Você treina um clube,
 escala o time, compra e vende jogadores, cuida do dinheiro e do estádio e disputa
 campeonato e copa, temporada após temporada, sozinho ou com outros treinadores humanos no
 mesmo computador.
 
-O RetroFoot é livre e de código aberto, escrito em C# com [Avalonia](https://avaloniaui.net/).
+O ReFoot98 é livre e de código aberto, escrito em C# com [Avalonia](https://avaloniaui.net/).
 Roda no Linux, no Windows e (em desenvolvimento) no Android.
 
-> **Sobre este fork:** esta é uma versão modificada do
-> [RetroFoot original de Juan Silveira](https://github.com/juan-silveira/RetroFoot),
+> **Sobre este fork:** o ReFoot98 é uma versão modificada do
+> [RetroFoot de Juan Silveira](https://github.com/juan-silveira/RetroFoot),
 > distribuída sob a mesma licença (GPL v3). Mudanças em relação ao original:
 >
+> - **Nome e marca próprios:** ReFoot98, com ícone, logo e capa novos
+>   (`scripts/gerar-marca.py`).
 > - **Premiação ampliada** (opcional, versão Atual): prêmios para as primeiras de cada
 >   divisão e para o vice da copa, proporcionais à divisão e à posição
 >   ([docs/premiacao.md](docs/premiacao.md)).
 
 <p align="center">
-  <img src="RetroFoot.App/Assets/Marca/capa-16x9.jpg" alt="Capa do RetroFoot" width="720">
+  <img src="RetroFoot.App/Assets/Marca/capa-16x9.jpg" alt="Capa do ReFoot98" width="720">
 </p>
 
 ## Download
 
 > **Versão beta:** espere bugs e coisas por melhorar. Encontrou um problema? Abra uma
-> [issue](https://github.com/vinibretz/RetroFoot/issues).
+> [issue](https://github.com/vinibretz/ReFoot98/issues).
 
 | Sistema | |
 |---|---|
-| 🐧 Linux (x64) | [Baixar v0.2.3 beta](https://github.com/vinibretz/RetroFoot/releases/download/v0.2.3-beta/retrofoot-0.2.3-beta-linux-x64.tar.gz) |
-| 🪟 Windows (x64) | [Baixar v0.2.3 beta](https://github.com/vinibretz/RetroFoot/releases/download/v0.2.3-beta/retrofoot-0.2.3-beta-windows-x64.zip) |
+| 🐧 Linux (x64) | [Baixar v0.2.4 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.4-beta/refoot98-0.2.4-beta-linux-x64.tar.gz) |
+| 🪟 Windows (x64) | [Baixar v0.2.4 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.4-beta/refoot98-0.2.4-beta-windows-x64.zip) |
 | 🍎 macOS | em breve... |
-| 🤖 Android | [Baixar v0.2.3 beta](https://github.com/vinibretz/RetroFoot/releases/download/v0.2.3-beta/retrofoot-0.2.3-beta-android.apk) |
+| 🤖 Android | [Baixar v0.2.4 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.4-beta/refoot98-0.2.4-beta-android.apk) |
 
-Todas as versões ficam em [Releases](https://github.com/vinibretz/RetroFoot/releases).
+Todas as versões ficam em [Releases](https://github.com/vinibretz/ReFoot98/releases).
 A partir da 0.1.1 o jogo avisa ao abrir quando sai uma versão nova e se atualiza sozinho
 (Linux e Windows); seus saves e configurações ficam como estão.
 
@@ -59,8 +61,8 @@ Precisa do [.NET SDK](https://dotnet.microsoft.com/download) 8 ou mais novo (o A
 precisa do .NET 10 com a workload `android`).
 
 ```sh
-git clone https://github.com/vinibretz/RetroFoot.git
-cd RetroFoot
+git clone https://github.com/vinibretz/ReFoot98.git
+cd ReFoot98
 dotnet run --project RetroFoot.Desktop
 ```
 
@@ -107,7 +109,7 @@ Esses saves não estão no repositório; sem eles, esses testes falham.
 
 ## Licença
 
-O código do RetroFoot está sob a [GNU GPL v3](LICENSE): você pode usar, estudar, modificar
+O código do ReFoot98 (e do RetroFoot, em que ele se baseia) está sob a [GNU GPL v3](LICENSE): você pode usar, estudar, modificar
 e redistribuir, desde que as versões distribuídas continuem abertas sob a mesma licença.
 
 Nomes, escudos e marcas de clubes, ligas e patrocinadores pertencem aos seus donos e

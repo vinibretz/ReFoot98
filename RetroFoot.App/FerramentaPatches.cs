@@ -225,7 +225,7 @@ public sealed class TelaPatches : UserControl
         var meta = new List<string>();
         if (p.Autor.Length > 0) meta.Add(T("Autor: {0}", p.Autor));
         if (p.Versao.Length > 0) meta.Add(T("Versão {0}", p.Versao));
-        meta.Add(p.RetroFoot ? T("Patch do RetroFoot") : T("Patch Retrô (.EFT)"));
+        meta.Add(p.RetroFoot ? T("Patch do ReFoot98") : T("Patch Retrô (.EFT)"));
         if (p.Tamanho > 0) meta.Add(Tamanho(p.Tamanho));
         if (p.Erro != "sem-zip") s.Children.Add(Txt(string.Join("  ·  ", meta), 11.5, CorFraca));
         if (p.Aplicado)
@@ -411,7 +411,7 @@ public sealed class TelaPatches : UserControl
                 }
                 ok.Add(BibliotecaPatches.Adicionar(raiz, cam));
             }
-            catch (InvalidDataException e) when (e.Message == "vazio") { erros.Add(T("{0}: não tem nada que o RetroFoot use (equipas, países, árbitros, bandeiras, logos).", f.Name)); }
+            catch (InvalidDataException e) when (e.Message == "vazio") { erros.Add(T("{0}: não tem nada que o ReFoot98 use (equipas, países, árbitros, bandeiras, logos).", f.Name)); }
             catch (Exception e) { erros.Add($"{f.Name}: {e.Message}"); }
             finally { if (tmp != null) try { Directory.Delete(Path.GetDirectoryName(tmp)!, true); } catch { } }
         }

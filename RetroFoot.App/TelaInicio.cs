@@ -322,7 +322,7 @@ public sealed partial class TelaInicio : UserControl
             dados = ms.ToArray();
             if (Jogo98.Ler(dados).Equipas.Count == 0) throw new InvalidDataException();
         }
-        catch { Mensagem(T("Importar jogo"), T("\"{0}\" não é um jogo gravado que o RetroFoot consiga ler.", arqs[0].Name)); return; }
+        catch { Mensagem(T("Importar jogo"), T("\"{0}\" não é um jogo gravado que o ReFoot98 consiga ler.", arqs[0].Name)); return; }
         var nome = NomeDeArquivo(Path.GetFileNameWithoutExtension(arqs[0].Name));
         var atual = Achar(pastaJogos, nome + ".e98");
         void Gravar()

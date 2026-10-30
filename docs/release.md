@@ -38,9 +38,9 @@ O script:
 - muda a versão em `RetroFoot.App/RetroFoot.App.csproj` e `RetroFoot.Android/RetroFoot.Android.csproj`
   (no Android também o código da versão, que só pode crescer: 0.2.4 = 204);
 - gera em `dist\` os três arquivos:
-  - `retrofoot-0.2.4-beta-windows-x64.zip`
-  - `retrofoot-0.2.4-beta-linux-x64.tar.gz`
-  - `retrofoot-0.2.4-beta-android.apk` (assinado e conferido)
+  - `refoot98-0.2.4-beta-windows-x64.zip`
+  - `refoot98-0.2.4-beta-linux-x64.tar.gz`
+  - `refoot98-0.2.4-beta-android.apk` (assinado e conferido)
 
 O Android demora (10 a 20 minutos) e roda em prioridade baixa para não travar o computador.
 Para gerar só Windows e Linux: acrescente `-SemAndroid`.
@@ -76,7 +76,7 @@ repositório do Juan.
 
 ## 6. Criar a release no GitHub
 
-1. Abra https://github.com/vinibretz/RetroFoot/releases/new
+1. Abra https://github.com/vinibretz/ReFoot98/releases/new
 2. **Choose a tag**: `v0.2.4-beta`.
 3. **Release title**: `RetroFoot 0.2.4 beta`.
 4. **Descrição**: use o modelo abaixo, com as novidades da versão.
@@ -93,7 +93,7 @@ Modelo de descrição:
 ```markdown
 ## RetroFoot 0.2.4 beta
 
-> **Versão beta:** espere bugs. Encontrou um problema? Abra uma [issue](https://github.com/vinibretz/RetroFoot/issues).
+> **Versão beta:** espere bugs. Encontrou um problema? Abra uma [issue](https://github.com/vinibretz/ReFoot98/issues).
 
 Versão modificada do [RetroFoot de Juan Silveira](https://github.com/juan-silveira/RetroFoot), sob a mesma licença (GPL v3).
 
@@ -101,9 +101,9 @@ Versão modificada do [RetroFoot de Juan Silveira](https://github.com/juan-silve
 
 | Sistema | Arquivo |
 |---|---|
-| 🐧 Linux (x64) | `retrofoot-0.2.4-beta-linux-x64.tar.gz` |
-| 🪟 Windows (x64) | `retrofoot-0.2.4-beta-windows-x64.zip` |
-| 🤖 Android | `retrofoot-0.2.4-beta-android.apk` |
+| 🐧 Linux (x64) | `refoot98-0.2.4-beta-linux-x64.tar.gz` |
+| 🪟 Windows (x64) | `refoot98-0.2.4-beta-windows-x64.zip` |
+| 🤖 Android | `refoot98-0.2.4-beta-android.apk` |
 
 ### Novidades
 
@@ -125,7 +125,7 @@ git merge upstream/master
 
 Resolva os conflitos, se houver. Os mais comuns:
 
-- `RetroFoot.App/Atualizacao.cs`: mantenha `repos/vinibretz/RetroFoot`.
+- `RetroFoot.App/Atualizacao.cs`: mantenha `repos/vinibretz/ReFoot98`.
 - `RetroFoot.Android/RetroFoot.Android.csproj`: mantenha `io.github.vinibretz.retrofoot` e a
   `PastaChaves`.
 - `README.md`: mantenha os links do fork.

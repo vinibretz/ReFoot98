@@ -8,9 +8,9 @@ namespace RetroFoot.Android;
 
 [Activity(
 #if DEBUG
-    Label = "RetroFoot (prova)",
+    Label = "ReFoot98 (prova)",
 #else
-    Label = "RetroFoot",
+    Label = "ReFoot98",
 #endif
     Theme = "@style/MyTheme.NoActionBar",
     Icon = "@drawable/icon",

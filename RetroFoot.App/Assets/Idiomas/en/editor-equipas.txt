@@ -74,10 +74,10 @@ Equipas de {0}	Teams of {0}
 Minhas equipas	My teams
 Incluir também os .EFT (formato Retrô)	Also include the .EFT files (Retro format)
 Incluir os logos das ligas desses países	Include the league logos of those countries
-Um patch (.zip) com as equipas em JSON e os logos delas, para aplicar noutro RetroFoot (ferramenta Patches ou Importar).	A patch (.zip) with the teams in JSON and their logos, to apply in another RetroFoot (Patches tool or Import).
+Um patch (.zip) com as equipas em JSON e os logos delas, para aplicar noutro ReFoot98 (ferramenta Patches ou Importar).	A patch (.zip) with the teams in JSON and their logos, to apply in another ReFoot98 (Patches tool or Import).
 Nome do patch	Patch name
 Exportar patch	Export patch
-Patch do RetroFoot	RetroFoot patch
+Patch do ReFoot98	ReFoot98 patch
 Patch gravado: {0} equipas, {1} logos.	Patch saved: {0} teams, {1} logos.
 Gravar em patches/	Save to patches/
 Gravar como…	Save as…
@@ -94,7 +94,7 @@ Escolher arquivo…	Choose file…
 Importar patch	Import patch
 Patch (.zip) ou equipa (.EFT, .json)	Patch (.zip) or team (.EFT, .json)
 Importar patch de equipas	Import team patch
-Qualquer imagem PNG, JPG, WEBP, SVG ou BMP. O ideal: quadrada ou quase, fundo transparente, pelo menos 128 px. O RetroFoot corta as sobras, pode tirar um fundo de cor única e centra o escudo num quadrado de 256 px, como os do jogo.	Any PNG, JPG, WEBP, SVG or BMP image. Ideally: square or nearly square, transparent background, at least 128 px. RetroFoot trims the borders, can remove a single-colour background and centres the crest in a 256 px square, like the game's own.
+Qualquer imagem PNG, JPG, WEBP, SVG ou BMP. O ideal: quadrada ou quase, fundo transparente, pelo menos 128 px. O ReFoot98 corta as sobras, pode tirar um fundo de cor única e centra o escudo num quadrado de 256 px, como os do jogo.	Any PNG, JPG, WEBP, SVG or BMP image. Ideally: square or nearly square, transparent background, at least 128 px. ReFoot98 trims the borders, can remove a single-colour background and centres the crest in a 256 px square, like the game's own.
 Arraste uma imagem para aqui	Drag an image here
 Escudo de {0}	Crest of {0}
 (vai para a pasta logos/ ao Gravar)	(goes to the logos/ folder on Save)
@@ -146,7 +146,7 @@ Coleção…	Collection…
 Sem logo	No logo
 Logos das ligas	League logos
 O arquivo não existe.	The file does not exist.
-Não é uma imagem que o RetroFoot consiga abrir. Use PNG, JPG, WEBP, SVG ou BMP.	This is not an image RetroFoot can open. Use PNG, JPG, WEBP, SVG or BMP.
+Não é uma imagem que o ReFoot98 consiga abrir. Use PNG, JPG, WEBP, SVG ou BMP.	This is not an image ReFoot98 can open. Use PNG, JPG, WEBP, SVG or BMP.
 A imagem é grande demais ({0}x{1} px).	The image is too big ({0}x{1} px).
 Não consegui abrir a imagem: {0}	Could not open the image: {0}
 O SVG não tem nada para desenhar.	The SVG has nothing to draw.

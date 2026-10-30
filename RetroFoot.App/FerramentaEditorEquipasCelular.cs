@@ -1489,7 +1489,7 @@ sealed class EditorEquipasCelular : UserControl
         var nomeP = CUi.Caixa(opcoes[0].Nome, 60);
         bool comEft = true, ligas = true;
         var p = new StackPanel { Spacing = 12 };
-        p.Children.Add(Tx(T("Um patch (.zip) com as equipas em JSON e os logos delas, para aplicar noutro RetroFoot (ferramenta Patches ou Importar)."), 14, Fraco));
+        p.Children.Add(Tx(T("Um patch (.zip) com as equipas em JSON e os logos delas, para aplicar noutro ReFoot98 (ferramenta Patches ou Importar)."), 14, Fraco));
         p.Children.Add(Opcoes(opcoes.Select(o => o.Texto).ToList(), 0, k =>
         {
             // o nome sugerido segue a escolha (se o jogador nao escreveu outro)
@@ -1515,7 +1515,7 @@ sealed class EditorEquipasCelular : UserControl
                     var fa = await sp.SaveFilePickerAsync(new FilePickerSaveOptions
                     {
                         Title = T("Exportar patch"), SuggestedFileName = arq, DefaultExtension = "zip",
-                        FileTypeChoices = new[] { new FilePickerFileType(T("Patch do RetroFoot")) { Patterns = new[] { "*.zip" }, MimeTypes = new[] { "application/zip" } } },
+                        FileTypeChoices = new[] { new FilePickerFileType(T("Patch do ReFoot98")) { Patterns = new[] { "*.zip" }, MimeTypes = new[] { "application/zip" } } },
                     });
                     if (fa == null) return;
                     if (fa.TryGetLocalPath() is { } local) destino = local;

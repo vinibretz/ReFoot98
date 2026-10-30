@@ -75,10 +75,10 @@ Equipas de {0}	Equipos de {0}
 Minhas equipas	Mis equipos
 Incluir também os .EFT (formato Retrô)	Incluir también los .EFT (formato Retro)
 Incluir os logos das ligas desses países	Incluir los logos de las ligas de esos países
-Um patch (.zip) com as equipas em JSON e os logos delas, para aplicar noutro RetroFoot (ferramenta Patches ou Importar).	Un parche (.zip) con los equipos en JSON y sus logos, para aplicar en otro RetroFoot (herramienta Parches o Importar).
+Um patch (.zip) com as equipas em JSON e os logos delas, para aplicar noutro ReFoot98 (ferramenta Patches ou Importar).	Un parche (.zip) con los equipos en JSON y sus logos, para aplicar en otro ReFoot98 (herramienta Parches o Importar).
 Nome do patch	Nombre del parche
 Exportar patch	Exportar parche
-Patch do RetroFoot	Parche de RetroFoot
+Patch do ReFoot98	Parche de ReFoot98
 Patch gravado: {0} equipas, {1} logos.	Parche guardado: {0} equipos, {1} logos.
 Gravar em patches/	Guardar en patches/
 Gravar como…	Guardar como…
@@ -95,7 +95,7 @@ Escolher arquivo…	Elegir archivo…
 Importar patch	Importar parche
 Patch (.zip) ou equipa (.EFT, .json)	Parche (.zip) o equipo (.EFT, .json)
 Importar patch de equipas	Importar parche de equipos
-Qualquer imagem PNG, JPG, WEBP, SVG ou BMP. O ideal: quadrada ou quase, fundo transparente, pelo menos 128 px. O RetroFoot corta as sobras, pode tirar um fundo de cor única e centra o escudo num quadrado de 256 px, como os do jogo.	Cualquier imagen PNG, JPG, WEBP, SVG o BMP. Lo ideal: cuadrada o casi, fondo transparente, al menos 128 px. RetroFoot recorta los bordes, puede quitar un fondo de un solo color y centra el escudo en un cuadrado de 256 px, como los del juego.
+Qualquer imagem PNG, JPG, WEBP, SVG ou BMP. O ideal: quadrada ou quase, fundo transparente, pelo menos 128 px. O ReFoot98 corta as sobras, pode tirar um fundo de cor única e centra o escudo num quadrado de 256 px, como os do jogo.	Cualquier imagen PNG, JPG, WEBP, SVG o BMP. Lo ideal: cuadrada o casi, fondo transparente, al menos 128 px. ReFoot98 recorta los bordes, puede quitar un fondo de un solo color y centra el escudo en un cuadrado de 256 px, como los del juego.
 Arraste uma imagem para aqui	Arrastra una imagen aquí
 Escudo de {0}	Escudo de {0}
 (vai para a pasta logos/ ao Gravar)	(va a la carpeta logos/ al Guardar)
@@ -148,7 +148,7 @@ Coleção…	Colección…
 Sem logo	Sin logo
 Logos das ligas	Logos de las ligas
 O arquivo não existe.	El archivo no existe.
-Não é uma imagem que o RetroFoot consiga abrir. Use PNG, JPG, WEBP, SVG ou BMP.	No es una imagen que RetroFoot pueda abrir. Usa PNG, JPG, WEBP, SVG o BMP.
+Não é uma imagem que o ReFoot98 consiga abrir. Use PNG, JPG, WEBP, SVG ou BMP.	No es una imagen que ReFoot98 pueda abrir. Usa PNG, JPG, WEBP, SVG o BMP.
 A imagem é grande demais ({0}x{1} px).	La imagen es demasiado grande ({0}x{1} px).
 Não consegui abrir a imagem: {0}	No se pudo abrir la imagen: {0}
 O SVG não tem nada para desenhar.	El SVG no tiene nada que dibujar.

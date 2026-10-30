@@ -32,7 +32,7 @@ As equipas de {0} ({1})	Os times de {0} ({1})
 Todas as equipas ({0})	Todos os times ({0})
 Equipas de {0}	Times de {0}
 Minhas equipas	Meus times
-Um patch (.zip) com as equipas em JSON e os logos delas, para aplicar noutro RetroFoot (ferramenta Patches ou Importar).	Um patch (.zip) com os times em JSON e os logos deles, para aplicar em outro RetroFoot (ferramenta Patches ou Importar).
+Um patch (.zip) com as equipas em JSON e os logos delas, para aplicar noutro ReFoot98 (ferramenta Patches ou Importar).	Um patch (.zip) com os times em JSON e os logos deles, para aplicar em outro ReFoot98 (ferramenta Patches ou Importar).
 Patch gravado: {0} equipas, {1} logos.	Patch salvo: {0} times, {1} logos.
 Gravar em patches/	Salvar em patches/
 Gravar como…	Salvar como…

@@ -36,7 +36,7 @@ O patch continua aplicado e pode ser revertido depois.	O patch continua aplicado
 O patch não foi aplicado (nada mudou): {0}	O patch não foi aplicado (nada mudou): {0}
 Passa por cima do patch "{1}" ({0} em comum).	Passa por cima do patch "{1}" ({0} em comum).
 Patch (.zip)	Patch (.zip)
-Patch do RetroFoot	Patch do RetroFoot
+Patch do ReFoot98	Patch do ReFoot98
 Patches	Patches
 Patrocinadores	Patrocinadores
 Países	Países
@@ -67,7 +67,7 @@ países	países
 {0} equipas que o patch não traz saem do jogo (voltam ao reverter).	{0} times que o patch não traz saem do jogo (voltam ao reverter).
 {0} equipas saíram (voltam ao reverter).	{0} times saíram (voltam ao reverter).
 {0} logos	{0} escudos
-{0}: não tem nada que o RetroFoot use (equipas, países, árbitros, bandeiras, logos).	{0}: não tem nada que o RetroFoot use (times, países, árbitros, bandeiras, escudos).
+{0}: não tem nada que o ReFoot98 use (equipas, países, árbitros, bandeiras, logos).	{0}: não tem nada que o ReFoot98 use (times, países, árbitros, bandeiras, escudos).
 Árbitros	Árbitros
 árbitros	árbitros
 Cancelar	Cancelar

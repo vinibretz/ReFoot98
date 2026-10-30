@@ -13,7 +13,7 @@ Aplique patches de equipas e países	Apply team and country patches
 Edite a lista de árbitros	Edit the referee list
 Idioma, visual, formato e regras do jogo	Language, look, screen format and game rules
 Versão e créditos	Version and credits
-Fecha o RetroFoot	Closes RetroFoot
+Fecha o ReFoot98	Closes ReFoot98
 Pasta de dados (equipas, logos, saves, patches):	Data folder (teams, logos, saves, patches):
 Arquivos Retrô convertidos: {0} equipas	Retro files converted: {0} teams
 Abrir pasta de dados	Open data folder
@@ -28,9 +28,9 @@ Não achei os dados do jogo (countries.tsv, teams...) em {0}.	Could not find the
 Esc: volta ao menu.	Esc: back to the menu.
 Equipas, logos, saves e patches	Teams, logos, saves and patches
 
-Sair do RetroFoot?	Quit RetroFoot?
-Nova versão do RetroFoot	New RetroFoot version
-A versão {0} do RetroFoot está disponível (você tem a {1}). Seus saves, equipas e configurações ficam como estão.	RetroFoot {0} is available (you have {1}). Your saves, teams and settings stay as they are.
+Sair do ReFoot98?	Quit ReFoot98?
+Nova versão do ReFoot98	New ReFoot98 version
+A versão {0} do ReFoot98 está disponível (você tem a {1}). Seus saves, equipas e configurações ficam como estão.	ReFoot98 {0} is available (you have {1}). Your saves, teams and settings stay as they are.
 Depois	Later
 Atualizar agora	Update now
 Baixando... {0}%	Downloading... {0}%

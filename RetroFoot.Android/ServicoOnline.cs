@@ -26,7 +26,7 @@ public sealed class ServicoOnline : Service
         var abrir = PendingIntent.GetActivity(this, 0, new Intent(this, typeof(MainActivity)).AddFlags(ActivityFlags.SingleTop),
             PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent);
         var n = (Build.VERSION.SdkInt >= BuildVersionCodes.O ? new Notification.Builder(this, Canal) : new Notification.Builder(this))
-            .SetContentTitle("RetroFoot")!
+            .SetContentTitle(RetroFoot.App.TelaAcerca.Nome)!
             .SetContentText(intent?.GetStringExtra("texto") ?? "Jogo online em andamento (você é o host)")!
             .SetSmallIcon(Resource.Drawable.Icon)!
             .SetOngoing(true)!

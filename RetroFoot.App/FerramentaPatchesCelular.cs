@@ -215,7 +215,7 @@ public sealed class TelaPatchesCelular : UserControl
         var meta = new List<string>();
         if (p.Autor.Length > 0) meta.Add(T("Autor: {0}", p.Autor));
         if (p.Versao.Length > 0) meta.Add(T("Versão {0}", p.Versao));
-        meta.Add(p.RetroFoot ? T("Patch do RetroFoot") : T("Patch Retrô (.EFT)"));
+        meta.Add(p.RetroFoot ? T("Patch do ReFoot98") : T("Patch Retrô (.EFT)"));
         if (p.Tamanho > 0) meta.Add(TelaPatches.Tamanho(p.Tamanho));
         var ic = Ui.Icone("peca", 26, CUi.Retro ? W95.Preto : TemaVerde.Destaque);
         var folha = new CUi.Folha(p.Titulo, s, bs.Count > 0 ? CUi.Botoes(bs.ToArray()) : null,

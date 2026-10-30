@@ -36,7 +36,7 @@ O patch continua aplicado e pode ser revertido depois.	The patch stays applied a
 O patch não foi aplicado (nada mudou): {0}	The patch was not applied (nothing changed): {0}
 Passa por cima do patch "{1}" ({0} em comum).	Overrides the patch "{1}" ({0} in common).
 Patch (.zip)	Patch (.zip)
-Patch do RetroFoot	RetroFoot patch
+Patch do ReFoot98	ReFoot98 patch
 Patrocinadores	Sponsors
 Países das equipas	Teams' countries
 Remover da biblioteca	Remove from library
@@ -63,7 +63,7 @@ países	countries
 {0} equipas que o patch não traz saem do jogo (voltam ao reverter).	{0} teams the patch does not include leave the game (they come back when reverting).
 {0} equipas saíram (voltam ao reverter).	{0} teams were removed (they come back when reverting).
 {0} logos	{0} logos
-{0}: não tem nada que o RetroFoot use (equipas, países, árbitros, bandeiras, logos).	{0}: has nothing RetroFoot can use (teams, countries, referees, flags, logos).
+{0}: não tem nada que o ReFoot98 use (equipas, países, árbitros, bandeiras, logos).	{0}: has nothing ReFoot98 can use (teams, countries, referees, flags, logos).
 árbitros	referees
 Importe um patch .zip Retrô (pastas EQUIPAS, FLAGS, COUNTRY.TXE...) ou um patch de equipas e logos exportado pelo Editor de Equipas.	Import a Retro .zip patch (EQUIPAS, FLAGS folders, COUNTRY.TXE...) or a team and logo patch exported by the Team Editor.
 Patch Retrô (.EFT)	Retro patch (.EFT)

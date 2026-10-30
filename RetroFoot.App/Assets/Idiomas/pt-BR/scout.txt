@@ -72,7 +72,7 @@ Chance de ser ele o lesionado quando a equipa sofre uma lesão. 0 nunca se lesio
 Chance de ser ele o expulso. Fair Play nunca é expulso. Suspensão de 1 a 4 jogos; guarda-redes expulso dá penálti certo, defesa dá em 1 de 3.	Chance de ser ele o expulso. Fair Play nunca é expulso. Suspensão de 1 a 4 jogos; goleiro expulso dá pênalti certo, defensor dá em 1 de 3.
 O valor do jogador para o jogo (força, nota, lesão, comportamento, moeda e inflação). O preço base dos leilões e os pedidos das equipas partem dele.	O valor do jogador para o jogo (força, nota, lesão, comportamento, moeda e inflação). O preço base dos leilões e os pedidos dos times partem dele.
 Jogos, Golos, Lesões, Amar., Expuls.	Jogos, Gols, Lesões, Amar., Expuls.
-O historial do jogador no save (golos desta época; Amar. = cartões amarelos na carreira, só com as regras do RetroFoot).	O histórico do jogador no jogo salvo (gols desta temporada; Amar. = cartões amarelos na carreira, só com as regras do RetroFoot).
+O historial do jogador no save (golos desta época; Amar. = cartões amarelos na carreira, só com as regras do ReFoot98).	O histórico do jogador no jogo salvo (gols desta temporada; Amar. = cartões amarelos na carreira, só com as regras do ReFoot98).
 S = suspenso por N jogos, A = N amarelos acumulados (o 3º suspende por 1 jogo), L = lesionado por N jogos; Estrang. = conta como estrangeiro (Bosman e PLOP não contam).	S = suspenso por N jogos, A = N amarelos acumulados (o 3º suspende por 1 jogo), L = lesionado por N jogos; Estrang. = conta como estrangeiro (Bosman e PLOP não contam).
 Idade	Idade
 O jogo gravado não guarda a idade dos jogadores, por isso o Scout não tem filtro de idade.	O jogo salvo não guarda a idade dos jogadores, por isso o Scout não tem filtro de idade.

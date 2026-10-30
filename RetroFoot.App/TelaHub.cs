@@ -133,7 +133,7 @@ public sealed class TelaHub : UserControl
         l.Add(new("sobre", "info", T("Sobre"), T("Versão e créditos"), AbrirSobre));
         if (DadosJogo.PodeAbrirPasta)
             l.Add(new("pasta", "pasta", T("Abrir pasta de dados"), T("Equipas, logos, saves e patches"), AbrirPasta));
-        l.Add(new("sair", "sair", T("Sair"), T("Fecha o RetroFoot"), Sair));
+        l.Add(new("sair", "sair", T("Sair"), T("Fecha o ReFoot98"), Sair));
         return l;
     }
 
@@ -359,7 +359,7 @@ public sealed class TelaHub : UserControl
                         Children =
                         {
                             Ui.Icone("sair", 20, new ImmutableSolidColorBrush(Amarelo)),
-                            new TextBlock { Text = T("Sair do RetroFoot?"), FontFamily = Tema.Inter, FontSize = 18, FontWeight = FontWeight.Bold, Foreground = Brushes.White, VerticalAlignment = VerticalAlignment.Center },
+                            new TextBlock { Text = T("Sair do ReFoot98?"), FontFamily = Tema.Inter, FontSize = 18, FontWeight = FontWeight.Bold, Foreground = Brushes.White, VerticalAlignment = VerticalAlignment.Center },
                         },
                     },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 12, HorizontalAlignment = HorizontalAlignment.Center, Children = { sim, nao } },
@@ -396,7 +396,7 @@ public sealed class TelaHub : UserControl
     void OferecerAtualizacao(Atualizacao.Nova nova)
     {
         void Fechar() { sobre.Children.Clear(); Focar(); }
-        var texto = Ui.Txt(T("A versão {0} do RetroFoot está disponível (você tem a {1}). Seus saves, equipas e configurações ficam como estão.",
+        var texto = Ui.Txt(T("A versão {0} do ReFoot98 está disponível (você tem a {1}). Seus saves, equipas e configurações ficam como estão.",
             nova.Versao.ToString(3), Atualizacao.Atual.ToString(3)), 13.5);
         texto.TextWrapping = TextWrapping.Wrap;
         var estado = Ui.Txt("", 12.5);
@@ -427,7 +427,7 @@ public sealed class TelaHub : UserControl
         var botoes = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, HorizontalAlignment = HorizontalAlignment.Right, Children = { depois, agora } };
         var corpo = new StackPanel { Spacing = 14, Margin = new Thickness(18, 14), Width = 420, Children = { texto, estado, botoes } };
         sobre.Children.Clear();
-        sobre.Children.Add(Ui.Veu(Ui.Janela(T("Nova versão do RetroFoot"), corpo, () => { if (!baixando) Fechar(); }, "info"), () => { if (!baixando) Fechar(); }));
+        sobre.Children.Add(Ui.Veu(Ui.Janela(T("Nova versão do ReFoot98"), corpo, () => { if (!baixando) Fechar(); }, "info"), () => { if (!baixando) Fechar(); }));
         Dispatcher.UIThread.Post(() => agora.Focus(), DispatcherPriority.Loaded);
     }
 

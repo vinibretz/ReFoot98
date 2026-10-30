@@ -1,7 +1,7 @@
-# Gera os pacotes de uma release do RetroFoot (fork vinibretz) no Windows:
-#   dist/retrofoot-<versao>-beta-windows-x64.zip   (RetroFoot.exe)
-#   dist/retrofoot-<versao>-beta-linux-x64.tar.gz  (RetroFoot)
-#   dist/retrofoot-<versao>-beta-android.apk       (assinado com a chave do fork)
+# Gera os pacotes de uma release do ReFoot98 (fork vinibretz do RetroFoot) no Windows:
+#   dist/refoot98-<versao>-beta-windows-x64.zip   (RetroFoot.exe: o nome que a atualizacao procura)
+#   dist/refoot98-<versao>-beta-linux-x64.tar.gz  (RetroFoot)
+#   dist/refoot98-<versao>-beta-android.apk       (assinado com a chave do fork)
 # Antes, muda a versao nos dois csproj. Nao faz commit, tag nem push (passo a passo em
 # docs/release.md).
 #
@@ -15,7 +15,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $raiz = Split-Path $PSScriptRoot -Parent
 Set-Location $raiz
-$nome = "retrofoot-$Versao-beta"
+$nome = "refoot98-$Versao-beta"
 $dist = Join-Path $raiz 'dist'
 
 # 1. a versao: o jogo (Sobre e atualizacao) e o Android (o codigo so cresce: 0.2.4 = 204)

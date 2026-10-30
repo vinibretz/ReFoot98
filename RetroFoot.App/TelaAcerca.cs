@@ -43,7 +43,7 @@ public static class Registo
 public static class TelaAcerca
 {
     // o nome do jogo nas janelas e a unica linha de credito (o modo Classico)
-    public const string Nome = "RetroFoot";
+    public const string Nome = "ReFoot98";
     public static string Slogan => T("Gestor de futebol");
 
     // a versao do RetroFoot.App.csproj (<Version>), sem o "+commit" que o SDK junta
