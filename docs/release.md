@@ -62,7 +62,7 @@ No `README.md`, na tabela **Download**, troque a versão nos três links (`v0.2.
 ```powershell
 git add README.md RetroFoot.App/RetroFoot.App.csproj RetroFoot.Android/RetroFoot.Android.csproj
 git commit -m "Versao 0.2.4"
-git tag -a v0.2.4-beta -m "RetroFoot 0.2.4 beta"
+git tag -a v0.2.4-beta -m "ReFoot98 0.2.4 beta"
 ```
 
 ## 5. Enviar para o GitHub
@@ -81,7 +81,7 @@ repositório do Juan.
 
 1. Abra https://github.com/vinibretz/ReFoot98/releases/new
 2. **Choose a tag**: `v0.2.4-beta`.
-3. **Release title**: `RetroFoot 0.2.4 beta`.
+3. **Release title**: `ReFoot98 0.2.4 beta` (o nome do jogo é ReFoot98, não RetroFoot).
 4. **Descrição**: use o modelo abaixo, com as novidades da versão.
 5. Arraste os três arquivos de `dist\` para "Attach binaries" e espere terminar de enviar
    (o APK tem uns 140 MB).
@@ -94,7 +94,7 @@ atualização ao abrir, no Windows, no Linux e no Android.
 Modelo de descrição:
 
 ```markdown
-## RetroFoot 0.2.4 beta
+## ReFoot98 0.2.4 beta
 
 > **Versão beta:** espere bugs. Encontrou um problema? Abra uma [issue](https://github.com/vinibretz/ReFoot98/issues).
 
