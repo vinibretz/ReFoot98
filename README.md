@@ -11,6 +11,14 @@ mesmo computador.
 O RetroFoot é livre e de código aberto, escrito em C# com [Avalonia](https://avaloniaui.net/).
 Roda no Linux, no Windows e (em desenvolvimento) no Android.
 
+> **Sobre este fork:** esta é uma versão modificada do
+> [RetroFoot original de Juan Silveira](https://github.com/juan-silveira/RetroFoot),
+> distribuída sob a mesma licença (GPL v3). Mudanças em relação ao original:
+>
+> - **Premiação ampliada** (opcional, versão Atual): prêmios para as primeiras de cada
+>   divisão e para o vice da copa, proporcionais à divisão e à posição
+>   ([docs/premiacao.md](docs/premiacao.md)).
+
 <p align="center">
   <img src="RetroFoot.App/Assets/Marca/capa-16x9.jpg" alt="Capa do RetroFoot" width="720">
 </p>
@@ -18,16 +26,16 @@ Roda no Linux, no Windows e (em desenvolvimento) no Android.
 ## Download
 
 > **Versão beta:** espere bugs e coisas por melhorar. Encontrou um problema? Abra uma
-> [issue](https://github.com/juan-silveira/RetroFoot/issues).
+> [issue](https://github.com/vinibretz/RetroFoot/issues).
 
 | Sistema | |
 |---|---|
-| 🐧 Linux (x64) | [Baixar v0.1.1 beta](https://github.com/juan-silveira/RetroFoot/releases/download/v0.1.1-beta/retrofoot-0.1.1-beta-linux-x64.tar.gz) |
-| 🪟 Windows (x64) | [Baixar v0.1.1 beta](https://github.com/juan-silveira/RetroFoot/releases/download/v0.1.1-beta/retrofoot-0.1.1-beta-windows-x64.zip) |
+| 🐧 Linux (x64) | [Baixar v0.2.3 beta](https://github.com/vinibretz/RetroFoot/releases/download/v0.2.3-beta/retrofoot-0.2.3-beta-linux-x64.tar.gz) |
+| 🪟 Windows (x64) | [Baixar v0.2.3 beta](https://github.com/vinibretz/RetroFoot/releases/download/v0.2.3-beta/retrofoot-0.2.3-beta-windows-x64.zip) |
 | 🍎 macOS | em breve... |
-| 🤖 Android | em breve... |
+| 🤖 Android | [Baixar v0.2.3 beta](https://github.com/vinibretz/RetroFoot/releases/download/v0.2.3-beta/retrofoot-0.2.3-beta-android.apk) |
 
-Todas as versões ficam em [Releases](https://github.com/juan-silveira/RetroFoot/releases).
+Todas as versões ficam em [Releases](https://github.com/vinibretz/RetroFoot/releases).
 A partir da 0.1.1 o jogo avisa ao abrir quando sai uma versão nova e se atualiza sozinho
 (Linux e Windows); seus saves e configurações ficam como estão.
 
@@ -36,8 +44,8 @@ A partir da 0.1.1 o jogo avisa ao abrir quando sai uma versão nova e se atualiz
 - **Dois visuais:** o **Retrô**, com a cara das janelas do Windows 95, e o **Moderno**,
   com o tema verde e amarelo. A tela pode ser 4:3 ou 16:9.
 - **Duas versões de regras:** a **Retrô**, igual ao jogo clássico, e a **Atual**, com
-  5 substituições, banco maior, acréscimos, cartões amarelos e outras novidades
-  (Configurações > Regras).
+  5 substituições, banco maior, acréscimos, cartões amarelos, premiação ampliada e outras
+  novidades (Configurações > Regras).
 - **Hub de ferramentas:** Editor de Equipas (com escudos), Editor de Save, Scout, Patches
   e Árbitros, tudo dentro do jogo.
 - **Dados abertos:** equipas em JSON (uma por arquivo), países e árbitros em TSV, logos em
@@ -51,7 +59,7 @@ Precisa do [.NET SDK](https://dotnet.microsoft.com/download) 8 ou mais novo (o A
 precisa do .NET 10 com a workload `android`).
 
 ```sh
-git clone https://github.com/juan-silveira/RetroFoot.git
+git clone https://github.com/vinibretz/RetroFoot.git
 cd RetroFoot
 dotnet run --project RetroFoot.Desktop
 ```
