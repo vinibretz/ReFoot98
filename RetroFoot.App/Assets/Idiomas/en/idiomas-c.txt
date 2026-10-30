@@ -94,6 +94,13 @@ Até {0}	Up to {0}
 " Mais de {0}"	" Over {0}"
 Não mostrar os jogadores do meu time	Hide my team's players
 Nota   RL	Rtg    IR
+Ordenar por	Sort by
+Mais barato	Cheapest
+Mais caro	Most expensive
+Mais forte	Strongest
+Mais fraco	Weakest
+Melhor nota	Best rating
+Menor risco	Lowest risk
 Só estão listados os primeiros 50 jogadores encontrados	Only the first 50 players found are listed
 Jogadores sob observação	Watched players
 Só pode ter {0} jogadores sob observação	You can only watch {0} players

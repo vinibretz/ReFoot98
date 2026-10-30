@@ -14,7 +14,8 @@ namespace RetroFoot.App;
 // A Lista de Jogadores no celular: a tela inteira com o nome a procurar em cima, os criterios
 // em pilulas (cada uma abre a escolha numa folha), o "nao mostrar os do meu time", o Procurar
 // embaixo e a lista do que foi achado (o preco e a equipa de cada um; aos 50, "Mostrar mais").
-// O toque num jogador abre a ficha com o Equipa... (e o Comprar do launcher). Os criterios, a
+// O "Ordenar por" e a ultima pilula (no Retro, a ultima linha dos criterios): reordena a
+// lista ja achada. O toque num jogador abre a ficha com o Equipa... (e o Comprar do launcher). Os criterios, a
 // busca e os botoes sao os do Form (TelaProcura.cs), guardados de uma vez para a outra.
 public static partial class TelaProcura
 {
@@ -120,7 +121,12 @@ public static partial class TelaProcura
                     Pilula(T("Risco de lesão"), _risco > 0 ? RiscosLauncher[_risco] : "", () =>
                         Escolher(T("Risco de lesão"), RiscosLauncher, _risco, false, i => _risco = i));
                 }
+                Pilula(T("Ordenar por"), _ordem > 0 ? _f.Ordens[Math.Min(_ordem, _f.Ordens.Length - 1)] : "", EscolherOrdem);
             }
+
+            // a ordem nao e criterio da busca: reordena o que ja foi achado
+            void EscolherOrdem() =>
+                Escolher(T("Ordenar por"), _f.Ordens, _ordem, false, i => { _f.TrocarOrdem(i); Lista(); }, filtro: false);
 
             // uma pilula de criterio: o nome e, se escolhido, o valor (em destaque)
             void Pilula(string rotulo, string valor, Action abrir)
@@ -142,7 +148,8 @@ public static partial class TelaProcura
             }
 
             // escolhe um item (limpar: a primeira linha e o X do original, sem criterio = -1)
-            void Escolher(string titulo, IReadOnlyList<string> itens, int atual, bool limpar, Action<int> escolheu)
+            // (filtro: false, o "Ordenar por", nao pede outro Procurar)
+            void Escolher(string titulo, IReadOnlyList<string> itens, int atual, bool limpar, Action<int> escolheu, bool filtro = true)
             {
                 var linhas = new List<Control>();
                 if (limpar) linhas.Add(CUi.Txt(T("Sem filtro"), 15, CUi.Fraco, FontWeight.SemiBold));
@@ -152,7 +159,7 @@ public static partial class TelaProcura
                 {
                     FecharFolha();
                     escolheu(i - d);
-                    _f.Alterado();
+                    if (filtro) _f.Alterado();
                     Atualizar();
                 });
                 marcar(atual + d);
@@ -433,6 +440,7 @@ public static partial class TelaProcura
                         Escolher(T("Risco de lesão"), RiscosLauncher, _risco, false, i => _risco = i)),
                         Pequeno("clearPositionBtn", () => _risco = 0)));
                 }
+                p.Children.Add(Criterio(T("Ordenar por"), Combo(_f.Ordens[Math.Clamp(_ordem, 0, _f.Ordens.Length - 1)], EscolherOrdem)));
                 p.Children.Add(MercadoRetro.Marcar(T("Não mostrar os jogadores do meu time"), _naoMinha, W95.Preto, () => { _f.TrocarNaoMinha(); Atualizar(); }));
                 // "Dinheiro em caixa" em azul (clBlue), como no computador
                 var din = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };

@@ -21,6 +21,10 @@ namespace RetroFoot.App;
 // Nota e RL na lista, com a janela 50 pontos mais larga (procura.py) e o botao Comprar
 // (comprar.py: compra direta do escolhido, sem confirmar; a linha fica sem preco).
 //
+// O RetroFoot acrescenta o "Ordenar por" (a lista vem pelo nome, como no original, ou por
+// preco, forca, posicao, equipa e, no launcher, nota e risco de lesao): trocar a ordem
+// reordena o que ja foi achado, sem precisar de Procurar de novo.
+//
 // Como no original, a janela guarda os criterios e a lista de uma vez para a outra enquanto
 // o treinador for o mesmo.
 public static partial class TelaProcura
@@ -60,6 +64,11 @@ public static partial class TelaProcura
     static List<ushort> _achados = new();
     // os filtros do launcher (ItemIndex; 0 = "Qualquer")
     static int _comp, _nota, _risco;
+    // a ordem da lista (0 = pelo nome, a do original; fica de uma vez para a outra)
+    static int _ordem;
+
+    // as ordens (as duas ultimas so no launcher: Nota e RL)
+    static readonly string[] OrdensChaves = { "Nome", "Mais barato", "Mais caro", "Mais forte", "Mais fraco", "Posição", "Equipa", "Melhor nota", "Menor risco" };
 
     // a forca em duas caixas, minimo e maximo (no original, faixas fixas de DS:02D6): aqui
     // todos os numeros de 1 a 50 e, em primeiro, o vazio (sem limite). O indice e o valor.
@@ -166,9 +175,14 @@ public static partial class TelaProcura
                 Comps.Add(Pequeno(new Rect(650, 40, 25, 25), "clearSkillBtn", () => { _nota = 0; Alterado(); }));
                 Comps.Add(Caixa(new Rect(505, 72, 140, 24), () => RiscosLauncher, () => _risco, i => _risco = i));
                 Comps.Add(Pequeno(new Rect(650, 72, 25, 25), "clearPositionBtn", () => { _risco = 0; Alterado(); }));
-                Comps.Add(new Marcar { R = new Rect(389, 102, 21, 29), Marcado = () => _naoMinha, Clique = TrocarNaoMinha });
+                Comps.Add(CaixaOrdem(new Rect(505, 104, 140, 24)));
+                Comps.Add(new Marcar { R = new Rect(389, 130, 21, 29), Marcado = () => _naoMinha, Clique = TrocarNaoMinha });
             }
-            else Comps.Add(new Marcar { R = new Rect(424, 96, 21, 29), Marcado = () => _naoMinha, Clique = TrocarNaoMinha });
+            else
+            {
+                Comps.Add(new Marcar { R = new Rect(424, 96, 21, 29), Marcado = () => _naoMinha, Clique = TrocarNaoMinha });
+                Comps.Add(CaixaOrdem(new Rect(470, 148, 140, 24)));
+            }
 
             // --- a lista e os botoes (larguras.py: lista 16 pontos mais larga; procura.py: +50)
             _lista = new Lista
@@ -207,6 +221,9 @@ public static partial class TelaProcura
                 Negrito = true, Cancelar = true, Clique = () => { _treinador = _e.Treinador; Fechar(); },
             });
 
+            // (um save sem as regras do launcher depois de um com: a ordem Nota ou RL volta ao nome)
+            if (_ordem >= Ordens.Length) _ordem = 0;
+
             _caixaNome = CaixaTexto(new Rect(108, 8, 200, 24), 20, t =>
             {
                 // textNameChange (10:39b1)
@@ -227,6 +244,23 @@ public static partial class TelaProcura
             Texto = () => { int i = indice(); var l = itens(); return i >= 0 && i < l.Count ? l[i] : ""; },
             Escolher = i => { escolher(i); Alterado(); },
         };
+
+        // o "Ordenar por": reordena o que ja foi achado (nao pede outro Procurar)
+        Combo CaixaOrdem(Rect r) => new()
+        {
+            R = r, Itens = () => Ordens, Indice = () => _ordem,
+            Texto = () => Ordens[Math.Clamp(_ordem, 0, Ordens.Length - 1)],
+            Escolher = i => { TrocarOrdem(i); Redesenhar(); },
+        };
+
+        string[] Ordens => OrdensChaves.Take(_launcher ? OrdensChaves.Length : OrdensChaves.Length - 2).Select(x => T(x)).ToArray();
+
+        void TrocarOrdem(int i)
+        {
+            if (i < 0 || i >= Ordens.Length || i == _ordem) return;
+            _ordem = i;
+            Ordenar();
+        }
 
         void Alterado()
         {
@@ -278,17 +312,55 @@ public static partial class TelaProcura
             _lista.Sel = -1;
             _lista.Rolagem = 0;
             var todos = S.S.Equipas.SelectMany(eq => eq.Jogadores.Select(p => (eq, p))).ToList();
-            var itens = new List<(string Chave, ushort Id)>();
+            var itens = new List<(SEquipa, SJogador)>();
             for (int i = todos.Count - 1; i >= 0; i--)
             {
                 var (eq, p) = todos[i];
-                if (!PassaFiltro(eq, p)) continue;
-                itens.Add((NomeJogador(p) + "," + p.ID, p.ID));
+                if (PassaFiltro(eq, p)) itens.Add((eq, p));
             }
-            // LBS_SORT: lstrcmpi (sem diferenciar maiusculas, acentos so no fim)
-            var cmp = StringComparer.Create(System.Globalization.CultureInfo.InvariantCulture, ignoreCase: true);
-            _achados = itens.OrderBy(x => x.Chave, cmp).Select(x => x.Id).ToList();
+            Ordenar(itens);
             Redesenhar();
+        }
+
+        // a ordem da lista: a escolhida no "Ordenar por" e, no empate, o nome (LBS_SORT do
+        // original: lstrcmpi, sem diferenciar maiusculas, acentos so no fim). Sem itens: os ja
+        // achados, na equipa em que estao agora (o escolhido continua escolhido).
+        void Ordenar(List<(SEquipa Eq, SJogador P)>? itens = null)
+        {
+            ushort? sel = _lista.Sel >= 0 && _lista.Sel < _achados.Count ? _achados[_lista.Sel] : null;
+            if (itens == null)
+            {
+                var ids = new HashSet<ushort>(_achados);
+                itens = S.S.Equipas.SelectMany(eq => eq.Jogadores.Where(p => ids.Contains(p.ID)).Select(p => (eq, p))).ToList();
+            }
+            var cmp = StringComparer.Create(System.Globalization.CultureInfo.InvariantCulture, ignoreCase: true);
+            bool porPreco = _ordem is 1 or 2;
+            var medias = new Dictionary<SEquipa, short>();
+            var xs = itens.Select(x =>
+            {
+                int v = 0;
+                if (porPreco)
+                {
+                    if (!medias.TryGetValue(x.Eq, out var m)) medias[x.Eq] = m = MercadoJogo.ForcaMedia(x.Eq);
+                    v = S.Mercado.PrecoDeVenda(x.Eq, _e, x.P, m);
+                }
+                return (x.Eq, x.P, Nome: NomeJogador(x.P) + "," + x.P.ID, Preco: v);
+            }).ToList();
+            // (no preco, os sem preco, que nao estao a venda para esta equipa, no fim)
+            var o = _ordem switch
+            {
+                1 => xs.OrderBy(x => x.Preco <= 0).ThenBy(x => x.Preco),
+                2 => xs.OrderBy(x => x.Preco <= 0).ThenByDescending(x => x.Preco),
+                3 => xs.OrderByDescending(x => (short)x.P.Forca),
+                4 => xs.OrderBy(x => (short)x.P.Forca),
+                5 => xs.OrderBy(x => x.P.Posicao).ThenByDescending(x => (short)x.P.Forca),
+                6 => xs.OrderBy(x => Texto(x.Eq.NomeCurto), cmp).ThenBy(x => x.P.Posicao),
+                7 => xs.OrderByDescending(x => (short)x.P.Nota),
+                8 => xs.OrderBy(x => (short)x.P.Lesao),
+                _ => xs.OrderBy(x => 0),
+            };
+            _achados = o.ThenBy(x => x.Nome, cmp).Select(x => x.P.ID).ToList();
+            _lista.Sel = sel is { } id ? _achados.IndexOf(id) : -1;
         }
 
         // a funcao aninhada 10:3223 (+ filtros.asm do launcher)
@@ -368,15 +440,17 @@ public static partial class TelaProcura
                 Escreve(dc, T("Comportamento"), 385, 12, 13, Preto);
                 Escreve(dc, T("Nota"), 385, 44, 13, Preto);
                 Escreve(dc, T("Risco de lesão"), 385, 76, 13, Preto);
-                Rotulo(dc, T("Não mostrar os jogadores do meu time"), new Rect(417, 108, 270, 16), 13, Preto);
-                Escreve(dc, T("Dinheiro em caixa"), 385, 146, 13, Azul);
-                Rotulo(dc, Dinheiro((int)_e.Dinheiro), new Rect(505, 146, 170, 16), 13, Azul);
+                Escreve(dc, T("Ordenar por"), 385, 108, 13, Preto);
+                Rotulo(dc, T("Não mostrar os jogadores do meu time"), new Rect(417, 136, 270, 16), 13, Preto);
+                Escreve(dc, T("Dinheiro em caixa"), 385, 162, 13, Azul);
+                Rotulo(dc, Dinheiro((int)_e.Dinheiro), new Rect(505, 162, 170, 16), 13, Azul);
                 // o rotulo das colunas novas (procura.py)
                 Escreve(dc, T("Nota   RL"), 18 + 466 - 6, 168, 13, Preto);
             }
             else
             {
                 Rotulo(dc, T("Não mostrar os jogadores do meu time"), new Rect(452, 96, 149, 32), 13, Preto);
+                Escreve(dc, T("Ordenar por"), 385, 152, 13, Preto);
                 Escreve(dc, T("Dinheiro em caixa"), 420, 12, 13, Azul);
                 Rotulo(dc, Dinheiro((int)_e.Dinheiro), new Rect(420, 36, 205, 16), 13, Azul);
             }

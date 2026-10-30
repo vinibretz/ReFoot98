@@ -92,6 +92,13 @@ Até {0}	Hasta {0}
 " Mais de {0}"	" Más de {0}"
 Não mostrar os jogadores do meu time	Ocultar los jugadores de mi equipo
 Nota   RL	Nota   RL
+Ordenar por	Ordenar por
+Mais barato	Más barato
+Mais caro	Más caro
+Mais forte	Más fuerte
+Mais fraco	Más débil
+Melhor nota	Mejor nota
+Menor risco	Menor riesgo
 Só estão listados os primeiros 50 jogadores encontrados	Solo se muestran los 50 primeros jugadores encontrados
 Jogadores sob observação	Jugadores en observación
 Só pode ter {0} jogadores sob observação	Solo puedes observar {0} jugadores
