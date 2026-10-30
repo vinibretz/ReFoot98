@@ -40,6 +40,23 @@ Roda no Linux, no Windows e (em desenvolvimento) no Android.
 | 🍎 macOS | em breve... |
 | 🤖 Android | [Baixar v0.2.5 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.5-beta/refoot98-0.2.5-beta-android.apk) |
 
+### Como instalar
+
+> [!IMPORTANT]
+> **Windows: extraia o zip antes de jogar.** Não abra o `RetroFoot.exe` direto de dentro do
+> zip: o Windows roda o jogo numa pasta temporária e apaga ela depois (os saves se perdem e a
+> atualização automática não funciona).
+
+- **Windows:** clique com o botão direito no `.zip` → **Extrair tudo...** → abra o
+  `RetroFoot.exe` da pasta extraída. Se aparecer "O Windows protegeu o computador", clique em
+  **Mais informações** → **Executar assim mesmo**.
+- **Linux:** extraia o `.tar.gz` (`tar xzf refoot98-*-linux-x64.tar.gz`) e rode `./RetroFoot`.
+- **Android:** abra o `.apk` no celular e permita instalar apps desta fonte quando o Android
+  pedir.
+
+Os saves, equipas e configurações ficam na pasta `data`, ao lado do executável. Para fazer
+backup ou levar para outro computador, copie essa pasta.
+
 Todas as versões ficam em [Releases](https://github.com/vinibretz/ReFoot98/releases).
 A partir da 0.1.1 o jogo avisa ao abrir quando sai uma versão nova e se atualiza sozinho
 (Linux e Windows); seus saves e configurações ficam como estão.

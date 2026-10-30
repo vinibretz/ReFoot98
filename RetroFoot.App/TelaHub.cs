@@ -384,8 +384,19 @@ public sealed class TelaHub : UserControl
 
     void ProcurarAtualizacao()
     {
-        if (_procurouAtualizacao || !Atualizacao.Suportada) return;
+        if (_procurouAtualizacao) return;
         _procurouAtualizacao = true;
+        if (DadosJogo.DentroDoZip)
+        {
+            // nada de atualizar a copia temporaria: o aviso para extrair
+            Dispatcher.UIThread.Post(() => Mensagem(T("Extraia o jogo antes de jogar"),
+                T("Você abriu o ReFoot98 de dentro do zip, sem extrair. Assim o Windows roda o jogo numa pasta temporária, que ele apaga depois, e a atualização automática não funciona.\n\n"
+                + "Feche o jogo, clique com o botão direito no zip, escolha \"Extrair tudo...\" e abra o RetroFoot.exe da pasta extraída.\n\n"
+                + "O que você salvar agora fica guardado em:\n{0}\ne vem junto na primeira vez que abrir o jogo extraído.", DadosJogo.Raiz)),
+                DispatcherPriority.Loaded);
+            return;
+        }
+        if (!Atualizacao.Suportada) return;
         Atualizacao.LimparAntigo();
         Task.Run(Atualizacao.Procurar).ContinueWith(t =>
         {

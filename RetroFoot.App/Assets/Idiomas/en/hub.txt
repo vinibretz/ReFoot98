@@ -36,3 +36,5 @@ Atualizar agora	Update now
 Baixando... {0}%	Downloading... {0}%
 Pronto. Abrindo a versão nova...	Done. Opening the new version...
 Não consegui atualizar: {0}	Couldn't update: {0}
+Extraia o jogo antes de jogar	Extract the game before playing
+Você abriu o ReFoot98 de dentro do zip, sem extrair. Assim o Windows roda o jogo numa pasta temporária, que ele apaga depois, e a atualização automática não funciona.\n\nFeche o jogo, clique com o botão direito no zip, escolha "Extrair tudo..." e abra o RetroFoot.exe da pasta extraída.\n\nO que você salvar agora fica guardado em:\n{0}\ne vem junto na primeira vez que abrir o jogo extraído.	You opened ReFoot98 from inside the zip, without extracting it. That way Windows runs the game in a temporary folder that it deletes later, and automatic updates don't work.\n\nClose the game, right-click the zip, choose "Extract All..." and open RetroFoot.exe from the extracted folder.\n\nWhat you save now is kept in:\n{0}\nand comes along the first time you open the extracted game.

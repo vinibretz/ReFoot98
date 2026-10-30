@@ -38,6 +38,28 @@ public static class DadosJogo
 
     public static bool Portatil => Environment.GetEnvironmentVariable("RETROFOOT_DADOS") is not { Length: > 0 } && Raiz == PastaPortatil;
 
+    // aberto de dentro do zip, sem extrair: o Windows (e o WinRAR, o 7-Zip, os gestores do
+    // Linux) tira so o executavel para uma pasta temporaria, que apaga depois. Os dados vao
+    // entao para a pasta do sistema (os saves nao somem e vem junto quando o jogo extraido
+    // abrir pela 1a vez) e o hub avisa para extrair
+    public static bool DentroDoZip { get; } = NaPastaTemporaria(AppContext.BaseDirectory);
+
+    static bool NaPastaTemporaria(string pasta)
+    {
+        if (OperatingSystem.IsAndroid() || OperatingSystem.IsBrowser()) return false;
+        try
+        {
+            var p = Path.GetFullPath(pasta);
+            var tmp = Path.GetFullPath(Path.GetTempPath());
+            var cmp = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+            if (p.StartsWith(tmp, cmp)) return true;
+            // o caminho do TEMP pode vir abreviado (C:\Users\FULANO~1\...): as pastas que cada extrator cria
+            return p.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Any(s =>
+                System.Text.RegularExpressions.Regex.IsMatch(s, @"^(Temp\d+_.*\.zip|Rar\$EX.*|7zO.*)$", System.Text.RegularExpressions.RegexOptions.IgnoreCase));
+        }
+        catch { return false; }
+    }
+
     public static string Raiz
     {
         get
@@ -47,6 +69,7 @@ public static class DadosJogo
             lock (_trava)
             {
                 if (_raiz != null) return _raiz;
+                if (DentroDoZip) return _raiz = PastaSistema;
                 var port = PastaPortatil;
                 try
                 {

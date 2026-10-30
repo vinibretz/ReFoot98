@@ -45,6 +45,9 @@ O script:
 O Android demora (10 a 20 minutos) e roda em prioridade baixa para não travar o computador.
 Para gerar só Windows e Linux: acrescente `-SemAndroid`.
 
+O zip do Windows traz a pasta `ReFoot98` com o `RetroFoot.exe` e o
+`LEIA-ME - EXTRAIA ANTES DE JOGAR.txt` (o texto está no script).
+
 Teste o pacote do Windows: extraia o zip numa pasta qualquer, fora do projeto, e abra o
 `RetroFoot.exe`. O APK, se puder, instale num celular.
 
@@ -104,6 +107,11 @@ Versão modificada do [RetroFoot de Juan Silveira](https://github.com/juan-silve
 | 🐧 Linux (x64) | `refoot98-0.2.4-beta-linux-x64.tar.gz` |
 | 🪟 Windows (x64) | `refoot98-0.2.4-beta-windows-x64.zip` |
 | 🤖 Android | `refoot98-0.2.4-beta-android.apk` |
+
+> [!IMPORTANT]
+> **Windows: extraia o zip antes de jogar** (botão direito → **Extrair tudo...**) e abra o
+> `RetroFoot.exe` da pasta extraída. Aberto de dentro do zip, o jogo roda numa pasta
+> temporária e os saves se perdem.
 
 ### Novidades
 

@@ -41,8 +41,33 @@ foreach ($r in 'win-x64', 'linux-x64') {
     dotnet publish RetroFoot.Desktop -c Release -r $r -o "$tmp\$r" | Out-Null
     if ($LASTEXITCODE) { throw "publish $r falhou (rode o comando a mao para ver o erro)" }
 }
-Move-Item "$tmp\win-x64\RetroFoot.Desktop.exe" "$tmp\RetroFoot.exe"
-Compress-Archive "$tmp\RetroFoot.exe" "$dist\$nome-windows-x64.zip" -Force
+# o zip: a pasta ReFoot98 com o executavel e o LEIA-ME (quem abre o zip ve logo o aviso de
+# extrair; a atualizacao acha o RetroFoot.exe pelo nome, em qualquer pasta do zip)
+$win = Join-Path $tmp 'ReFoot98'
+New-Item -ItemType Directory -Force $win | Out-Null
+Move-Item "$tmp\win-x64\RetroFoot.Desktop.exe" "$win\RetroFoot.exe"
+Set-Content "$win\LEIA-ME - EXTRAIA ANTES DE JOGAR.txt" -Encoding utf8 -Value @"
+ReFoot98 $Versao beta - como instalar no Windows
+================================================
+
+1. EXTRAIA O ZIP ANTES DE JOGAR.
+   Clique com o botao direito no arquivo .zip e escolha "Extrair tudo...".
+   Nao abra o RetroFoot.exe direto de dentro do zip: o Windows roda o jogo numa
+   pasta temporaria e apaga ela depois (os saves se perdem e a atualizacao
+   automatica nao funciona).
+
+2. Abra o RetroFoot.exe da pasta extraida.
+   Se o Windows mostrar "O Windows protegeu o computador", clique em
+   "Mais informacoes" e depois em "Executar assim mesmo".
+
+3. Os saves, equipas e configuracoes ficam na pasta "data", que o jogo cria ao
+   lado do RetroFoot.exe. Para fazer backup ou levar para outro computador,
+   copie a pasta inteira.
+
+O jogo avisa quando sai uma versao nova e se atualiza sozinho.
+Problemas: https://github.com/vinibretz/ReFoot98/issues
+"@
+Compress-Archive $win "$dist\$nome-windows-x64.zip" -Force
 Move-Item "$tmp\linux-x64\RetroFoot.Desktop" "$tmp\RetroFoot"
 # o tar do .NET, com a permissao de execucao (0755) que o Linux precisa, comprimido em gzip
 $tgz = [IO.File]::Create("$dist\$nome-linux-x64.tar.gz")
