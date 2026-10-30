@@ -20,6 +20,9 @@ Roda no Linux, no Windows e (em desenvolvimento) no Android.
 > - **Premiação ampliada** (opcional, versão Atual): prêmios para as primeiras de cada
 >   divisão e para o vice da copa, proporcionais à divisão e à posição
 >   ([docs/premiacao.md](docs/premiacao.md)).
+> - **Ordenar a busca de jogadores:** na Lista de Jogadores (Jogador > Procurar), o
+>   "Ordenar por" organiza o resultado por nome, preço, força, posição, time e, com as
+>   regras do launcher, nota e risco de lesão.
 
 <p align="center">
   <img src="RetroFoot.App/Assets/Marca/capa-16x9.jpg" alt="Capa do ReFoot98" width="720">
@@ -32,10 +35,10 @@ Roda no Linux, no Windows e (em desenvolvimento) no Android.
 
 | Sistema | |
 |---|---|
-| 🐧 Linux (x64) | [Baixar v0.2.4 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.4-beta/refoot98-0.2.4-beta-linux-x64.tar.gz) |
-| 🪟 Windows (x64) | [Baixar v0.2.4 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.4-beta/refoot98-0.2.4-beta-windows-x64.zip) |
+| 🐧 Linux (x64) | [Baixar v0.2.5 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.5-beta/refoot98-0.2.5-beta-linux-x64.tar.gz) |
+| 🪟 Windows (x64) | [Baixar v0.2.5 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.5-beta/refoot98-0.2.5-beta-windows-x64.zip) |
 | 🍎 macOS | em breve... |
-| 🤖 Android | [Baixar v0.2.4 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.4-beta/refoot98-0.2.4-beta-android.apk) |
+| 🤖 Android | [Baixar v0.2.5 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.5-beta/refoot98-0.2.5-beta-android.apk) |
 
 Todas as versões ficam em [Releases](https://github.com/vinibretz/ReFoot98/releases).
 A partir da 0.1.1 o jogo avisa ao abrir quando sai uma versão nova e se atualiza sozinho
