@@ -23,6 +23,10 @@ Roda no Linux, no Windows e (em desenvolvimento) no Android.
 > - **Ordenar a busca de jogadores:** na Lista de Jogadores (Jogador > Procurar), o
 >   "Ordenar por" organiza o resultado por nome, preço, força, posição, time e, com as
 >   regras do launcher, nota e risco de lesão.
+> - **Temas clean no visual Moderno:** além do Verde da marca, o **Escuro** (grafite e âmbar,
+>   liso, para não cansar a vista) e o **Claro** (cinza-claro e verde, bom de dia), no
+>   computador e no celular (Configurações > Aparência > Cores do Moderno). Na rodada, o jogo
+>   do seu time aparece destacado ([docs/tema-verde.md](docs/tema-verde.md)).
 
 <p align="center">
   <img src="RetroFoot.App/Assets/Marca/capa-16x9.jpg" alt="Capa do ReFoot98" width="720">
@@ -35,10 +39,10 @@ Roda no Linux, no Windows e (em desenvolvimento) no Android.
 
 | Sistema | |
 |---|---|
-| 🐧 Linux (x64) | [Baixar v0.2.5 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.5-beta/refoot98-0.2.5-beta-linux-x64.tar.gz) |
-| 🪟 Windows (x64) | [Baixar v0.2.5 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.5-beta/refoot98-0.2.5-beta-windows-x64.zip) |
+| 🐧 Linux (x64) | [Baixar v0.3.0 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.3.0-beta/refoot98-0.3.0-beta-linux-x64.tar.gz) |
+| 🪟 Windows (x64) | [Baixar v0.3.0 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.3.0-beta/refoot98-0.3.0-beta-windows-x64.zip) |
 | 🍎 macOS | em breve... |
-| 🤖 Android | [Baixar v0.2.5 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.5-beta/refoot98-0.2.5-beta-android.apk) |
+| 🤖 Android | [Baixar v0.3.0 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.3.0-beta/refoot98-0.3.0-beta-android.apk) |
 
 ### Como instalar
 
