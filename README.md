@@ -39,10 +39,10 @@ Roda no Linux, no Windows e (em desenvolvimento) no Android.
 
 | Sistema | |
 |---|---|
-| 🐧 Linux (x64) | [Baixar v0.3.0 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.3.0-beta/refoot98-0.3.0-beta-linux-x64.tar.gz) |
-| 🪟 Windows (x64) | [Baixar v0.3.0 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.3.0-beta/refoot98-0.3.0-beta-windows-x64.zip) |
+| 🐧 Linux (x64) | [Baixar v0.2.6 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.6-beta/refoot98-0.2.6-beta-linux-x64.tar.gz) |
+| 🪟 Windows (x64) | [Baixar v0.2.6 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.6-beta/refoot98-0.2.6-beta-windows-x64.zip) |
 | 🍎 macOS | em breve... |
-| 🤖 Android | [Baixar v0.3.0 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.3.0-beta/refoot98-0.3.0-beta-android.apk) |
+| 🤖 Android | [Baixar v0.2.6 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.6-beta/refoot98-0.2.6-beta-android.apk) |
 
 ### Como instalar
 
