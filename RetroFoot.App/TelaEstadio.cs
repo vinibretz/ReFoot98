@@ -190,8 +190,10 @@ public static class TelaEstadio
     internal sealed class Desenho(Func<int> bancadas, bool moderno = false) : Control
     {
         static readonly IBrush CinzaO = W95.Cor(128, 128, 128), VerdeO = W95.Cor(0, 128, 0);
-        static readonly IBrush CinzaM = TemaVerde.Linha, VerdeM = TemaVerde.VerdeForte;
-        static readonly Pen AmarelaO = new(W95.Cor(255, 255, 128), 2), AmarelaM = new(TemaVerde.Apagado, 2);
+        static IBrush CinzaM => TemaVerde.Linha;
+        static IBrush VerdeM => TemaVerde.VerdeForte;
+        static readonly Pen AmarelaO = new(W95.Cor(255, 255, 128), 2);
+        static Pen AmarelaM => new(TemaVerde.Apagado, 2);
         static readonly Pen Branca2 = new(Brushes.White, 2), Branca3 = new(Brushes.White, 3);
         IBrush Cinza => moderno ? CinzaM : CinzaO;
         IBrush Verde => moderno ? VerdeM : VerdeO;

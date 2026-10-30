@@ -74,8 +74,7 @@ Pontos, saldo de golos e golos marcados (como no Retrô).	Points, goal differenc
 Como as telas são desenhadas. Muda na hora, mesmo com um jogo aberto.	How the screens are drawn. Changes right away, even with a game open.
 Visual	Look
 Moderno	Modern
-Tema verde e amarelo, cartões e os logos das equipas e das ligas.	Green and yellow theme, cards and the team and league logos.
-Moderno: tema escuro, cartões e logos	Modern: dark theme, cards and logos
+Cartões, os logos das equipas e das ligas e as cores à escolha.	Cards, the team and league logos and a choice of colours.
 Formato da tela	Screen format
 Formato	Format
 Como o Retrô: as telas no formato de 800x600.	As in the original: the screens in 800x600 format.
@@ -113,3 +112,15 @@ Patrocínio pontual	One-off sponsor
 {0} jogo restante	{0} match left
 {0} jogos restantes	{0} matches left
 Nenhum no momento	None right now
+Cores do Moderno	Modern colours
+Vale para o visual Moderno.	Applies to the Modern look.
+Verde	Green
+Escuro	Dark
+Claro	Light
+O verde e amarelo da marca, com degradê e fio dourado.	The brand green and yellow, with gradient and gold trim.
+Grafite e âmbar, liso e sem brilho. Cansa menos a vista.	Graphite and amber, flat and glare-free. Easier on the eyes.
+Cinza-claro e verde, liso. Bom de dia e ao sol.	Light grey and green, flat. Good by day and in the sun.
+Moderno: cartões, logos e cores à escolha	Modern: cards, logos and a choice of colours
+Verde: o verde e amarelo da marca	Green: the brand green and yellow
+Escuro: grafite e âmbar, cansa menos a vista	Dark: graphite and amber, easier on the eyes
+Claro: cinza-claro e verde, bom de dia	Light: light grey and green, good by day

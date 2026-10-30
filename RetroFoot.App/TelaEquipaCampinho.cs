@@ -151,7 +151,15 @@ public sealed partial class TelaEquipa
             var c = r.Center;
             using (dc.PushTransform(Matrix.CreateTranslation(-c.X, -c.Y) * Matrix.CreateScale(esc, esc) * Matrix.CreateTranslation(c.X, c.Y + p * 1.2)))
             {
-                if (principal)
+                if (TemaVerde.Clean)
+                {
+                    // nos clean: a pilula lisa (o acento no principal), sem halo nem vidro
+                    var fundo = principal ? Mist(Mist(TemaVerde.Cores.CartaoForte, TemaVerde.Cores.Destaque, e), TemaVerde.Cores.DestaqueClaro, s * e)
+                        : Mist(TemaVerde.Cores.CartaoForte, TemaVerde.Cores.Hover, s);
+                    var borda = principal ? fundo : hab ? Mist(TemaVerde.Cores.Borda, TemaVerde.Cores.Destaque, s) : TemaVerde.Cores.Linha;
+                    dc.DrawRectangle(new ImmutableSolidColorBrush(fundo), new Pen(new ImmutableSolidColorBrush(borda), 1), r, raio, raio);
+                }
+                else if (principal)
                 {
                     // a pilula ouro do Jogar do hub, com o halo amarelo (mais forte com o rato em cima)
                     double brilho = e * (0.55 + 0.75 * s) * (1 - 0.5 * p);
@@ -177,11 +185,11 @@ public sealed partial class TelaEquipa
                 }
                 // o brilho de vidro na metade de cima e o fio claro da borda
                 var vidro = new Rect(r.X + 3, r.Y + 1.5, r.Width - 6, r.Height * 0.48);
-                dc.DrawRectangle(Vertical((Alfa(Colors.White, principal ? 0.42 * e + 0.08 : 0.16), 0), (Alfa(Colors.White, 0.02), 1)), null, vidro, raio - 2, raio - 2);
+                if (!TemaVerde.Clean) dc.DrawRectangle(Vertical((Alfa(Colors.White, principal ? 0.42 * e + 0.08 : 0.16), 0), (Alfa(Colors.White, 0.02), 1)), null, vidro, raio - 2, raio - 2);
                 var cor = principal ? (hab ? (IBrush)new ImmutableSolidColorBrush(TemaVerde.Cores.SobreDestaque) : MFraco) : hab ? new ImmutableSolidColorBrush(Mist(TemaVerde.Cores.Destaque, TemaVerde.Cores.DestaqueClaro, s)) : MFraco;
                 var t = TM(texto, tam, cor, true);
                 double tx = r.X + (w - t.WidthIncludingTrailingWhitespace) / 2, ty = yc - t.Height / 2;
-                if (principal && hab) dc.DrawText(TM(texto, tam, new ImmutableSolidColorBrush(Alfa(Colors.White, 0.35)), true), new Point(tx, ty + 1));
+                if (principal && hab && !TemaVerde.Clean) dc.DrawText(TM(texto, tam, new ImmutableSolidColorBrush(Alfa(Colors.White, 0.35)), true), new Point(tx, ty + 1));
                 dc.DrawText(t, new Point(tx, ty));
             }
             if (hab && acao != null) _alvos.Add((r, acao));

@@ -184,8 +184,10 @@ public sealed partial class TelaConfiguracoes : UserControl
         var visual = new EscolhaModerna(new (string, string?)[]
         {
             (T("Retrô"), T("O aspecto Retrô: janelas do Windows 95 no verde, sem logos.")),
-            (T("Moderno"), T("Tema verde e amarelo, cartões e os logos das equipas e das ligas.")),
+            (T("Moderno"), T("Cartões, os logos das equipas e das ligas e as cores à escolha.")),
         }, _cfg.Moderno ? 1 : 0, lado: true, figura: i => new Previa(i == 0 ? Previa.Tipo.Original : Previa.Tipo.Moderno));
+        var tema = new EscolhaModerna(OpcoesTema(), (int)_cfg.Tema, lado: true, figura: i => new PreviaTema((TemaCor)i));
+        var temaBloco = new StackPanel { Spacing = 10, Children = { tema, Ajuda(T("Vale para o visual Moderno.")) } };
         var formato = new EscolhaModerna(new (string, string?)[]
         {
             ("4:3", T("Como o Retrô: as telas no formato de 800x600.")),
@@ -233,7 +235,7 @@ public sealed partial class TelaConfiguracoes : UserControl
             Cartao(T("Jogadores estrangeiros"), null, estrangeiros),
             Cartao(T("Desempate na classificação"), null, desempate));
         var pAparencia = Pagina(T("Aparência"), T("Como as telas são desenhadas. Muda na hora, mesmo com um jogo aberto."),
-            Cartao(T("Visual"), null, visual), Cartao(T("Formato da tela"), null, formato));
+            Cartao(T("Visual"), null, visual), Cartao(T("Cores do Moderno"), null, temaBloco), Cartao(T("Formato da tela"), null, formato));
         var pIdioma = Pagina(T("Idioma"), T("Os textos do jogo."), Cartao(T("Idioma do jogo"), null, idioma));
         // a pasta de dados (DadosJogo): o caminho e o botao que a abre
         var dados = new StackPanel { Spacing = 12 };
@@ -368,6 +370,7 @@ public sealed partial class TelaConfiguracoes : UserControl
         sobem.Mudou += i => { if (_cfg.Modificada) { _cfg.SobemDescem = i; _atualizar!(); } };
         estrangeiros.Mudou += i => { _cfg.EstrangeirosLiberados = i == 1; _atualizar!(); };
         visual.Mudou += i => { _cfg.VisualTela = i == 1 ? Configuracoes.VisualModerno : Configuracoes.VisualClassico; _atualizar!(); };
+        tema.Mudou += i => { _cfg.Tema = (TemaCor)i; _atualizar!(); };
         formato.Mudou += i => { _cfg.FormatoTela = i == 1 ? Configuracoes.Formato169 : Configuracoes.Formato43; _atualizar!(); };
         idioma.Mudou += i => TrocarIdioma(i);
 
@@ -388,6 +391,8 @@ public sealed partial class TelaConfiguracoes : UserControl
             cincoSubst.IsChecked = mod && _cfg.CincoSubstituicoes;
             noveRes.IsChecked = mod && _cfg.NoveReservas;
             premiacao.IsChecked = mod && _cfg.PremiacaoAmpliada;
+            temaBloco.IsEnabled = _cfg.Moderno;
+            temaBloco.Opacity = _cfg.Moderno ? 1 : 0.45;
             sobemBloco.IsEnabled = mod;
             sobemBloco.Opacity = mod ? 1 : 0.45;
             sobem.Selecionado = mod ? _cfg.SobemDescem : 0;
@@ -430,7 +435,7 @@ public sealed partial class TelaConfiguracoes : UserControl
         int k = _cfg.SobemDescemPara(_cfg.N);
         r.Add((T("Sobem e descem"), _cfg.Modificada && _cfg.SobemDescem > 0 ? k.ToString() : T("Automático ({0})", k)));
         r.Add((T("Estrangeiros"), _cfg.EstrangeirosLiberados ? T("Liberado") : T("Realístico")));
-        r.Add((T("Visual"), _cfg.Moderno ? T("Moderno") : T("Retrô")));
+        r.Add((T("Visual"), _cfg.Moderno ? T("Moderno") + " (" + NomeTema(_cfg.Tema) + ")" : T("Retrô")));
         r.Add((T("Formato"), _cfg.FormatoTela));
         r.Add((T("Idioma"), Nomes[IndiceIdioma]));
         return r;
@@ -465,6 +470,41 @@ public sealed partial class TelaConfiguracoes : UserControl
         t.Children.Add(new TextBlock { Text = RegrasDoJogo(s), FontSize = 13.5, Foreground = Texto, TextWrapping = TextWrapping.Wrap });
         t.Children.Add(Ajuda(T("O número de equipas vem do jogo gravado e não muda. O que você mudar aqui vale da próxima vez que um jogo for aberto.")));
         return new Border { Background = FundoAviso, CornerRadius = new CornerRadius(12), Padding = new Thickness(16, 12), Child = t };
+    }
+
+    // as cores do Moderno (TemaVerde), na ordem de TemaCor
+    static (string, string?)[] OpcoesTema() => new (string, string?)[]
+    {
+        (NomeTema(TemaCor.Verde), T("O verde e amarelo da marca, com degradê e fio dourado.")),
+        (NomeTema(TemaCor.Escuro), T("Grafite e âmbar, liso e sem brilho. Cansa menos a vista.")),
+        (NomeTema(TemaCor.Claro), T("Cinza-claro e verde, liso. Bom de dia e ao sol.")),
+    };
+
+    static string NomeTema(TemaCor t) => t switch { TemaCor.Escuro => T("Escuro"), TemaCor.Claro => T("Claro"), _ => T("Verde") };
+
+    // a previa de umas cores do Moderno: o fundo, dois cartoes e o botao no acento
+    internal sealed class PreviaTema : Control
+    {
+        readonly TemaCor _t;
+        public PreviaTema(TemaCor t, double altura = 74) { _t = t; Height = altura; Margin = new Thickness(0, 0, 0, 10); IsHitTestVisible = false; }
+
+        public override void Render(DrawingContext dc)
+        {
+            static IBrush B(Color c) => new ImmutableSolidColorBrush(c);
+            var (fundo, cartao, borda, destaque, fraco) = TemaVerde.Amostra(_t);
+            double h = Bounds.Height, w = Math.Min(Bounds.Width, h * 4 / 3);
+            var r = new Rect(0.5, 0.5, w - 1, h - 1);
+            // (o fio em volta para a previa clara nao sumir no cartao claro, nem a escura no escuro)
+            dc.DrawRectangle(B(fundo), new Pen(B(Color.FromArgb(0x50, 0x80, 0x80, 0x80)), 1), r, 6, 6);
+            for (int i = 0; i < 2; i++)
+            {
+                var c = new Rect(r.X + 6, r.Y + 7 + (h - 30) / 2 * i, r.Width - 12, (h - 30) / 2 - 4);
+                dc.DrawRectangle(B(cartao), new Pen(B(borda), 1), c, 4, 4);
+                dc.DrawEllipse(B(destaque), null, new Point(c.X + 7, c.Y + c.Height / 2), 3, 3);
+                dc.FillRectangle(B(fraco), new Rect(c.X + 14, c.Y + c.Height / 2 - 1, c.Width - 22, 2));
+            }
+            dc.DrawRectangle(B(destaque), null, new Rect(r.X + r.Width / 4, r.Bottom - 15, r.Width / 2, 9), 4.5, 4.5);
+        }
     }
 
     // o desenho pequeno de cada visual / formato
@@ -586,10 +626,12 @@ public sealed partial class TelaConfiguracoes : UserControl
 
         // Aparencia
         var visual = NovoGrupo(pAparencia, T("Visual"), 12, 10, 460, 74, _cfg.Moderno ? 1 : 0,
-            T("Retrô: o aspecto do Windows 95, sem logos"), T("Moderno: tema escuro, cartões e logos"));
-        var formato = NovoGrupo(pAparencia, T("Formato da tela"), 12, 96, 460, 74, _cfg.Largo ? 1 : 0,
+            T("Retrô: o aspecto do Windows 95, sem logos"), T("Moderno: cartões, logos e cores à escolha"));
+        var temaR = NovoGrupo(pAparencia, T("Cores do Moderno"), 12, 92, 460, 94, (int)_cfg.Tema,
+            T("Verde: o verde e amarelo da marca"), T("Escuro: grafite e âmbar, cansa menos a vista"), T("Claro: cinza-claro e verde, bom de dia"));
+        var formato = NovoGrupo(pAparencia, T("Formato da tela"), 12, 194, 460, 74, _cfg.Largo ? 1 : 0,
             T("4:3: como o Retrô (800x600)"), T("16:9: janela larga, as telas aproveitam a largura"));
-        Texto(pAparencia, T("O visual e o formato mudam na hora, mesmo com um jogo aberto."), 24, 184, 448, 30, a11, W95.Cinzento);
+        Texto(pAparencia, T("O visual e o formato mudam na hora, mesmo com um jogo aberto."), 24, 280, 448, 30, a11, W95.Cinzento);
 
         // Idioma
         var idioma = NovoGrupo(pIdioma, T("Idioma do jogo"), 12, 10, 460, 114, IndiceIdioma,
@@ -626,6 +668,7 @@ public sealed partial class TelaConfiguracoes : UserControl
         };
         estrangeiros.Mudou += () => _cfg.EstrangeirosLiberados = estrangeiros.Indice == 1;
         visual.Mudou += () => _cfg.VisualTela = visual.Indice == 1 ? Configuracoes.VisualModerno : Configuracoes.VisualClassico;
+        temaR.Mudou += () => _cfg.Tema = (TemaCor)temaR.Indice;
         formato.Mudou += () => _cfg.FormatoTela = formato.Indice == 1 ? Configuracoes.Formato169 : Configuracoes.Formato43;
         idioma.Mudou += () => TrocarIdioma(idioma.Indice);
 
@@ -687,7 +730,7 @@ public sealed partial class TelaConfiguracoes : UserControl
         catch (Exception ex) { erro(T("Não consegui gravar: ") + ex.Message); return; }
         // o formato e o visual valem na hora (a janela e as telas)
         Formato.Aplicar(_cfg.Largo);
-        Visual.Aplicar(_cfg.Moderno);
+        Visual.Aplicar(_cfg.Moderno, _cfg.Tema);
         Idioma.Aplicar(_cfg.Idioma);
         Fechar(true);
     }

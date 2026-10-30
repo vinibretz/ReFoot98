@@ -128,7 +128,7 @@ sealed class TelaClassificacaoCelular : UserControl
 
     // as cores das zonas (as do kit: o destaque, o bom e o erro de cada pele)
     // (no Retro, as da classificacao do computador: TelaClassificacaoRetro)
-    static IBrush CorCampeao => CUi.Retro ? R.Campeao : TemaVerde.Destaque;
+    static IBrush CorCampeao => CUi.Retro ? R.Campeao : TemaVerde.Campeao;
     static IBrush CorSobe => CUi.Retro ? R.Sobe : TemaVerde.Verde;
     static IBrush CorDesce => CUi.Retro ? R.Desce : TemaVerde.VermelhoForte;
 

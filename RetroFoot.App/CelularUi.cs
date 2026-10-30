@@ -132,7 +132,7 @@ public static class CUi
             return new Border
             {
                 Background = Cartao, BorderBrush = Linha, BorderThickness = new Thickness(1.5), CornerRadius = new CornerRadius(Raio),
-                Padding = new Thickness(14, 12), Child = corpo, BoxShadow = BoxShadows.Parse("0 4 12 0 #40000000"),
+                Padding = new Thickness(14, 12), Child = corpo, BoxShadow = TemaVerde.SombraCartao,
             };
         var janela = new StackPanel();
         if (titulo != null)
@@ -786,7 +786,7 @@ public static class CUi
     public static Control Medidor(double valor, double max, IBrush cor, double altura = 18) => new ProgressBar
     {
         Minimum = 0, Maximum = max, Value = Math.Clamp(valor, 0, max), Height = altura, MinHeight = altura,
-        Foreground = cor, Background = Retro ? W95.Branco : TemaVerde.Alfa(Colors.White, 0.15),
+        Foreground = cor, Background = Retro ? W95.Branco : TemaVerde.Trilho,
         BorderBrush = Retro ? W95.Escura : null, BorderThickness = new Thickness(Retro ? 1 : 0),
         CornerRadius = new CornerRadius(Retro ? 0 : 6),
     };

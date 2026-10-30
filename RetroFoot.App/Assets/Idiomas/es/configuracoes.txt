@@ -69,8 +69,7 @@ Pontos, saldo de golos e golos marcados (como no Retrô).	Puntos, diferencia de 
 # Aparencia
 Como as telas são desenhadas. Muda na hora, mesmo com um jogo aberto.	Cómo se dibujan las pantallas. Cambia al momento, incluso con una partida abierta.
 Visual	Aspecto
-Tema verde e amarelo, cartões e os logos das equipas e das ligas.	Tema verde y amarillo, tarjetas y los escudos de los equipos y las ligas.
-Moderno: tema escuro, cartões e logos	Moderno: tema oscuro, tarjetas y escudos
+Cartões, os logos das equipas e das ligas e as cores à escolha.	Tarjetas, los escudos de los equipos y las ligas y los colores a elegir.
 Formato da tela	Formato de pantalla
 Como o Retrô: as telas no formato de 800x600.	Como el original: las pantallas en formato 800x600.
 Janela larga: a jornada com as divisões lado a lado e as telas aproveitando a largura.	Ventana ancha: la jornada con las divisiones lado a lado y las pantallas aprovechando el ancho.
@@ -107,3 +106,15 @@ Patrocínio pontual	Patrocinio puntual
 {0} jogo restante	Queda {0} partido
 {0} jogos restantes	Quedan {0} partidos
 Nenhum no momento	Ninguno por ahora
+Cores do Moderno	Colores del Moderno
+Vale para o visual Moderno.	Vale para el aspecto Moderno.
+Verde	Verde
+Escuro	Oscuro
+Claro	Claro
+O verde e amarelo da marca, com degradê e fio dourado.	El verde y amarillo de la marca, con degradado y filete dorado.
+Grafite e âmbar, liso e sem brilho. Cansa menos a vista.	Grafito y ámbar, liso y sin brillo. Cansa menos la vista.
+Cinza-claro e verde, liso. Bom de dia e ao sol.	Gris claro y verde, liso. Bueno de día y al sol.
+Moderno: cartões, logos e cores à escolha	Moderno: tarjetas, escudos y colores a elegir
+Verde: o verde e amarelo da marca	Verde: el verde y amarillo de la marca
+Escuro: grafite e âmbar, cansa menos a vista	Oscuro: grafito y ámbar, cansa menos la vista
+Claro: cinza-claro e verde, bom de dia	Claro: gris claro y verde, bueno de día

@@ -181,7 +181,7 @@ public sealed partial class TelaEquipa
             var barra = new ProgressBar
             {
                 Minimum = 0, Maximum = 1, Value = moral, Height = 8, MinHeight = 8, MinWidth = 0, Margin = new Thickness(0, 6, 8, 0),
-                Foreground = CUi.Retro ? _corLetra : TemaVerde.Destaque, Background = CUi.Retro ? Alfa(_corLetra, 0.3) : TemaVerde.Alfa(Colors.White, 0.2),
+                Foreground = CUi.Retro ? _corLetra : TemaVerde.Destaque, Background = CUi.Retro ? Alfa(_corLetra, 0.3) : TemaVerde.Trilho,
                 CornerRadius = new CornerRadius(CUi.Retro ? 0 : 4),
             };
             numeros.Children.Add(Num(T("Moral"), barra, 2));
@@ -318,7 +318,7 @@ public sealed partial class TelaEquipa
             return new ProgressBar
             {
                 Minimum = 0, Maximum = 20, Value = Math.Clamp(Math.Round(m * 10, MidpointRounding.ToEven), 0, 20), Height = 18, MinHeight = 18,
-                Foreground = cor, Background = CUi.Retro ? W95.Branco : TemaVerde.Alfa(Colors.White, 0.15),
+                Foreground = cor, Background = CUi.Retro ? W95.Branco : TemaVerde.Trilho,
                 BorderBrush = CUi.Retro ? W95.Escura : null, BorderThickness = new Thickness(CUi.Retro ? 1 : 0),
                 CornerRadius = new CornerRadius(CUi.Retro ? 0 : 6),
             };
@@ -354,7 +354,7 @@ public sealed partial class TelaEquipa
                     p.Children.Add(new ProgressBar
                     {
                         Minimum = 0, Maximum = 15, Value = Math.Clamp(v, 0, 15), Height = 16, MinHeight = 16,
-                        Foreground = CUi.Retro ? W95.Azul : TemaVerde.Destaque, Background = CUi.Retro ? W95.Branco : TemaVerde.Alfa(Colors.White, 0.15),
+                        Foreground = CUi.Retro ? W95.Azul : TemaVerde.Destaque, Background = CUi.Retro ? W95.Branco : TemaVerde.Trilho,
                         BorderBrush = CUi.Retro ? W95.Escura : null, BorderThickness = new Thickness(CUi.Retro ? 1 : 0), Margin = new Thickness(0, 0, 0, 6),
                     });
                 }

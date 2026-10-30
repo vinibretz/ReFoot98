@@ -299,7 +299,7 @@ public sealed partial class TelaInicio
         var contCartao = new Border
         {
             Background = FundoCartao, CornerRadius = new CornerRadius(12), Padding = new Thickness(22, 20),
-            BorderBrush = Linha, BorderThickness = new Thickness(1.5), Child = cont, BoxShadow = BoxShadows.Parse("0 4 12 0 #40000000"),
+            BorderBrush = Linha, BorderThickness = new Thickness(1.5), Child = cont, BoxShadow = TemaVerde.SombraCartao,
         };
 
         var corpo = new Grid { ColumnDefinitions = new ColumnDefinitions("5*,20,7*") };

@@ -65,6 +65,8 @@ public sealed class Configuracoes
     // o visual das telas: classico (padrao, o aspecto do jogo original) ou moderno (Visual.cs)
     public string VisualTela { get; set; } = VisualClassico;
     public bool Moderno => VisualTela == VisualModerno;
+    // as cores do Moderno (TemaVerde): o verde da marca (padrao) ou os clean, escuro e claro
+    public TemaCor Tema { get; set; } = TemaCor.Verde;
 
     // o N do proximo jogo novo
     public int N => Modificada ? EquipasPorDivisao : 8;
@@ -208,6 +210,7 @@ public sealed class Configuracoes
             if (Texto(o, "formatoTela") is Formato43 or Formato169) c.FormatoTela = Texto(o, "formatoTela")!;
             if (Texto(o, "visual") is VisualClassico or VisualOriginal) c.VisualTela = VisualClassico;
             else if (Texto(o, "visual") is VisualModerno) c.VisualTela = VisualModerno;
+            c.Tema = Texto(o, "tema") switch { "escuro" => TemaCor.Escuro, "claro" => TemaCor.Claro, _ => TemaCor.Verde };
         }
         catch { }
         return c;
@@ -233,6 +236,7 @@ public sealed class Configuracoes
             ["estrangeiros"] = EstrangeirosLiberados ? "liberado" : "original",
             ["formatoTela"] = FormatoTela,
             ["visual"] = VisualTela,
+            ["tema"] = Tema switch { TemaCor.Escuro => "escuro", TemaCor.Claro => "claro", _ => "verde" },
         };
         var tmp = arquivo + ".tmp";
         File.WriteAllText(tmp, o.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));

@@ -44,7 +44,9 @@ static class IconesModernos
     static string R(double x, double y, double w, double h, double rx) =>
         FormattableString.Invariant($"M{x + rx} {y}h{w - 2 * rx}a{rx} {rx} 0 0 1 {rx} {rx}v{h - 2 * rx}a{rx} {rx} 0 0 1 {-rx} {rx}h{-(w - 2 * rx)}a{rx} {rx} 0 0 1 {-rx} {-rx}v{-(h - 2 * rx)}a{rx} {rx} 0 0 1 {rx} {-rx}z");
 
-    static readonly IBrush Sim = MM.Vivo, Nao = MM.Vermelho, Acao = MM.Azul;
+    static IBrush Sim => MM.Vivo;
+    static IBrush Nao => MM.Vermelho;
+    static IBrush Acao => MM.Azul;
 
     public static readonly Icone
         Ok = new("check", "M20 6 9 17l-5-5", Sim),

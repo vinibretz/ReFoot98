@@ -157,7 +157,14 @@ public sealed partial class TelaInicio : UserControl
         bool foi = false;
         // depois do Sobre, o hub (TelaHub: Jogar, ferramentas, Configuracoes...)
         void Seguir() { if (foi) return; foi = true; mostrar(new TelaHub(mostrar)); }
-        raiz.AttachedToVisualTree += (_, _) => { if (quadro.Children.Count == 0 && !foi) TelaAcerca.Abrir(d, Seguir); };
+        // o Sobre fica nas cores da marca, como o hub, em qualquer tema do Moderno: o Verde vale
+        // enquanto ele esta aberto (o hover e o foco repintam) e o tema escolhido volta ao fechar
+        raiz.AttachedToVisualTree += (_, _) =>
+        {
+            if (quadro.Children.Count > 0 || foi) return;
+            var marca = TemaVerde.Marca();
+            TelaAcerca.Abrir(d, () => { marca.Dispose(); Seguir(); });
+        };
         return raiz;
     }
 

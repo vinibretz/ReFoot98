@@ -36,15 +36,26 @@ public sealed partial class TelaEquipa
     sealed partial class Painel
     {
         // as cores sao as do TemaVerde (o tema do Moderno)
-        internal static readonly IBrush MFundo = TemaVerde.FundoTela;
-        static readonly IBrush MBarra = TemaVerde.Barra, MCartao = TemaVerde.Cartao, MCartao2 = TemaVerde.CartaoForte;
-        static readonly IBrush MLinha = TemaVerde.Linha, MTexto = TemaVerde.Texto, MFraco = TemaVerde.TextoFraco;
-        static readonly IBrush MAzul = TemaVerde.Destaque, MVerde = TemaVerde.Verde, MSel = TemaVerde.Selecao, MSobre = TemaVerde.Hover;
-        static readonly IBrush MVermelho = TemaVerde.Vermelho, MAmarelo = TemaVerde.Destaque, MLaranja = TemaVerde.Laranja;
-        static readonly IBrush MEscuro = TemaVerde.SobreDestaque, MMenuFundo = TemaVerde.Menu, MApagado = TemaVerde.Apagado;
-        static readonly IBrush MZebra = TemaVerde.Zebra;
-        static readonly IPen MBorda = new Pen(TemaVerde.Borda, 1).ToImmutable();
-        static readonly IBrush[] MCorPosicao = { TemaVerde.Destaque, TemaVerde.Azul, TemaVerde.Verde, TemaVerde.Vermelho };
+        internal static IBrush MFundo => TemaVerde.FundoTela;
+        static IBrush MBarra => TemaVerde.Barra;
+        static IBrush MCartao => TemaVerde.Cartao;
+        static IBrush MCartao2 => TemaVerde.CartaoForte;
+        static IBrush MLinha => TemaVerde.Linha;
+        static IBrush MTexto => TemaVerde.Texto;
+        static IBrush MFraco => TemaVerde.TextoFraco;
+        static IBrush MAzul => TemaVerde.Destaque;
+        static IBrush MVerde => TemaVerde.Verde;
+        static IBrush MSel => TemaVerde.Selecao;
+        static IBrush MSobre => TemaVerde.Hover;
+        static IBrush MVermelho => TemaVerde.Vermelho;
+        static IBrush MAmarelo => TemaVerde.Destaque;
+        static IBrush MLaranja => TemaVerde.Laranja;
+        static IBrush MEscuro => TemaVerde.SobreDestaque;
+        static IBrush MMenuFundo => TemaVerde.Menu;
+        static IBrush MApagado => TemaVerde.Apagado;
+        static IBrush MZebra => TemaVerde.Zebra;
+        static IPen MBorda => new Pen(TemaVerde.Borda, 1).ToImmutable();
+        static IBrush[] MCorPosicao => new IBrush[] { TemaVerde.Destaque, TemaVerde.Azul, TemaVerde.Verde, TemaVerde.Vermelho };
         static readonly string[] MNomesPosicao = { "Goleiros", "Defensores", "Meio-campistas", "Atacantes" };
         static readonly string[] MNomePosicao = { "Goleiro", "Defensor", "Meio-campista", "Atacante" };
         static readonly FontFamily Inter = new("fonts:Inter#Inter");

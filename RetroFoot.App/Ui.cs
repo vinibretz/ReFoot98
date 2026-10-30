@@ -60,7 +60,7 @@ public static class Ui
     public static Border Cartao(Control conteudo, Thickness? padding = null) => new()
     {
         Background = Tema.FundoCartao, BorderBrush = Tema.Linha, BorderThickness = new Thickness(M ? 1.5 : 1), CornerRadius = new CornerRadius(12),
-        Padding = padding ?? new Thickness(14, 12), Child = conteudo, BoxShadow = M ? BoxShadows.Parse("0 4 12 0 #40000000") : default,
+        Padding = padding ?? new Thickness(14, 12), Child = conteudo, BoxShadow = M ? TemaVerde.SombraCartao : default,
     };
 
     public static Border Afundado(Control c) => new()
@@ -187,7 +187,7 @@ public static class Ui
         return new Border
         {
             Background = Tema.FundoDialogo, BorderBrush = M ? TemaVerde.Destaque : Tema.Linha, BorderThickness = new Thickness(M ? 1.5 : 1),
-            CornerRadius = new CornerRadius(M ? 16 : 14), BoxShadow = BoxShadows.Parse("0 12 36 0 #A0000000"), Child = d, ClipToBounds = true,
+            CornerRadius = new CornerRadius(M ? 16 : 14), BoxShadow = M ? TemaVerde.SombraDialogo : BoxShadows.Parse("0 12 36 0 #A0000000"), Child = d, ClipToBounds = true,
         };
     }
 

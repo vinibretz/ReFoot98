@@ -19,11 +19,22 @@ namespace RetroFoot.App;
 static class ConfigEstilo
 {
     // as cores sao as do TemaVerde (o tema do Moderno); Azul e o destaque (amarelo), Linha o fio dourado
-    public static readonly IBrush Fundo = TemaVerde.Fundo, FundoCartao = TemaVerde.CartaoHub, FundoAviso = TemaVerde.Alfa(TemaVerde.Cores.Selecao, 0.85);
-    public static readonly IBrush FundoBarra = TemaVerde.BarraHub, FundoHover = TemaVerde.Hover, FundoZebra = TemaVerde.Zebra;
-    public static readonly IBrush Texto = TemaVerde.Texto, TextoSuave = TemaVerde.TextoSuave, TextoFraco = TemaVerde.TextoFraco, Linha = TemaVerde.Borda;
-    public static readonly IBrush Azul = TemaVerde.Destaque, AzulFundo = TemaVerde.Selecao, TextoEscuro = TemaVerde.SobreDestaque;
-    public static readonly IBrush Erro = TemaVerde.Vermelho, Verde = TemaVerde.Verde, Amarelo = TemaVerde.Destaque;
+    public static IBrush Fundo => TemaVerde.Fundo;
+    public static IBrush FundoCartao => TemaVerde.CartaoHub;
+    public static IBrush FundoAviso => TemaVerde.Alfa(TemaVerde.Cores.Selecao, 0.85);
+    public static IBrush FundoBarra => TemaVerde.BarraHub;
+    public static IBrush FundoHover => TemaVerde.Hover;
+    public static IBrush FundoZebra => TemaVerde.Zebra;
+    public static IBrush Texto => TemaVerde.Texto;
+    public static IBrush TextoSuave => TemaVerde.TextoSuave;
+    public static IBrush TextoFraco => TemaVerde.TextoFraco;
+    public static IBrush Linha => TemaVerde.Borda;
+    public static IBrush Azul => TemaVerde.Destaque;
+    public static IBrush AzulFundo => TemaVerde.Selecao;
+    public static IBrush TextoEscuro => TemaVerde.SobreDestaque;
+    public static IBrush Erro => TemaVerde.Vermelho;
+    public static IBrush Verde => TemaVerde.Verde;
+    public static IBrush Amarelo => TemaVerde.Destaque;
     public static readonly FontFamily Inter = new("fonts:Inter#Inter");
 
     public static IBrush Hex(string s) => new ImmutableSolidColorBrush(Color.Parse(s));
@@ -32,7 +43,7 @@ static class ConfigEstilo
     // as cores do TemaVerde no lugar do azul e do cinzento do Fluent
     public static Control Escuro(Control c)
     {
-        var s = new ThemeVariantScope { RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark, Child = c };
+        var s = new ThemeVariantScope { RequestedThemeVariant = Visual.Moderno ? TemaVerde.Variante : Avalonia.Styling.ThemeVariant.Dark, Child = c };
         if (Visual.Moderno) CoresFluent(s.Resources);
         return s;
     }
@@ -128,7 +139,7 @@ static class ConfigEstilo
         return new Border
         {
             Background = FundoCartao, CornerRadius = new CornerRadius(12), Padding = padding ?? new Thickness(18, 16),
-            BorderBrush = Linha, BorderThickness = new Thickness(1.5), Child = p, BoxShadow = BoxShadows.Parse("0 4 12 0 #40000000"),
+            BorderBrush = Linha, BorderThickness = new Thickness(1.5), Child = p, BoxShadow = TemaVerde.SombraCartao,
         };
     }
 
@@ -274,7 +285,7 @@ sealed class BotaoConfig : Border
         Background = _principal ? (s ? TemaVerde.BotaoPrimarioHover : TemaVerde.BotaoPrimario) : (s ? TemaVerde.Hover : TemaVerde.BotaoSecundario);
         BorderBrush = _principal ? TemaVerde.DestaqueClaro : s ? TemaVerde.Ouro : ConfigEstilo.Linha;
         _t.Foreground = _principal ? ConfigEstilo.TextoEscuro : ConfigEstilo.Texto;
-        BoxShadow = _principal ? BoxShadows.Parse("0 2 8 0 #50000000") : default;
+        BoxShadow = _principal ? TemaVerde.SombraBotao : default;
     }
 }
 
@@ -419,7 +430,7 @@ sealed class CaixaModerna : UserControl
             // como a caixa "Sair do RetroFoot?" do hub: o verde quase opaco com o fio amarelo
             Background = TemaVerde.DialogoHub, CornerRadius = new CornerRadius(16), ClipToBounds = true,
             BorderBrush = TemaVerde.Destaque, BorderThickness = new Thickness(1.5),
-            BoxShadow = BoxShadows.Parse("0 12 36 0 #A0000000"),
+            BoxShadow = TemaVerde.SombraDialogo,
             Child = ConfigEstilo.Escuro(corpo),
         };
         AttachedToVisualTree += (_, _) => Dispatcher.UIThread.Post(Focar, DispatcherPriority.Loaded);

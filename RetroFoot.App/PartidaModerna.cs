@@ -20,9 +20,18 @@ namespace RetroFoot.App;
 static class PM
 {
     // as cores sao as do TemaVerde (o tema do Moderno); Azul e o destaque (amarelo)
-    public static readonly IBrush Fundo = TemaVerde.Fundo, Barra = TemaVerde.Barra, Linha = TemaVerde.Linha, Zebra = TemaVerde.Zebra;
-    public static readonly IBrush Texto = TemaVerde.Texto, Fraco = TemaVerde.TextoFraco, Vivo = TemaVerde.Verde, Azul = TemaVerde.Destaque;
-    public static readonly IBrush Escolhido = TemaVerde.Selecao, Vermelho = TemaVerde.Vermelho, Amarelo = TemaVerde.Destaque, Escuro = TemaVerde.SobreDestaque;
+    public static IBrush Fundo => TemaVerde.Fundo;
+    public static IBrush Barra => TemaVerde.Barra;
+    public static IBrush Linha => TemaVerde.Linha;
+    public static IBrush Zebra => TemaVerde.Zebra;
+    public static IBrush Texto => TemaVerde.Texto;
+    public static IBrush Fraco => TemaVerde.TextoFraco;
+    public static IBrush Vivo => TemaVerde.Verde;
+    public static IBrush Azul => TemaVerde.Destaque;
+    public static IBrush Escolhido => TemaVerde.Selecao;
+    public static IBrush Vermelho => TemaVerde.Vermelho;
+    public static IBrush Amarelo => TemaVerde.Destaque;
+    public static IBrush Escuro => TemaVerde.SobreDestaque;
     public static readonly FontFamily Inter = new("fonts:Inter#Inter");
 
     public static IBrush Hex(string s) => new ImmutableSolidColorBrush(Color.Parse(s));
@@ -41,8 +50,8 @@ static class PM
     public static Border Cartao(Control corpo) => new()
     {
         Background = Fundo, CornerRadius = new CornerRadius(14), ClipToBounds = true, BorderBrush = TemaVerde.Borda, BorderThickness = new Thickness(1),
-        BoxShadow = BoxShadows.Parse("0 8 28 0 #80000000"),
-        Child = new ThemeVariantScope { RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark, Child = corpo },
+        BoxShadow = TemaVerde.SombraDialogo,
+        Child = new ThemeVariantScope { RequestedThemeVariant = TemaVerde.Variante, Child = corpo },
     };
 
     // o rodape com os botoes a direita (e um texto opcional a esquerda)
@@ -105,7 +114,7 @@ static class PM
     }
 
     // a barra de rolagem fina das listas desenhadas
-    public static readonly IBrush Rolagem = TemaVerde.Borda;
+    public static IBrush Rolagem => TemaVerde.Borda;
 
     public static Control Titulo(string s, double tam = 13) =>
         new TextBlock { Text = s.ToUpperInvariant(), FontSize = tam, FontWeight = FontWeight.SemiBold, Foreground = Fraco, LetterSpacing = 0.6 };

@@ -18,7 +18,24 @@ A paleta unica fica em `RetroFoot.App/TemaVerde.cs` (`TemaVerde.*` como `IBrush`
 | Ui.cs (`Tema`), UiModerno.cs, TelaHub.cs (pagina da ferramenta) | `Tema` | ajustado: as ferramentas no quadro `FundoTela`, cartoes `CartaoHub` com sombra, icone amarelo no circulo escuro, janelinhas `DialogoHub` |
 | ClubeModerno.cs, ModernoMercado.cs (`MM`), PartidaModerna.cs, TelaDetalhesModerna.cs, ModernoConfigDialogos.cs, TelaLeilao.cs, TelaEstadio.cs | varias | apontam para os tokens, sem ajuste fino |
 
-## Tokens
+## Temas clean (Escuro e Claro)
+
+O Moderno tem tres paletas com os mesmos tokens (`TemaCor`: Verde, Escuro, Claro), escolhidas em
+Configuracoes > Aparencia > Cores do Moderno (gravado como `"tema"`; `RETROFOOT_TEMA=verde|escuro|claro`
+passa por cima). A troca vale na hora (`Visual.Aplicar(moderno, tema)`), por isso as paletas de cada
+tela sao propriedades (`=>`), nao `static readonly`: um campo congelaria a cor do tema do comeco.
+
+- **Escuro**: grafite esverdeado `#1A211E`, cartoes `#212A26`, texto giz `#E3E8E4` (nao branco),
+  acento ambar apagado `#E2B04A`. Liso: sem o degrade do quadro, sem o fio dourado, Jogar solido.
+- **Claro**: cinza-esverdeado `#E7ECE8`, cartoes `#F6F8F6`, texto grafite `#1E2622`, acento verde
+  `#2F7A4E` (texto branco sobre ele). Fluent em `ThemeVariant.Light` (`TemaVerde.Variante`).
+- `TemaVerde.Clean` liga o que muda alem das cores (botoes do campinho lisos, sem halo/vidro).
+- Tokens novos: `Campeao` (ouro no Claro, para nao confundir com o Sobe verde), `Trilho` (fundo das
+  barras de medida), `SombraCartao` / `SombraBotao` / `SombraDialogo`.
+- Nao assuma texto branco nas telas do Moderno: use `Texto` / `SobreDestaque`.
+- O hub (TelaHub) e a capa da marca: igual nos tres temas.
+
+## Tokens (Verde)
 
 | Token | Cor | Uso |
 |---|---|---|

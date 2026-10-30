@@ -206,7 +206,7 @@ static class MercadoCelular
         return new ProgressBar
         {
             Minimum = 0, Maximum = 1, Value = f, Height = 8, MinHeight = 8, MinWidth = 0,
-            Foreground = c, Background = CUi.Retro ? W95.Branco : TemaVerde.Alfa(Colors.White, 0.15),
+            Foreground = c, Background = CUi.Retro ? W95.Branco : TemaVerde.Trilho,
             CornerRadius = new CornerRadius(CUi.Retro ? 0 : 4), VerticalAlignment = VerticalAlignment.Center,
         };
     }

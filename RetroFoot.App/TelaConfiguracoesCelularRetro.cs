@@ -108,9 +108,14 @@ public sealed partial class TelaConfiguracoes
             case 2:
             {
                 // (o formato 4:3 / 16:9 e do computador: no celular a tela e a do telefone)
-                var (visual, _, _) = CR95.Radios(new[] { T("Retrô: o aspecto do Windows 95, sem logos"), T("Moderno: tema escuro, cartões e logos") },
+                var (visual, _, _) = CR95.Radios(new[] { T("Retrô: o aspecto do Windows 95, sem logos"), T("Moderno: cartões, logos e cores à escolha") },
                     _cfg.Moderno ? 1 : 0, i => _cfg.VisualTela = i == 1 ? Configuracoes.VisualModerno : Configuracoes.VisualClassico, 15);
                 p.Children.Add(CUi.GrupoRetro(T("Visual"), visual));
+                var (tema, _, _) = CR95.Radios(new[]
+                {
+                    T("Verde: o verde e amarelo da marca"), T("Escuro: grafite e âmbar, cansa menos a vista"), T("Claro: cinza-claro e verde, bom de dia"),
+                }, (int)_cfg.Tema, i => _cfg.Tema = (TemaCor)i, 15);
+                p.Children.Add(CUi.GrupoRetro(T("Cores do Moderno"), tema));
                 p.Children.Add(Texto(T("O visual e o formato mudam na hora, mesmo com um jogo aberto."), 13, W95.Cinzento));
                 break;
             }

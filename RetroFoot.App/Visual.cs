@@ -24,10 +24,12 @@ public static class Visual
     // as telas abertas redesenham sem trocar o visual (o tamanho do texto mudou: Acessibilidade)
     public static void Redesenhar() => Mudou?.Invoke();
 
-    public static void Aplicar(bool moderno)
+    // o visual e as cores do Moderno (TemaVerde: verde, clean escuro ou claro)
+    public static void Aplicar(bool moderno, TemaCor tema)
     {
-        if (moderno == Moderno) return;
+        if (moderno == Moderno && tema == TemaVerde.Atual) return;
         Moderno = moderno;
+        TemaVerde.Aplicar(tema);
         Mudou?.Invoke();
     }
 }

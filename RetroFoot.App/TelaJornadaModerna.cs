@@ -29,16 +29,22 @@ public sealed partial class TelaJornada
     const double MLarguraColuna = 620;
 
     // as cores sao as do TemaVerde (o tema do Moderno); o relogio ao vivo e amarelo
-    static readonly IBrush MFundo = TemaVerde.FundoTela, MBarra = TemaVerde.Barra, MCartao = TemaVerde.Cartao;
-    static readonly IBrush MLinha = TemaVerde.Linha, MTexto = TemaVerde.Texto, MFraco = TemaVerde.TextoFraco;
-    static readonly IBrush MVivo = TemaVerde.Destaque, MProrrog = TemaVerde.Roxo, MBotao = TemaVerde.CartaoForte;
-    static readonly IPen MBorda = new Pen(TemaVerde.Borda, 1).ToImmutable();
+    static IBrush MFundo => TemaVerde.FundoTela;
+    static IBrush MBarra => TemaVerde.Barra;
+    static IBrush MCartao => TemaVerde.Cartao;
+    static IBrush MLinha => TemaVerde.Linha;
+    static IBrush MTexto => TemaVerde.Texto;
+    static IBrush MFraco => TemaVerde.TextoFraco;
+    static IBrush MVivo => TemaVerde.Destaque;
+    static IBrush MProrrog => TemaVerde.Roxo;
+    static IBrush MBotao => TemaVerde.CartaoForte;
+    static IPen MBorda => new Pen(TemaVerde.Borda, 1).ToImmutable();
     static readonly FontFamily Inter = new("fonts:Inter#Inter");
 
     double passoM = 27, passoBase = 27;
     Rect proximaM, anteriorM;
 
-    static readonly IBrush FundoLogo = TemaVerde.DiscoLogo;
+    static IBrush FundoLogo => TemaVerde.DiscoLogo;
 
     static IBrush Hex(string s) => new ImmutableSolidColorBrush(Color.Parse(s));
 
@@ -204,6 +210,17 @@ public sealed partial class TelaJornada
     {
         var (mp, hl) = Partes(cw);
         double mc = cx + mp / 2, meio = ry + passoM / 2;
+        // o jogo de um humano (liga ou taca): a linha no fundo de destaque com a barra do acento
+        // a esquerda e o nome dele na cor do acento (so o negrito se perdia no meio das outras)
+        bool humCasa = l.Jogo is { } jc && EDestaque(jc, Lado.Casa);
+        bool humFora = l.Jogo is { } jf && EDestaque(jf, Lado.Visit);
+        if (humCasa || humFora)
+        {
+            var rh = new Rect(cx + 4, ry + 2, cw - 8, passoM - 3);
+            dc.DrawRectangle(TemaVerde.Humano, null, rh, 6, 6);
+            dc.DrawRectangle(TemaVerde.Destaque, null, new Rect(rh.X, rh.Y, 4, rh.Height), 2, 2);
+        }
+        var corHumano = TemaVerde.Claro ? TemaVerde.Ouro : TemaVerde.Destaque;
         // o placar e o minuto em cima
         bool baixa = passoM < 26;
         var st = TxtM(status, baixa ? 8 : 9, corStatus, true);
@@ -231,10 +248,8 @@ public sealed partial class TelaJornada
         for (int k = 0; k < Math.Min(l.VermCasa, 3); k++) Cartao(dc, Vermelho, mc - meia + 3 + 3 * k, yv);
         for (int k = 0; k < Math.Min(l.VermFora, 3); k++) Cartao(dc, Vermelho, mc + meia - 9 - 3 * k, yv);
         // os nomes, a casa encostada ao logo dela
-        bool humCasa = l.Jogo is { } jc && EDestaque(jc, Lado.Casa);
-        bool humFora = l.Jogo is { } jf && EDestaque(jf, Lado.Visit);
-        var nc = TxtM(l.Casa, 13, MTexto, humCasa);
-        var nf = TxtM(l.Fora, 13, MTexto, humFora);
+        var nc = TxtM(l.Casa, 13, humCasa ? corHumano : MTexto, humCasa);
+        var nf = TxtM(l.Fora, 13, humFora ? corHumano : MTexto, humFora);
         using (dc.PushClip(new Rect(cx + 8, ry, Math.Max(0, xc - 8 - cx - 8), passoM)))
             dc.DrawText(nc, new Point(Math.Max(cx + 10, xc - 8 - nc.Width), meio - nc.Height / 2));
         using (dc.PushClip(new Rect(xf + t + 8, ry, Math.Max(0, cx + mp - 8 - xf - t - 8), passoM)))
@@ -407,7 +422,7 @@ static class Icones
         }
     }
 
-    static readonly IBrush Verde = TemaVerde.Verde;
+    static IBrush Verde => TemaVerde.Verde;
 
     // a seta da substituicao: verde para cima (entra) ou vermelha para baixo (sai)
     public static void Seta(DrawingContext dc, bool entra, Rect r)

@@ -19,9 +19,18 @@ namespace RetroFoot.App;
 static class ClubeModerno
 {
     // as cores sao as do TemaVerde (o tema do Moderno); Azul e o destaque (amarelo)
-    public static readonly IBrush Fundo = TemaVerde.Fundo, Barra = TemaVerde.Barra, Cartao = TemaVerde.Cartao, Linha = TemaVerde.Linha;
-    public static readonly IBrush Texto = TemaVerde.Texto, Fraco = TemaVerde.TextoFraco, Azul = TemaVerde.Destaque, Verde = TemaVerde.Verde;
-    public static readonly IBrush Vermelho = TemaVerde.Vermelho, Ouro = TemaVerde.Destaque, Prata = TemaVerde.Prata, Escuro = TemaVerde.SobreDestaque;
+    public static IBrush Fundo => TemaVerde.Fundo;
+    public static IBrush Barra => TemaVerde.Barra;
+    public static IBrush Cartao => TemaVerde.Cartao;
+    public static IBrush Linha => TemaVerde.Linha;
+    public static IBrush Texto => TemaVerde.Texto;
+    public static IBrush Fraco => TemaVerde.TextoFraco;
+    public static IBrush Azul => TemaVerde.Destaque;
+    public static IBrush Verde => TemaVerde.Verde;
+    public static IBrush Vermelho => TemaVerde.Vermelho;
+    public static IBrush Ouro => TemaVerde.Destaque;
+    public static IBrush Prata => TemaVerde.Prata;
+    public static IBrush Escuro => TemaVerde.SobreDestaque;
     public static readonly FontFamily Inter = new("fonts:Inter#Inter");
 
     public static IBrush Hex(string s) => new ImmutableSolidColorBrush(Color.Parse(s));
@@ -190,8 +199,8 @@ sealed class JanelaModerna : UserControl
         {
             Background = ClubeModerno.Fundo, CornerRadius = new CornerRadius(14), ClipToBounds = true,
             BorderBrush = TemaVerde.Borda, BorderThickness = new Thickness(1),
-            BoxShadow = BoxShadows.Parse("0 8 28 0 #80000000"),
-            Child = new ThemeVariantScope { RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark, Child = tudo },
+            BoxShadow = TemaVerde.SombraDialogo,
+            Child = new ThemeVariantScope { RequestedThemeVariant = TemaVerde.Variante, Child = tudo },
         };
     }
 

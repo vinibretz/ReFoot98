@@ -96,7 +96,7 @@ public sealed partial class TelaConfiguracoes
         });
         return new[]
         {
-            jogo, regras, T("Visual") + ": " + (_cfg.Moderno ? T("Moderno") : T("Retrô")), Nomes[IndiceIdioma], DadosJogo.Raiz,
+            jogo, regras, T("Visual") + ": " + (_cfg.Moderno ? T("Moderno") + " (" + NomeTema(_cfg.Tema) + ")" : T("Retrô")), Nomes[IndiceIdioma], DadosJogo.Raiz,
         };
     }
 
@@ -180,9 +180,12 @@ public sealed partial class TelaConfiguracoes
         p.Children.Add(CCfg.Bloco(T("Visual"), CCfg.Opcoes(new (string, string?)[]
         {
             (T("Retrô"), T("O aspecto Retrô: janelas do Windows 95 no verde, sem logos.")),
-            (T("Moderno"), T("Tema verde e amarelo, cartões e os logos das equipas e das ligas.")),
+            (T("Moderno"), T("Cartões, os logos das equipas e das ligas e as cores à escolha.")),
         }, _cfg.Moderno ? 1 : 0, i => _cfg.VisualTela = i == 1 ? Configuracoes.VisualModerno : Configuracoes.VisualClassico,
             i => new CCfg.PreviaPele(i == 1))));
+        p.Children.Add(CCfg.Bloco(T("Cores do Moderno"), CCfg.Opcoes(OpcoesTema(), (int)_cfg.Tema, i => _cfg.Tema = (TemaCor)i,
+            i => new PreviaTema((TemaCor)i, 74) { Width = 44, Margin = default })));
+        p.Children.Add(CCfg.TextoFundo(T("Vale para o visual Moderno.")));
     }
 
     void IdiomaCelular(StackPanel p)

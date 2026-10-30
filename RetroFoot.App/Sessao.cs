@@ -565,7 +565,7 @@ public sealed class Sessao
     public void FundoVerdeDepoisDaRodada() => Dispatcher.UIThread.Invoke(() =>
     {
         if (camadaTela.Child is TelaJornada or TelaClassificacao)
-            mostrar(new Border { Background = new ImmutableSolidColorBrush(Avalonia.Media.Color.FromRgb(0, 128, 0)) });
+            mostrar(FundoVerde());
     });
 
     // o aviso de espera do jogo online sobre a tela (o fundo da camada escurece o resto)
@@ -781,7 +781,7 @@ public sealed class Sessao
     {
         if (hostMostrado) return;
         hostMostrado = true;
-        if (camadaTela.Child == null) camadaTela.Child = new Border { Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromRgb(0, 128, 0)) };
+        if (camadaTela.Child == null) camadaTela.Child = FundoVerde();
         mostrarRaiz(host);
     }
 
@@ -893,5 +893,6 @@ public sealed class Sessao
             throw new InvalidOperationException("Sessao: espera de uma janela na thread da interface (travaria)");
     }
 
-    static Control FundoVerde() => new Border { Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromRgb(0, 128, 0)) };
+    // o fundo entre as telas (atras dos dialogos): o clGreen do Retro; no Moderno o fundo do tema
+    static Control FundoVerde() => new Border { Background = Visual.Moderno ? TemaVerde.FundoTela : new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromRgb(0, 128, 0)) };
 }

@@ -19,7 +19,7 @@ Realístico: até 5 por equipa (Bosman e lusófonos não contam)	Realístico: at
 Pontos, vitórias, saldo de golos e golos marcados.	Pontos, vitórias, saldo de gols e gols marcados.
 Pontos, saldo de golos e golos marcados (como no Retrô).	Pontos, saldo de gols e gols marcados (como no Retrô).
 # Aparencia
-Tema verde e amarelo, cartões e os logos das equipas e das ligas.	Tema verde e amarelo, cartões e os logos dos times e das ligas.
+Cartões, os logos das equipas e das ligas e as cores à escolha.	Cartões, os logos dos times e das ligas e as cores à escolha.
 Janela larga: a jornada com as divisões lado a lado e as telas aproveitando a largura.	Janela larga: a rodada com as divisões lado a lado e as telas aproveitando a largura.
 # Idioma
 O texto das telas do jogo (equipa, jornada, classificação, listas, mercado), de 80% a 120%. O que não couber ganha a dica com o texto inteiro.	O texto das telas do jogo (equipe, rodada, classificação, listas, mercado), de 80% a 120%. O que não couber ganha a dica com o texto inteiro.

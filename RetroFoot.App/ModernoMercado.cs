@@ -17,19 +17,35 @@ namespace RetroFoot.App;
 static class MM
 {
     // as cores sao as do TemaVerde (o tema do Moderno); Azul e o destaque (amarelo)
-    public static readonly IBrush Fundo = TemaVerde.FundoTela, Barra = TemaVerde.Barra, Cartao = TemaVerde.Cartao;
-    public static readonly IBrush Campo = TemaVerde.CartaoForte, Linha = TemaVerde.Linha, Borda = TemaVerde.Borda;
-    public static readonly IBrush Texto = TemaVerde.Texto, Fraco = TemaVerde.TextoFraco, Apagado = TemaVerde.Apagado;
-    public static readonly IBrush Azul = TemaVerde.Destaque, SobreAzul = TemaVerde.SobreDestaque, AzulFundo = TemaVerde.Selecao;
-    public static readonly IBrush Vivo = TemaVerde.Verde, Vermelho = TemaVerde.Vermelho, Amarelo = TemaVerde.Destaque;
-    public static readonly IBrush Botao = TemaVerde.CartaoForte, BotaoSobre = TemaVerde.Hover, BotaoBaixo = TemaVerde.Linha;
+    public static IBrush Fundo => TemaVerde.FundoTela;
+    public static IBrush Barra => TemaVerde.Barra;
+    public static IBrush Cartao => TemaVerde.Cartao;
+    public static IBrush Campo => TemaVerde.CartaoForte;
+    public static IBrush Linha => TemaVerde.Linha;
+    public static IBrush Borda => TemaVerde.Borda;
+    public static IBrush Texto => TemaVerde.Texto;
+    public static IBrush Fraco => TemaVerde.TextoFraco;
+    public static IBrush Apagado => TemaVerde.Apagado;
+    public static IBrush Azul => TemaVerde.Destaque;
+    public static IBrush SobreAzul => TemaVerde.SobreDestaque;
+    public static IBrush AzulFundo => TemaVerde.Selecao;
+    public static IBrush Vivo => TemaVerde.Verde;
+    public static IBrush Vermelho => TemaVerde.Vermelho;
+    public static IBrush Amarelo => TemaVerde.Destaque;
+    public static IBrush Botao => TemaVerde.CartaoForte;
+    public static IBrush BotaoSobre => TemaVerde.Hover;
+    public static IBrush BotaoBaixo => TemaVerde.Linha;
     // as listas: o poco escuro (como o fundo dos botoes do hub), as linhas pares e a escolhida
-    public static readonly IBrush Poco = TemaVerde.FundoEscuro, Zebra = TemaVerde.Zebra, Selecao = TemaVerde.Selecao;
+    public static IBrush Poco => TemaVerde.FundoEscuro;
+    public static IBrush Zebra => TemaVerde.Zebra;
+    public static IBrush Selecao => TemaVerde.Selecao;
     // o texto da linha escolhida: o amarelo claro (le melhor que o amarelo sobre a Selecao)
-    public static readonly IBrush TextoEscolhido = TemaVerde.DestaqueClaro;
+    public static IBrush TextoEscolhido => TemaVerde.DestaqueClaro;
     // o botao padrao (Enter): a pilula ouro do Jogar do hub, com o texto e o icone verde-escuros
-    public static readonly IBrush Primario = TemaVerde.BotaoPrimario, PrimarioSobre = TemaVerde.BotaoPrimarioHover;
-    public static readonly IBrush PrimarioBaixo = TemaVerde.Ouro, PrimarioBorda = TemaVerde.Ouro;
+    public static IBrush Primario => TemaVerde.BotaoPrimario;
+    public static IBrush PrimarioSobre => TemaVerde.BotaoPrimarioHover;
+    public static IBrush PrimarioBaixo => TemaVerde.Ouro;
+    public static IBrush PrimarioBorda => TemaVerde.Ouro;
     public static readonly FontFamily Inter = new("fonts:Inter#Inter");
 
     // a Inter e mais larga que a Arial: um pouco menor para caber nas mesmas colunas

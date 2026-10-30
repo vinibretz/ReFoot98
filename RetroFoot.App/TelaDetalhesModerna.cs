@@ -30,8 +30,12 @@ namespace RetroFoot.App;
 public sealed class TelaDetalhesModerna : UserControl
 {
     // as cores sao as do TemaVerde (o tema do Moderno); Azul e o destaque (amarelo)
-    static readonly IBrush Fundo = TemaVerde.Fundo, Barra = TemaVerde.Barra, Linha = TemaVerde.Linha;
-    static readonly IBrush Texto = TemaVerde.Texto, Fraco = TemaVerde.TextoFraco, Azul = TemaVerde.Destaque;
+    static IBrush Fundo => TemaVerde.Fundo;
+    static IBrush Barra => TemaVerde.Barra;
+    static IBrush Linha => TemaVerde.Linha;
+    static IBrush Texto => TemaVerde.Texto;
+    static IBrush Fraco => TemaVerde.TextoFraco;
+    static IBrush Azul => TemaVerde.Destaque;
     static readonly FontFamily Inter = new("fonts:Inter#Inter");
 
     public event Action? Fechou;
@@ -166,8 +170,8 @@ public sealed class TelaDetalhesModerna : UserControl
         Content = new Border
         {
             Background = Fundo, CornerRadius = new CornerRadius(14), ClipToBounds = true, BorderBrush = TemaVerde.Borda, BorderThickness = new Thickness(1),
-            BoxShadow = BoxShadows.Parse("0 8 28 0 #80000000"),
-            Child = new ThemeVariantScope { RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark, Child = corpo },
+            BoxShadow = TemaVerde.SombraDialogo,
+            Child = new ThemeVariantScope { RequestedThemeVariant = TemaVerde.Variante, Child = corpo },
         };
     }
 

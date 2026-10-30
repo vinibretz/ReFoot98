@@ -16,9 +16,14 @@ namespace RetroFoot.App;
 public static class UiModerno
 {
     // as cores sao as do TemaVerde (o tema do Moderno)
-    public static readonly IBrush Campo = TemaVerde.CartaoForte, Fundo2 = TemaVerde.FundoEscuro, AzulHover = TemaVerde.DestaqueClaro, HoverForte = TemaVerde.Selecao;
-    static readonly IBrush Azul = ConfigEstilo.Azul, Escuro = ConfigEstilo.TextoEscuro, Texto = ConfigEstilo.Texto,
-        Linha = ConfigEstilo.Linha;
+    public static IBrush Campo => TemaVerde.CartaoForte;
+    public static IBrush Fundo2 => TemaVerde.FundoEscuro;
+    public static IBrush AzulHover => TemaVerde.DestaqueClaro;
+    public static IBrush HoverForte => TemaVerde.Selecao;
+    static IBrush Azul => ConfigEstilo.Azul;
+    static IBrush Escuro => ConfigEstilo.TextoEscuro;
+    static IBrush Texto => ConfigEstilo.Texto;
+    static IBrush Linha => ConfigEstilo.Linha;
     static readonly FontFamily Inter = ConfigEstilo.Inter;
 
     // ---------------------------------------------------------------- icones (Lucide, 24x24, traco 2)
@@ -101,7 +106,7 @@ public static class UiModerno
             Background = principal ? TemaVerde.BotaoPrimario : TemaVerde.BotaoSecundario, CornerRadius = new CornerRadius(15), Padding = new Thickness(14, 5),
             MinHeight = 30, MinWidth = 40, Child = p, Hover = principal ? TemaVerde.BotaoPrimarioHover : HoverForte,
             BorderBrush = principal ? TemaVerde.DestaqueClaro : Linha, BorderThickness = new Thickness(1), CorFoco = principal ? Texto : Azul,
-            BoxShadow = principal ? BoxShadows.Parse("0 2 8 0 #50000000") : default,
+            BoxShadow = principal ? TemaVerde.SombraBotao : default,
         };
         b.Clique += clique;
         Ui.Nome(b, texto);

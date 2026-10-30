@@ -32,11 +32,19 @@ namespace RetroFoot.App;
 sealed class TelaClassificacaoModerna : UserControl
 {
     // cores (as do TemaVerde: a tabela num cartao verde-escuro sobre o quadro)
-    static readonly IBrush Fundo = TemaVerde.FundoTela, FundoZebra = TemaVerde.Zebra, FundoHumano = TemaVerde.Humano;
-    static readonly IBrush Texto = TemaVerde.Texto, TextoFraco = TemaVerde.TextoFraco, Linha = TemaVerde.Linha;
-    static readonly IBrush Azul = TemaVerde.Destaque;
-    static readonly IBrush CorCampeao = TemaVerde.Destaque, CorSobe = TemaVerde.Verde, CorDesce = TemaVerde.VermelhoForte;
-    static readonly IBrush CorVitoria = TemaVerde.VerdeForte, CorEmpate = TemaVerde.CinzaForte, CorDerrota = TemaVerde.VermelhoForte;
+    static IBrush Fundo => TemaVerde.FundoTela;
+    static IBrush FundoZebra => TemaVerde.Zebra;
+    static IBrush FundoHumano => TemaVerde.Humano;
+    static IBrush Texto => TemaVerde.Texto;
+    static IBrush TextoFraco => TemaVerde.TextoFraco;
+    static IBrush Linha => TemaVerde.Linha;
+    static IBrush Azul => TemaVerde.Destaque;
+    static IBrush CorCampeao => TemaVerde.Campeao;
+    static IBrush CorSobe => TemaVerde.Verde;
+    static IBrush CorDesce => TemaVerde.VermelhoForte;
+    static IBrush CorVitoria => TemaVerde.VerdeForte;
+    static IBrush CorEmpate => TemaVerde.CinzaForte;
+    static IBrush CorDerrota => TemaVerde.VermelhoForte;
     static readonly FontFamily Inter = new("fonts:Inter#Inter");
 
     // a altura das linhas: a tabela enche a area da tela (20 equipas sem rolar; menos equipas,
@@ -178,7 +186,7 @@ sealed class TelaClassificacaoModerna : UserControl
         var botao = new Border
         {
             Background = TemaVerde.BotaoPrimario, CornerRadius = new CornerRadius(18), Padding = new Thickness(20, 8),
-            BorderBrush = TemaVerde.Alfa(Colors.White, 0.55), BorderThickness = new Thickness(1.5),
+            BorderBrush = TemaVerde.Alfa(Colors.White, 0.55), BorderThickness = new Thickness(TemaVerde.Clean ? 0 : 1.5),
             Cursor = new Cursor(StandardCursorType.Hand), Child = _textoBotao, VerticalAlignment = VerticalAlignment.Center,
         };
         botao.PointerPressed += (_, a) => { a.Handled = true; Fechar(); };
@@ -260,7 +268,7 @@ sealed class TelaClassificacaoModerna : UserControl
         corpo.Children.Add(cartao);
         return new Avalonia.Controls.ThemeVariantScope
         {
-            RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark,
+            RequestedThemeVariant = TemaVerde.Variante,
             Child = new Viewbox { Stretch = Stretch.Uniform, StretchDirection = StretchDirection.Both, Child = corpo },
         };
     }
