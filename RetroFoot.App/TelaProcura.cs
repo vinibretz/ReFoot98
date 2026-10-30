@@ -442,8 +442,9 @@ public static partial class TelaProcura
                 Escreve(dc, T("Risco de lesão"), 385, 76, 13, Preto);
                 Escreve(dc, T("Ordenar por"), 385, 108, 13, Preto);
                 Rotulo(dc, T("Não mostrar os jogadores do meu time"), new Rect(417, 136, 270, 16), 13, Preto);
-                Escreve(dc, T("Dinheiro em caixa"), 385, 162, 13, Azul);
-                Rotulo(dc, Dinheiro((int)_e.Dinheiro), new Rect(505, 162, 170, 16), 13, Azul);
+                // (o "Ordenar por" tomou a linha dele: o dinheiro vai para baixo da lista)
+                Escreve(dc, T("Dinheiro em caixa"), 20, 432, 13, Azul);
+                Rotulo(dc, Dinheiro((int)_e.Dinheiro), new Rect(150, 432, 200, 16), 13, Azul);
                 // o rotulo das colunas novas (procura.py)
                 Escreve(dc, T("Nota   RL"), 18 + 466 - 6, 168, 13, Preto);
             }

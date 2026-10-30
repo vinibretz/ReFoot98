@@ -112,7 +112,8 @@ public class App : Application
                 Title = TelaAcerca.Nome,
                 Icon = Logotipo.IconeJanela(),
                 // a tela do computador na caixa do formato (4:3 ou 16:9), preta em volta
-                Content = celular || retrato ? raiz : new CaixaFormato { Child = raiz },
+                // (no celular, a vista: o raiz ja esta dentro dela, com a camada da pergunta)
+                Content = celular ? vista : retrato ? raiz : new CaixaFormato { Child = raiz },
                 Background = Brushes.Black,
                 // RETROFOOT_RETRATO=1: janela do tamanho de um celular em pe (previa)
                 Width = retrato ? 390 : 1280,
