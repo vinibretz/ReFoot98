@@ -943,6 +943,9 @@ public sealed class HostOnline : IDisposable
     // dele (janelaLocal) e todos tem o mesmo prazo; acabou (ou todos deram Continuar), segue.
     // As trocas do time do gancho que chamou (chamador) ja sao observadas pela Jornada; as dos
     // outros, aqui (ObservarTrocas), para a linha do tempo.
+    // A janela do host roda numa thread propria: enquanto ela esta aberta, as trocas e o
+    // Continuar dos outros sao atendidos (antes esperavam ela fechar: quem terminava antes ficava
+    // sem resposta, e uma troca mandada perto do fim do prazo se perdia).
     public void IntervaloColetivo(Jornada jn, JogoAtual chamador, int ladoChamador, Action? janelaLocal, TimeSpan prazo)
     {
         AtualizarJogadores();
@@ -957,12 +960,19 @@ public sealed class HostOnline : IDisposable
             ["equipas"] = new JsonArray(remotos.Values.Select(x => (JsonNode)(int)x.Jg.Equipa[x.Lado]!.ID).ToArray()),
         });
         PausaMudou?.Invoke("*");
-        janelaLocal?.Invoke();
+        Exception? erroLocal = null;
+        Thread? janela = null;
+        if (janelaLocal != null)
+        {
+            janela = new Thread(() => { try { janelaLocal(); } catch (Exception ex) { erroLocal = ex; } }) { IsBackground = true, Name = "intervalo-host" };
+            janela.Start();
+        }
         var faltam = new HashSet<string>(remotos.Keys);
-        while (DateTime.UtcNow < fim && faltam.Count > 0)
+        while (DateTime.UtcNow < fim && (faltam.Count > 0 || janela is { IsAlive: true }))
         {
             if (!_filaAoVivo.TryTake(out var p, 300)) continue;
             if (!remotos.TryGetValue(p.Uid, out var alvo)) { Responder(p.Uid, p.Chave, Resposta.Recusado("intervalo")); continue; }
+            lock (jn.TravaExtras)
             switch (p.C)
             {
                 case Trocar t:
@@ -984,8 +994,11 @@ public sealed class HostOnline : IDisposable
                     break;
             }
         }
+        // (a janela do host tem o mesmo prazo: acabou, ela fecha sozinha)
+        janela?.Join();
         Enviar($"{_sala.Raiz}/rodada/aoVivo/pausa", null);
         PausaMudou?.Invoke(null);
+        if (erroLocal != null) System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(erroLocal).Throw();
     }
 
     // a pausa simples do host (o botao de pausa da jornada): a partida de todos para e os outros

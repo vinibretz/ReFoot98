@@ -21,17 +21,36 @@ Numeração: `maior.menor.correção`. Correção (0.2.**4**) para ajustes e con
 ## 1. Fazer e testar as mudanças
 
 1. Implemente e teste no jogo (`dotnet run --project RetroFoot.Desktop`).
-2. Rode os testes: `dotnet test RetroFoot.Motor.Testes`. (Cerca de 78 testes falham sempre,
-   porque precisam dos arquivos do jogo original; o que importa é não aparecerem falhas novas.)
-3. Faça o commit das mudanças (pela extensão do git ou `git commit`).
+2. **Registre cada mudança no `CHANGELOG.md`**, na seção `[Não lançado]` (Novidades,
+   Correções ou Interno). Vale para todas as sessões: as mudanças se acumulam ali até a
+   próxima versão.
+3. Rode os testes: `dotnet test RetroFoot.Motor.Testes`. (Cerca de 78 testes falham sempre,
+   porque precisam dos arquivos do jogo original; o que importa é não aparecerem falhas novas.
+   Os testes online passam com um save seu em `RetroFoot.Motor.Testes/Oraculo/j3-entrada.e98`.)
+4. Faça o commit das mudanças (pela extensão do git ou `git commit`).
+
+## 1.5. Fechar o CHANGELOG da versão
+
+Antes de gerar os pacotes, no `CHANGELOG.md`:
+
+1. Releia a seção `[Não lançado]` e confira com `git log v<última>-beta..HEAD --oneline` se
+   nada ficou de fora.
+2. Troque o título `## [Não lançado]` por `## [0.2.4] - AAAA-MM-DD` (a data do lançamento).
+3. Acima dela, crie de novo uma seção vazia `## [Não lançado]` (com Novidades, Correções e
+   Interno), para as próximas mudanças.
+
+Essa seção da versão é usada no commit, na tag e na descrição da release (passos 4 e 6).
 
 ## 2. Gerar os pacotes
 
-No terminal (PowerShell), na pasta do projeto:
+No terminal **PowerShell 7** (`pwsh`), na pasta do projeto:
 
 ```powershell
-.\scripts\gerar-release.ps1 -Versao 0.2.4
+pwsh -File .\scripts\gerar-release.ps1 -Versao 0.2.4
 ```
+
+(O Windows PowerShell antigo, `powershell.exe` 5.1, não serve: ele não tem o `TarWriter` e o
+`.tar.gz` do Linux sai vazio, sem gerar o APK.)
 
 O script:
 
@@ -59,11 +78,27 @@ No `README.md`, na tabela **Download**, troque a versão nos três links (`v0.2.
 
 ## 4. Commit da versão e tag
 
-```powershell
-git add README.md RetroFoot.App/RetroFoot.App.csproj RetroFoot.Android/RetroFoot.Android.csproj
-git commit -m "Versao 0.2.4"
-git tag -a v0.2.4-beta -m "ReFoot98 0.2.4 beta"
+A mensagem do commit e a da tag levam as Novidades e Correções da seção da versão no
+`CHANGELOG.md` (sem o Interno). Copie os itens para um arquivo temporário, por exemplo
+`dist\notas-0.2.4.txt`:
+
+```text
+ReFoot98 0.2.4 beta
+
+Novidades:
+- ...
+
+Correções:
+- ...
 ```
+
+```powershell
+git add CHANGELOG.md README.md RetroFoot.App/RetroFoot.App.csproj RetroFoot.Android/RetroFoot.Android.csproj
+git commit -F dist\notas-0.2.4.txt
+git tag -a v0.2.4-beta -F dist\notas-0.2.4.txt
+```
+
+(`dist\` não vai para o git, então o arquivo de notas não entra no commit.)
 
 ## 5. Enviar para o GitHub
 
@@ -82,7 +117,8 @@ repositório do Juan.
 1. Abra https://github.com/vinibretz/ReFoot98/releases/new
 2. **Choose a tag**: `v0.2.4-beta`.
 3. **Release title**: `ReFoot98 0.2.4 beta` (o nome do jogo é ReFoot98, não RetroFoot).
-4. **Descrição**: use o modelo abaixo, com as novidades da versão.
+4. **Descrição**: use o modelo abaixo; em **Novidades** e **Correções**, copie os itens da
+   seção da versão no `CHANGELOG.md` (o Interno fica de fora).
 5. Arraste os três arquivos de `dist\` para "Attach binaries" e espere terminar de enviar
    (o APK tem uns 140 MB).
 6. Marque **Set as a pre-release**.

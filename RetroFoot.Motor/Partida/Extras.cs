@@ -40,13 +40,20 @@ public sealed partial class Jornada
     Jogador? ultimoGoleiro;
     int ultimoResultado;
 
+    // (jogo online: no intervalo de todos a janela do host roda numa thread e as trocas dos outros
+    // aparelhos na do motor; as duas anotam aqui)
+    public readonly object TravaExtras = new();
+
     void Extra(JogoAtual jg, LanceExtra x)
     {
         if (!RegistarExtras) return;
-        x.Ordem = jg.Lances.Count;
-        if (!x.Intervalo) x.Acrescimo = Acrescimo;
-        jg.Extras.Add(x);
-        Ganchos.Extra?.Invoke(jg, x);
+        lock (TravaExtras)
+        {
+            x.Ordem = jg.Lances.Count;
+            if (!x.Intervalo) x.Acrescimo = Acrescimo;
+            jg.Extras.Add(x);
+            Ganchos.Extra?.Invoke(jg, x);
+        }
     }
 
     void ExtraSubstituicao(JogoAtual jg, int lado, int minuto, Jogador saiu, Jogador entrou, bool intervalo = false) =>

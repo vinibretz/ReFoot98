@@ -62,6 +62,9 @@ public static partial class TelaProcura
     static int _pais = -1, _forcaMin = -1, _forcaMax = -1, _faixa = -1, _posicao = -1, _preco = -1;
     static bool _naoMinha, _procurar;
     static List<ushort> _achados = new();
+    // (RetroFoot) a equipa para a qual _achados foi achado: o "nao mostrar os da minha equipa" e
+    // os precos dependem dela; o tecnico despedido e contratado por outra continua o mesmo
+    static ushort _equipaAchados;
     // os filtros do launcher (ItemIndex; 0 = "Qualquer")
     static int _comp, _nota, _risco;
     // a ordem da lista (0 = pelo nome, a do original; fica de uma vez para a outra)
@@ -233,6 +236,9 @@ public static partial class TelaProcura
                 Redesenhar();
             });
             _caixaNome.Text = _nome;
+            // o mesmo tecnico noutra equipa (despedido e contratado): a lista da busca anterior
+            // escondia a equipa antiga (era a dele) e mostrava a nova; refeita com os mesmos criterios
+            if (!_procurar && _equipaAchados != e.ID) Procurar();
         }
 
         Botao Pequeno(Rect r, string nome, Action clique) =>
@@ -309,6 +315,7 @@ public static partial class TelaProcura
         void Procurar()
         {
             _procurar = false;
+            _equipaAchados = _e.ID;
             _lista.Sel = -1;
             _lista.Rolagem = 0;
             var todos = S.S.Equipas.SelectMany(eq => eq.Jogadores.Select(p => (eq, p))).ToList();

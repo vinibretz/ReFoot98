@@ -1,5 +1,11 @@
 # Casos do oráculo
 
+> **Testes online sem o save do original:** os testes de `Online/` (e outros que leem
+> `j3-entrada.e98`) só precisam de um save válido com um técnico humano, não do jogo de 1998.
+> Sem o arquivo, copie um save seu (criado pelo próprio jogo, em `data/saves/`) para
+> `Oraculo/j3-entrada.e98` — o `.gitignore` ignora `*.e98`, então ele fica só local. Os testes
+> do oráculo (`OraculoTestes`) continuam precisando das entradas e saídas do original.
+
 O jogo original (98.003 puro, com o Randomize fixo em 0: ferramentas/oraculo/)
 jogou a partir da entrada: escalação Seleccionar > Automático, pênalti do humano
 pelo 1º da lista, intervalo sem trocas, e RetroFoot > Sair na tela da equipa da

@@ -240,12 +240,14 @@ public sealed class Sessao
                         if (g.Equipa[l] is { } me && me.ID == host.MeuTime && Memoria.Humano(g.Treinador[l]))
                         {
                             var (mg, ml) = (g, l);
+                            // (aqui, na thread do motor: a janela abre noutra, com os outros
+                            // aparelhos sendo atendidos ao mesmo tempo)
+                            Jornada.OrdenarPorPosicaoNome(me);
                             local = () =>
                             {
                                 PrazoDialogo = prazo;
                                 try
                                 {
-                                    Jornada.OrdenarPorPosicaoNome(me);
                                     if (mg == jg && ml == lado) sub?.Invoke(mg, ml, null, 4);
                                     else jn.ObservarTrocas(mg, ml, null, true, () => sub?.Invoke(mg, ml, null, 4));
                                 }
@@ -843,6 +845,11 @@ public sealed class Sessao
         finally { PrazoDialogo = antes; }
     }
     static void ComPrazo(Action f) => ComPrazo(() => { f(); return 0; });
+
+    // (jogo online, no host) uma janela do motor que so informa (ex.: a premiacao do fim de
+    // temporada): com o prazo das perguntas, para nao segurar o jogo de todos se o host nao
+    // fechar; no jogo local espera o OK
+    internal void ComPrazoSeOnline(Action f) { if (Online != null) ComPrazo(f); else f(); }
 
     // (online) a janela do proprio host que para o jogo de todos: os outros aparelhos veem
     // "aguardando fulano..." enquanto ela esta aberta

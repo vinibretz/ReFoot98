@@ -533,11 +533,12 @@ public sealed class JogoRemoto
     void Pausa(JsonObject? p)
     {
         var s = _jornada != null ? _sessaoAoVivo : _sessao;
-        if (p == null) { s?.MostrarAviso(null); s?.EsconderRelogio(); return; }
+        if (p == null) { _intervaloDeTodos = false; s?.MostrarAviso(null); s?.EsconderRelogio(); return; }
         string uid = (string?)p["uid"] ?? "";
         // o intervalo de todos (30 s): a janela das trocas para quem tem time no jogo; o relogio
         if ((bool?)p["coletivo"] == true)
         {
+            _intervaloDeTodos = true;
             // (o jogo de outro time aberto para ver: fecha, vem a janela das trocas)
             _jornada?.PararDeEspiar();
             int seg = (int?)p["segundos"] ?? 30;
@@ -587,11 +588,17 @@ public sealed class JogoRemoto
                     sairam.RemoveAt(k);
                 }
                 await _cli.Executar(new Retomar());
+                // (o intervalo de todos: o jogo so volta quando todos terminam; ate la, o aviso)
+                // (na thread da interface, como o fim da pausa: se ele ja chegou, nada)
+                if (prazo != null)
+                    Dispatcher.UIThread.Post(() => { if (_intervaloDeTodos) sv.MostrarAviso(T("⏸ Intervalo: aguardando os outros técnicos…")); });
             }
             catch (Exception ex) { Console.Error.WriteLine("pausa: " + ex.Message); }
             finally { _pausaMinha = false; }
         });
     }
+
+    bool _intervaloDeTodos;   // (na thread da interface)
 
     Sessao? _sessaoAoVivo;
 

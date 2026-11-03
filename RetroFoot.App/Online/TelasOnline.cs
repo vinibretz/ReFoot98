@@ -295,7 +295,13 @@ public static class Online
         return T("Leilão de {0}{1}: não houve ofertas", nome, v == null ? "" : " (" + Dlg.Texto(v.NomeCurto) + ")");
     }
 
-    public static string Versao => typeof(Online).Assembly.GetName().Version?.ToString(3) ?? "0";
+    // a versao gravada na sala: o nome do jogo e o numero ("ReFoot98 0.2.6"), para a sala de um
+    // fork com o mesmo numero nao passar por igual (Sala.MesmaVersao)
+    public static string Versao => TelaAcerca.Nome + " " + (typeof(Online).Assembly.GetName().Version?.ToString(3) ?? "0");
+
+    // a sala e de outra versao: ninguem entra (os jogos diferentes no mesmo estado dao problema)
+    public static string AvisoVersao(string daSala) =>
+        T("Esta sala é da versão {0} e o seu jogo é da versão {1}. Para jogarem juntos, todos precisam da mesma versão: atualize o jogo de quem estiver na versão mais antiga (ou peça ao host para atualizar e reabrir a sala).", daSala, Versao);
 
     // a pagina do kit numa coluna no meio (no computador a tela e larga)
     public static Control Pagina(string titulo, string? sub, Action? voltar, Control corpo, Control? rodape = null) =>
@@ -350,12 +356,13 @@ public sealed class TelaOnline : UserControl
             {
                 var b = Online.Banco;
                 await b.Ler("salas/AAAAAA/info");
-                var sala = await Sala.Entrar(b, b.Uid, chave, nome.Text ?? "");
+                var sala = await Sala.Entrar(b, b.Uid, chave, nome.Text ?? "", versao: Online.Versao);
                 // (a sala do jogar com um amigo e de uma vez so: nao fica na lista)
                 if (await sala.Modo() == Sala.ModoAmigo) Online.Esquecer(sala.Codigo);
                 else Online.Lembrar(sala);
                 _mostrar(new TelaSala(_mostrar, _voltar, sala, false));
             }
+            catch (Sala.VersaoDiferente ex) { Erro(Online.AvisoVersao(ex.DaSala)); }
             catch (Sala.SalaCheia) { Erro(T("A sala está cheia (6 técnicos).")); }
             catch (Sala.SalaInexistente) { Online.Esquecer(chave.Trim().ToUpperInvariant()); Erro(T("Não existe sala com essa chave.")); }
             catch (Exception ex) { Erro(T("Não consegui entrar: {0}", Curto(ex))); }
@@ -397,11 +404,12 @@ public sealed class TelaOnline : UserControl
                         // a mesma sala, se ainda for dele; se a sala continua com outro host (ele passou o
                         // host ou caiu e outro assumiu), entra como os outros; senao uma sala nova (com a
                         // mesma chave e o mesmo nome, se der: os outros a acham na lista deles)
-                        if (await Sala.Reabrir(bn, bn.Uid, codigoJogo) is { } minha) { Online.Lembrar(minha); _mostrar(new TelaSala(_mostrar, _voltar, minha, true, arq)); return; }
+                        if (await Sala.Reabrir(bn, bn.Uid, codigoJogo, versao: Online.Versao) is { } minha) { Online.Lembrar(minha); _mostrar(new TelaSala(_mostrar, _voltar, minha, true, arq)); return; }
                         if (await bn.Ler($"salas/{codigoJogo}/info") != null)
                         {
+                            // (o jogo gravado so vira passado depois de entrar: recusado pela versao, fica)
+                            var outra = await Sala.Entrar(bn, bn.Uid, codigoJogo, nome.Text ?? "", versao: Online.Versao);
                             try { File.Move(arq, arq + ".passado", true); } catch { }
-                            var outra = await Sala.Entrar(bn, bn.Uid, codigoJogo, nome.Text ?? "");
                             Online.Lembrar(outra);
                             _mostrar(new TelaSala(_mostrar, _voltar, outra, false));
                             return;
@@ -410,6 +418,7 @@ public sealed class TelaOnline : UserControl
                         Online.Lembrar(nova);
                         _mostrar(new TelaSala(_mostrar, _voltar, nova, true, arq));
                     }
+                    catch (Sala.VersaoDiferente ex) { Erro(Online.AvisoVersao(ex.DaSala)); }
                     catch (Exception ex) { Erro(T("Não consegui abrir a sala: {0}", Curto(ex))); }
                 });
             else b = new CUi.Botao(T("Entrar"), true, () => _ = EntrarNa(codigoJogo));

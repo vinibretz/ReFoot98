@@ -34,7 +34,9 @@ public static class TelaFimDeTemporada
     public static void Mostrar(Sessao s, Resultado r)
     {
         s.EsperarDialogo<bool>(fim => Janela(s, r, () => fim(true)));
-        if (r.Premios.Any(p => p.Divisao >= 0)) s.EsperarDialogo<bool>(fim => PremiacaoDivisoes(s, r, () => fim(true)));
+        // (sem o relogio da janela acima: no online, o prazo das perguntas fecha sozinha)
+        if (r.Premios.Any(p => p.Divisao >= 0))
+            s.ComPrazoSeOnline(() => s.EsperarDialogo<bool>(fim => PremiacaoDivisoes(s, r, () => fim(true))));
         if (MostrarSubidasEDescidas) s.EsperarDialogo<bool>(fim => SubidasEDescidas(s, r, () => fim(true)));
     }
 

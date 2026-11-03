@@ -88,11 +88,13 @@ public sealed class Sala
 
     // o host volta para a sala dele (o jogo continuado de um save): null se a sala nao existe
     // mais ou se o host agora e outro
-    public static async Task<Sala?> Reabrir(IBanco b, string uid, string codigo, CancellationToken ct = default)
+    // (versao: a do jogo do host, que passa a ser a da sala: ele pode ter atualizado o jogo)
+    public static async Task<Sala?> Reabrir(IBanco b, string uid, string codigo, CancellationToken ct = default, string? versao = null)
     {
         if (!CodigoValido(codigo) || await b.Ler($"salas/{codigo}/info", ct) is not { } info) return null;
         if ((string?)await b.Ler($"salas/{codigo}/host", ct) != uid) return null;
         var s = new Sala(b, codigo, uid) { Nome = (string?)info["nome"] ?? "" };
+        if (versao != null && (string?)info["versao"] != versao) await b.Atualizar($"salas/{codigo}/info", new JsonObject { ["versao"] = versao }, ct);
         await s.SinalDeVida(ct);
         // (o retrato e a rodada da vez anterior: ninguem entra num jogo velho antes do host
         // continuar)
@@ -117,13 +119,25 @@ public sealed class Sala
 
     public sealed class SalaCheia : Exception { public SalaCheia() : base("sala cheia") { } }
     public sealed class SalaInexistente : Exception { public SalaInexistente() : base("sala nao existe") { } }
+    public sealed class VersaoDiferente : Exception
+    {
+        public string DaSala { get; }
+        public VersaoDiferente(string daSala) : base("versao diferente da sala: " + daSala) { DaSala = daSala; }
+    }
+
+    // a versao da sala e a deste jogo batem. A da sala so com o numero (as salas de antes do
+    // aviso e as do RetroFoot original, que nao gravam o nome do jogo): compara so o numero
+    public static bool MesmaVersao(string daSala, string minha) =>
+        daSala.Length > 0 && char.IsDigit(daSala[0]) ? daSala == minha[(minha.LastIndexOf(' ') + 1)..] : daSala == minha;
 
     // entra numa sala pelo codigo: a primeira vaga livre (escrita condicional: dois nao pegam a
-    // mesma); quem ja estava na sala volta para a vaga dele
-    public static async Task<Sala> Entrar(IBanco b, string uid, string codigo, string nome, CancellationToken ct = default)
+    // mesma); quem ja estava na sala volta para a vaga dele. Com a versao deste jogo, recusa
+    // (VersaoDiferente) a sala de outra versao: jogos diferentes no mesmo estado dao problema
+    public static async Task<Sala> Entrar(IBanco b, string uid, string codigo, string nome, CancellationToken ct = default, string? versao = null)
     {
         codigo = codigo.Trim().ToUpperInvariant();
         if (!CodigoValido(codigo) || await b.Ler($"salas/{codigo}/info", ct) is not { } info) throw new SalaInexistente();
+        if (versao != null && (string?)info["versao"] is { Length: > 0 } daSala && !MesmaVersao(daSala, versao)) throw new VersaoDiferente(daSala);
         var s = new Sala(b, codigo, uid) { Nome = (string?)info["nome"] ?? "" };
         var vagas = Nos.Filhos(await b.Ler($"salas/{codigo}/vagas", ct)).ToDictionary(x => x.Chave, x => (string?)x.Valor);
         int minha = vagas.FirstOrDefault(x => x.Value == uid).Key is { } k ? int.Parse(k) : -1;

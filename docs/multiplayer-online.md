@@ -40,8 +40,12 @@ prontos ("Jogador 1 PRONTO · Jogador 2 AGUARDANDO…").
 - **Substituição (paralisação):** quando um técnico pede para parar o jogo e substituir,
   **o jogo para para todos** (como no jogo local). Os outros veem "Jogador 1 está fazendo
   substituições…"; o relógio volta quando ele confirma.
-- **Intervalo, lesão, goleiro expulso, batedor de pênalti:** a janela abre no aparelho do dono
-  do time; os outros aguardam.
+- **Intervalo:** é de todos ao mesmo tempo (`HostOnline.IntervaloColetivo`, 30 s): cada técnico
+  abre a janela das trocas, a do host numa thread própria, para as trocas e o Continuar dos
+  outros serem atendidos enquanto ela está aberta. Acaba quando todos terminam (ou no prazo);
+  quem terminou vê "aguardando os outros técnicos…".
+- **Lesão, goleiro expulso, batedor de pênalti:** a janela abre no aparelho do dono do time; os
+  outros aguardam.
 - **Pedido de aumento, convite para outro clube, patrocínio:** perguntados ao dono do time. O
   pedido de aumento e os leilões dos times do computador vêm **logo depois da rodada**, antes de
   os técnicos prepararem (`Mundo.Online`: a CPU prepara primeiro, depois os humanos), para nada
@@ -54,6 +58,10 @@ prontos ("Jogador 1 PRONTO · Jogador 2 AGUARDANDO…").
   na ordem sorteada do motor, então o desempate não muda.
 - **Troca de clube:** o aparelho segue o técnico; quem aceita um convite (ou é demitido e
   contratado por outro) passa a mandar no time novo na rodada seguinte, com um aviso.
+- **Janelas do motor no host:** toda janela que o motor abre e espera (`Sessao.EsperarDialogo`)
+  para o jogo de todos até fechar. Por isso, no online, ela precisa de prazo: as perguntas usam
+  `ComPrazo`, e as janelas que só informam (ex.: a premiação ampliada do fim de temporada) usam
+  `Sessao.ComPrazoSeOnline`, que fecha sozinha no prazo das perguntas e, no jogo local, espera o OK.
 - **Tempo para responder:** cada pergunta tem um prazo (ex.: 45 s) com contagem na tela. Sem
   resposta, vale o padrão do motor: aumento aceito, sem lance, convite e patrocínio recusados,
   substituição automática, melhor batedor.
@@ -99,6 +107,10 @@ prontos ("Jogador 1 PRONTO · Jogador 2 AGUARDANDO…").
   que o host cria e passa aos amigos) e o nome do técnico. A "autenticação anônima" do Firebase
   é invisível: o app cria sozinho uma identidade para o aparelho (guardada nele), só para as
   regras do banco saberem quem escreve o quê.
+- **Mesma versão para todos.** A sala grava a versão do jogo do host (`info/versao`, com o nome
+  do jogo: "ReFoot98 0.2.6"); quem entra com outra versão é recusado com um aviso para
+  atualizar (`Sala.VersaoDiferente`). O host que atualiza o jogo e reabre a sala grava a versão
+  nova. Salas antigas, só com o número ("0.2.6"), comparam só o número.
 - **No máximo 6 vagas por sala** — o limite de técnicos humanos do jogo. Cada vaga é um
   técnico num aparelho; com a sala cheia, ninguém mais entra.
 - Retrato de ~70–230 KB por rodada, comprimido: folgado no plano gratuito.

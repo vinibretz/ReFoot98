@@ -1015,4 +1015,75 @@ public class HostClienteTestes
         }
         finally { HostOnline.PrazoFixo = null; }
     }
+
+    // o intervalo coletivo com a janela do host aberta: a troca e o Continuar do cliente sao
+    // atendidos na hora (antes so depois de o host fechar a dele), e o intervalo acaba quando os
+    // dois terminam, sem esperar o prazo
+    [Fact(Timeout = 120_000)]
+    public async Task IntervaloAtendeComAJanelaDoHostAberta()
+    {
+        var banco = new BancoMemoria();
+        var sh = await Sala.Criar(banco, "host", "Juan", "0.2.0");
+        var sc = await Sala.Entrar(banco, "cli", sh.Codigo, "João");
+        var s = Jogo98.Ler(Entrada());
+        var minha = s.Equipas.First(e => MercadoJogo.HumanoAtivo(s.Treinadores.FirstOrDefault(t => t.ID == e.Treinador)));
+        var dele = s.Equipas.First(e => e != minha && s.Divisoes.Take(4).Any(d => d.Equipas.Contains(e.ID)));
+        s.Treinadores.First(t => t.ID == dele.Treinador).Humano = 1;
+        await sh.DarEquipa("host", minha.ID);
+        await sh.DarEquipa("cli", dele.ID);
+        HostOnline.PrazoFixo = TimeSpan.FromSeconds(1);
+        try
+        {
+            using var cli = new ClienteOnline(sc);
+            cli.NovoRetrato += (r, rodada, versao, inst) => _ = Task.Run(async () =>
+            {
+                var c = Jogo98.Ler(r.Save);
+                var e = c.Equipas.First(x => x.ID == dele.ID);
+                Escalacao.Automatico(new Aleatorio(3), e);
+                await cli.Pronto(new Preparo(e.Jogadores.Select(x => new Escalado(x.ID, Memoria.Escalacao(x))).ToList(), 10000, new(), 0));
+            });
+            JogoAtual? jogoDele = null;
+            Resposta? troca = null;
+            var relogio = new System.Diagnostics.Stopwatch();
+            TimeSpan? trocou = null;
+            using var obs = banco.Observar($"{sh.Raiz}/rodada/aoVivo/pausa", (c, v) =>
+            {
+                if (c != "/" || v is not System.Text.Json.Nodes.JsonObject p || (bool?)p["coletivo"] != true || troca != null) return;
+                var eq = jogoDele!.Equipa[jogoDele.Dados.Casa == dele.ID ? 0 : 1]!;
+                var sai = eq.Jogadores.First(x => x.Posicao != 0 && Memoria.Escalacao(x) == Memoria.EscTitular);
+                var entra = eq.Jogadores.First(x => x.Posicao != 0 && Memoria.Escalacao(x) == Memoria.EscReserva);
+                _ = Task.Run(async () => { troca = await cli.Executar(new Trocar(sai.ID, entra.ID)); trocou = relogio.Elapsed; await cli.Executar(new Retomar()); });
+            });
+            HostOnline? host = null;
+            int rodadas = 0;
+            Jornada? jornada = null;
+            var h = new Humano();
+            h.Preparar = (j, e, jogo) => host!.Preparar(e, jogo) || rodadas >= 1;
+            h.ComecoJornada = (t, jn) => { rodadas++; jornada = jn; host!.TransmitirInicio(t, jn); jogoDele = jn.Jogos.First(x => x.Dados.Casa == dele.ID || x.Dados.Fora == dele.ID); };
+            h.Minuto = jn => { host!.NoMinuto(jn); host.TransmitirMinuto(jn); };
+            bool feito = false;
+            TimeSpan durou = default;
+            h.Substituicao = (jg, lado, saiu, motivo) =>
+            {
+                if (motivo != 4 || feito) return;
+                feito = true;
+                relogio.Start();
+                // (a janela do host: aberta por 3 s)
+                host!.IntervaloColetivo(jornada!, jg, lado, () => Thread.Sleep(3000), TimeSpan.FromSeconds(20));
+                durou = relogio.Elapsed;
+            };
+            var jgo = new JogoEmCurso(s, 9, Opcoes.Padrao with { Regras = TRegras.Launcher(8), SubstituirNoIntervalo = true }, h);
+            host = new HostOnline(sh, jgo);
+            var motor = new Thread(() => jgo.Ciclo()) { IsBackground = true };
+            motor.Start();
+            Assert.True(await Task.Run(() => motor.Join(90_000)));
+            host.Dispose();
+            Assert.True(feito);
+            Assert.NotNull(troca);
+            Assert.True(troca!.Ok, troca.Motivo);
+            Assert.True(trocou < TimeSpan.FromSeconds(2.5), $"a troca so foi atendida em {trocou}");
+            Assert.True(durou >= TimeSpan.FromSeconds(3) && durou < TimeSpan.FromSeconds(10), $"o intervalo durou {durou}");
+        }
+        finally { HostOnline.PrazoFixo = null; }
+    }
 }
