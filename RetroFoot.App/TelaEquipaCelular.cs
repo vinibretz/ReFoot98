@@ -968,6 +968,8 @@ public sealed partial class TelaEquipa
             var vender = new CUi.Botao(T("Vender"), true, () => { FecharGaveta(); _p.VenderCelular(j); Refazer(); });
             var renovar = new CUi.Botao(T("Renovar contrato"), false, () => { FecharGaveta(); _p.RenovarCelular(j); Refazer(); });
             renovar.Habilitado = MercadoJogo.PodeMudarSalario(j);
+            // (como no desktop: esmaecido quando a venda e recusada; o motivo continua no menu)
+            vender.Habilitado = MercadoJogo.ImpedimentoVenda(_e, j) == MercadoJogo.PodeVender;
             p.Children.Add(new Border { Height = 2 });
             p.Children.Add(CUi.Botoes(renovar, vender));
             AbrirGaveta(Painel.NomeCelular(j), p);

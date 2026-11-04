@@ -8,10 +8,14 @@
 # Uso (PowerShell, na raiz do repositorio):
 #   .\scripts\gerar-release.ps1 -Versao 0.2.4
 #   .\scripts\gerar-release.ps1 -Versao 0.2.4 -SemAndroid
+#   .\scripts\gerar-release.ps1 -Versao 0.2.4 -SoAndroid   (so o APK: corrigir o Android de
+#                                                          uma release ja lancada, na mesma versao)
 param(
     [Parameter(Mandatory)][ValidatePattern('^\d+\.\d+\.\d+$')][string]$Versao,
-    [switch]$SemAndroid
+    [switch]$SemAndroid,
+    [switch]$SoAndroid
 )
+if ($SemAndroid -and $SoAndroid) { throw 'Use -SemAndroid ou -SoAndroid, nao os dois' }
 $ErrorActionPreference = 'Stop'
 $raiz = Split-Path $PSScriptRoot -Parent
 Set-Location $raiz
@@ -33,13 +37,30 @@ Write-Host "Versao $Versao (Android $codigo)" -ForegroundColor Cyan
 New-Item -ItemType Directory -Force $dist | Out-Null
 $tmp = Join-Path $dist 'tmp'
 if (Test-Path $tmp) { Remove-Item $tmp -Recurse -Force }
+New-Item -ItemType Directory -Force $tmp | Out-Null
+
+# os nos do MSBuild e o servidor de build que sobram de builds anteriores seguram memoria e
+# arquivos: o ILLink falha com "Out of memory" (ou "Could not process the body of method")
+# mesmo com memoria livre, e o publish falha por arquivo travado. Desligar antes de cada
+# publish e tentar de novo uma vez resolve (foi o que resolveu nas 0.2.x a mao).
+function Liberar { dotnet build-server shutdown 2>&1 | Out-Null }
 
 # 2. Windows e Linux: um executavel so, renomeado para RetroFoot(.exe) (o nome que a
 #    atualizacao automatica procura dentro do pacote)
+if (-not $SoAndroid) {
 foreach ($r in 'win-x64', 'linux-x64') {
-    Write-Host "Publicando $r..." -ForegroundColor Cyan
-    dotnet publish RetroFoot.Desktop -c Release -r $r -o "$tmp\$r" | Out-Null
-    if ($LASTEXITCODE) { throw "publish $r falhou (rode o comando a mao para ver o erro)" }
+    $log = "$tmp\publish-$r.log"
+    for ($tentativa = 1; ; $tentativa++) {
+        Write-Host "Publicando $r..." -ForegroundColor Cyan
+        Liberar
+        dotnet publish RetroFoot.Desktop -c Release -r $r -o "$tmp\$r" *> $log
+        if (-not $LASTEXITCODE) { break }
+        if ($tentativa -ge 2) {
+            Copy-Item $log "$dist\publish-$r-erro.log" -Force
+            throw "publish $r falhou duas vezes (veja dist\publish-$r-erro.log)"
+        }
+        Write-Host "  falhou; liberando a memoria do build e tentando de novo" -ForegroundColor Yellow
+    }
 }
 # o zip: a pasta ReFoot98 com o executavel e o LEIA-ME (quem abre o zip ve logo o aviso de
 # extrair; a atualizacao acha o RetroFoot.exe pelo nome, em qualquer pasta do zip)
@@ -79,6 +100,7 @@ $e.ModificationTime = [DateTimeOffset]::Now
 $e.DataStream = [IO.File]::OpenRead("$tmp\RetroFoot")
 $w.WriteEntry($e)
 $e.DataStream.Dispose(); $w.Dispose(); $gz.Dispose(); $tgz.Dispose()
+}
 
 # 3. Android: uma ABI de cada vez (em paralelo o ILLink fica sem memoria e trava a maquina),
 #    em prioridade baixa; depois assina sempre a mao e confere (o build pode pular a
@@ -91,11 +113,20 @@ if (-not $SemAndroid) {
     if (-not (Test-Path "$chaves\retrofoot-android.keystore")) { throw "Chave do Android nao encontrada em $chaves (restaure o backup)" }
     Write-Host 'Publicando Android (demora; uma ABI de cada vez)...' -ForegroundColor Cyan
     $argumentos = "publish RetroFoot.Android -c Release -f net10.0-android -m:1 -p:BuildInParallel=false `"-p:AndroidSdkDirectory=$sdk`" `"-p:JavaSdkDirectory=$jdk`" -o `"$tmp\android`""
-    $proc = Start-Process dotnet -ArgumentList $argumentos -NoNewWindow -PassThru -RedirectStandardOutput "$tmp\android.log"
-    try { $proc.PriorityClass = 'BelowNormal' } catch {}
-    $proc.WaitForExit()
-    $apk = Get-ChildItem "$tmp\android" -Filter '*.apk' -ErrorAction SilentlyContinue | Where-Object Name -notlike '*-Signed.apk' | Select-Object -First 1
-    if (-not $apk) { throw "build do Android falhou (veja $tmp\android.log)" }
+    for ($tentativa = 1; ; $tentativa++) {
+        Liberar
+        Remove-Item "$tmp\android" -Recurse -Force -ErrorAction SilentlyContinue
+        $proc = Start-Process dotnet -ArgumentList $argumentos -NoNewWindow -PassThru -RedirectStandardOutput "$tmp\android.log"
+        try { $proc.PriorityClass = 'BelowNormal' } catch {}
+        $proc.WaitForExit()
+        $apk = Get-ChildItem "$tmp\android" -Filter '*.apk' -ErrorAction SilentlyContinue | Where-Object Name -notlike '*-Signed.apk' | Select-Object -First 1
+        if ($apk) { break }
+        if ($tentativa -ge 2) {
+            Copy-Item "$tmp\android.log" "$dist\android-erro.log" -Force
+            throw "build do Android falhou duas vezes (veja dist\android-erro.log)"
+        }
+        Write-Host '  falhou (em geral falta de memoria no ILLink); liberando e tentando de novo' -ForegroundColor Yellow
+    }
     $signer = (Get-ChildItem "$sdk\build-tools" -Directory | Sort-Object Name -Descending | Select-Object -First 1).FullName + '\lib\apksigner.jar'
     $saida = "$dist\$nome-android.apk"
     & "$jdk\bin\java.exe" -jar $signer sign --ks "$chaves\retrofoot-android.keystore" --ks-key-alias retrofoot `

@@ -19,6 +19,11 @@
   Com o Windows PowerShell antigo (`powershell.exe` 5.1) falta o `TarWriter`: o `.tar.gz` do
   Linux sai com 0 bytes e o APK não é gerado, mas o script termina com código 0. Depois de
   gerar, confira os tamanhos dos três arquivos em `dist\`.
+- Falhas de memória do ILLink e arquivos travados no publish: o script já libera o servidor de
+  build e tenta de novo uma vez. Não refaça os passos à mão; se falhar duas vezes, leia o
+  `dist\*-erro.log` (ver "Problemas conhecidos" no `docs/release.md`).
+- Faça commit e tag da release pelo PowerShell: pelo Bash, o `git add` já deu "Permission
+  denied" em `.git/objects`.
 
 ## Modo online
 

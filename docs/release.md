@@ -64,6 +64,12 @@ O script:
 O Android demora (10 a 20 minutos) e roda em prioridade baixa para não travar o computador.
 Para gerar só Windows e Linux: acrescente `-SemAndroid`.
 
+Para corrigir só o Android de uma release já lançada, sem versão nova: com os csproj ainda na
+versão lançada, rode com `-SoAndroid` e a mesma versão (ex.: `-Versao 0.2.8 -SoAndroid`), e
+troque o `.apk` na release do GitHub (apague o antigo e envie o novo com o mesmo nome). Quem já
+instalou o APK antigo não recebe aviso de atualização (a versão é a mesma): precisa baixar e
+instalar por cima. Registre a correção na seção da própria versão no `CHANGELOG.md`.
+
 O zip do Windows traz a pasta `ReFoot98` com o `RetroFoot.exe` e o
 `LEIA-ME - EXTRAIA ANTES DE JOGAR.txt` (o texto está no script).
 
@@ -181,8 +187,14 @@ que o da última do Juan, para não confundir). Depois, siga do passo 1.
 
 ## Problemas conhecidos
 
-- **"Out of memory" no build do Android**: aparece se gerar as três ABIs em paralelo; o script
-  já gera uma de cada vez. Feche programas pesados se ainda acontecer.
+- **"publish win-x64 falhou" ou build do Android com "Out of memory" / "Could not process the
+  body of method"** (ILLink): o servidor de build e os nós do MSBuild que sobram de builds
+  anteriores seguram memória e arquivos, e o ILLink falha mesmo com memória livre. O script já
+  trata isso: roda `dotnet build-server shutdown` antes de cada publish e, se falhar, tenta de
+  novo uma vez (aparece "falhou; ... tentando de novo" em amarelo, e está tudo certo). Se
+  falhar duas vezes, o log fica em `dist\publish-<sistema>-erro.log` ou
+  `dist\android-erro.log`; feche programas pesados e rode o script de novo.
+- O Android já gera uma ABI de cada vez (as três em paralelo esgotam a memória).
 - **"Chave do Android não encontrada"**: restaure o backup de `%USERPROFILE%\.config\retrofoot`.
 - **Avisos (warnings) amarelos no build**: são do código original e não impedem nada.
 - **A release não aparece como atualização no jogo**: confira se a versão é maior que a

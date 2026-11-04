@@ -18,6 +18,12 @@ As versões até a 0.2.6 estão descritas nas [releases do GitHub](https://githu
 
 ### Interno
 
+- `scripts/gerar-release.ps1`: libera o servidor de build antes de cada publish e tenta de novo
+  uma vez se o publish ou o build do Android falhar (falta de memória do ILLink); o log do erro
+  fica em `dist\`. Documentado em `docs/release.md` e no `CLAUDE.md`.
+- `scripts/gerar-release.ps1 -SoAndroid`: gera só o APK, para trocar o Android de uma release
+  já lançada sem mudar a versão.
+
 ## [0.2.8] - 2026-11-04
 
 ### Novidades
@@ -35,6 +41,8 @@ As versões até a 0.2.6 estão descritas nas [releases do GitHub](https://githu
 - Moderno: na tela 4:3, a aba Finanças não fica mais embolada: o preço do ingresso e a previsão
   do próximo jogo em casa ganharam um cartão compacto no rodapé, com o público e a renda
   previstos inteiros, e o seletor de preço não encosta mais nas linhas do balanço.
+- Android: na ficha do jogador, o botão Vender fica esmaecido quando o jogador não pode ser
+  vendido, como o Renovar contrato (corrigido no APK da 0.2.8, trocado depois do lançamento).
 
 ### Interno
 
