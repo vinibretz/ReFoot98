@@ -13,6 +13,13 @@
 - Ao lançar uma versão, siga `docs/release.md`: a seção [Não lançado] vira a da versão e é a
   base do commit, da tag e da descrição da release.
 
+## Release
+
+- Rode `scripts/gerar-release.ps1` sempre com o PowerShell 7: `pwsh -File .\scripts\gerar-release.ps1 -Versao X.Y.Z`.
+  Com o Windows PowerShell antigo (`powershell.exe` 5.1) falta o `TarWriter`: o `.tar.gz` do
+  Linux sai com 0 bytes e o APK não é gerado, mas o script termina com código 0. Depois de
+  gerar, confira os tamanhos dos três arquivos em `dist\`.
+
 ## Modo online
 
 - Toda janela nova aberta pelo motor (`Sessao.EsperarDialogo`, na thread do motor) precisa de

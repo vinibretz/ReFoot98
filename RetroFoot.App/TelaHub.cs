@@ -436,7 +436,23 @@ public sealed class TelaHub : UserControl
             }
         }, true);
         var botoes = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, HorizontalAlignment = HorizontalAlignment.Right, Children = { depois, agora } };
-        var corpo = new StackPanel { Spacing = 14, Margin = new Thickness(18, 14), Width = 420, Children = { texto, estado, botoes } };
+        var corpo = new StackPanel { Spacing = 14, Margin = new Thickness(18, 14), Width = 420, Children = { texto } };
+        // o que mudou (as notas das releases), rolando se for longo
+        if (nova.Notas.Count > 0)
+        {
+            var notas = new StackPanel { Spacing = 4, Margin = new Thickness(0, 0, 10, 0) };
+            foreach (var n in nova.Notas)
+            {
+                var titulo = Ui.Txt(n.Titulo, 13, null, true);
+                if (notas.Children.Count > 0) titulo.Margin = new Thickness(0, 6, 0, 0);
+                notas.Children.Add(titulo);
+                foreach (var i in n.Itens)
+                    notas.Children.Add(Ui.Txt("•  " + i, 12.5));
+            }
+            corpo.Children.Add(new ScrollViewer { MaxHeight = 260, Content = notas, HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled });
+        }
+        corpo.Children.Add(estado);
+        corpo.Children.Add(botoes);
         sobre.Children.Clear();
         sobre.Children.Add(Ui.Veu(Ui.Janela(T("Nova versão do ReFoot98"), corpo, () => { if (!baixando) Fechar(); }, "info"), () => { if (!baixando) Fechar(); }));
         Dispatcher.UIThread.Post(() => agora.Focus(), DispatcherPriority.Loaded);

@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,12 +29,20 @@ namespace RetroFoot.App;
 // instalador do sistema (InstalarApk, ligado pelo projeto Android), que pede a confirmacao;
 // na 1a vez o Android pede tambem a permissao de instalar apps vindos do RetroFoot. O APK novo
 // tem a mesma assinatura e substitui este, com os dados (saves, configuracoes) intactos.
+// As notas: o que mudou (Novidades e Correcoes da descricao de cada release, ver
+// docs/release.md) em todas as versoes entre esta e a nova, a mais nova primeiro.
 // RETROFOOT_OTA_URL: outra lista de releases (o mesmo JSON do GitHub), para testes.
 public static class Atualizacao
 {
     const string Releases = "https://api.github.com/repos/vinibretz/ReFoot98/releases?per_page=20";
 
-    public sealed record Nova(Version Versao, string Tag, string Url, string Arquivo, long Tamanho);
+    public sealed record Nova(Version Versao, string Tag, string Url, string Arquivo, long Tamanho)
+    {
+        public IReadOnlyList<Nota> Notas { get; init; } = [];
+    }
+
+    // um bloco das notas: "0.2.7 · Novidades" e os itens
+    public sealed record Nota(string Titulo, IReadOnlyList<string> Itens);
 
     // a versao deste executavel (a do Sobre, sem o "+commit")
     public static Version Atual => Ler(TelaAcerca.Versao) ?? new Version(0, 0, 0);
@@ -40,7 +50,7 @@ public static class Atualizacao
     // "v0.1.1-beta" -> 0.1.1
     static Version? Ler(string s)
     {
-        var m = System.Text.RegularExpressions.Regex.Match(s, @"(\d+)\.(\d+)(?:\.(\d+))?");
+        var m = Regex.Match(s, @"(\d+)\.(\d+)(?:\.(\d+))?");
         if (!m.Success) return null;
         return new Version(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), m.Groups[3].Success ? int.Parse(m.Groups[3].Value) : 0);
     }
@@ -127,17 +137,24 @@ public static class Atualizacao
             var json = await c.GetStringAsync(url);
             if (JsonNode.Parse(json) is not JsonArray lista) return null;
             Nova? melhor = null;
+            var notas = new List<(Version V, List<Nota> N)>();
             foreach (var r in lista.OfType<JsonObject>())
             {
                 if (r["draft"]?.GetValue<bool>() == true) continue;
                 var tag = r["tag_name"]?.GetValue<string>() ?? "";
-                if (Ler(tag) is not { } v || v <= Atual || (melhor != null && v <= melhor.Versao)) continue;
+                if (Ler(tag) is not { } v || v <= Atual) continue;
+                notas.Add((v, Notas(v, r["body"]?.GetValue<string>())));
+                if (melhor != null && v <= melhor.Versao) continue;
                 var a = (r["assets"] as JsonArray)?.OfType<JsonObject>()
                     .FirstOrDefault(x => (x["name"]?.GetValue<string>() ?? "").EndsWith(Pacote!, StringComparison.OrdinalIgnoreCase));
                 if (a == null) continue;
                 melhor = new Nova(v, tag, a["browser_download_url"]!.GetValue<string>(), a["name"]!.GetValue<string>(), a["size"]?.GetValue<long>() ?? 0);
             }
-            return melhor;
+            // as notas das versoes ate a nova (inclusive), a mais nova primeiro
+            return melhor == null ? null : melhor with
+            {
+                Notas = notas.Where(x => x.V <= melhor.Versao).OrderByDescending(x => x.V).SelectMany(x => x.N).ToList(),
+            };
         }
         catch (Exception ex)
         {
@@ -145,6 +162,44 @@ public static class Atualizacao
             Console.WriteLine("atualizacao: " + ex.Message);
             return null;
         }
+    }
+
+    // as secoes Novidades e Correcoes da descricao de uma release (markdown), em texto simples:
+    // cada "- item" (com as linhas seguintes dele) vira um item; negrito, codigo e links somem
+    internal static List<Nota> Notas(Version v, string? corpo)
+    {
+        var res = new List<Nota>();
+        if (string.IsNullOrWhiteSpace(corpo)) return res;
+        string? secao = null;
+        List<string>? itens = null;
+        void Fechar()
+        {
+            if (secao != null && itens is { Count: > 0 }) res.Add(new Nota(v.ToString(3) + " · " + secao, itens));
+            secao = null; itens = null;
+        }
+        foreach (var bruta in corpo.Replace("\r", "").Split('\n'))
+        {
+            var l = bruta.Trim();
+            if (l.StartsWith('#'))
+            {
+                Fechar();
+                var t = l.TrimStart('#').Trim();
+                var chave = t.ToLowerInvariant().Replace("ç", "c").Replace("õ", "o");
+                if (chave is "novidades" or "correcoes") { secao = t; itens = []; }
+                continue;
+            }
+            if (itens == null || l.Length == 0) continue;
+            if (l.StartsWith("- ") || l.StartsWith("* ")) itens.Add(Limpar(l[2..]));
+            else if (itens.Count > 0) itens[^1] += " " + Limpar(l);
+        }
+        Fechar();
+        return res;
+    }
+
+    static string Limpar(string s)
+    {
+        s = Regex.Replace(s, @"\[([^\]]+)\]\([^)]*\)", "$1");
+        return s.Replace("**", "").Replace("__", "").Replace("`", "").Trim();
     }
 
     // o 1o passo: baixa e tira o executavel novo (RetroFoot.new); devolve o caminho dele, para

@@ -18,6 +18,30 @@ As versões até a 0.2.6 estão descritas nas [releases do GitHub](https://githu
 
 ### Interno
 
+## [0.2.8] - 2026-11-04
+
+### Novidades
+
+- Moderno: na aba Jogador, o botão Vender só aparece quando o jogador pode ser vendido (como
+  já acontecia com o Renovar contrato), e no menu do botão direito sobre o jogador o Vender
+  fica esmaecido. O motivo da recusa continua no menu Jogador > Vender.
+- Atualização: o aviso de versão nova mostra também o que mudou (Novidades e Correções), de
+  todas as versões entre a sua e a nova, no computador e no celular.
+
+### Correções
+
+- Moderno: na tela 4:3, a ficha do jogador (com a linha da Lei Bosman ou mais selos) não cobre
+  mais os botões Vender e Renovar contrato; as linhas da tabela encolhem para caber.
+- Moderno: na tela 4:3, a aba Finanças não fica mais embolada: o preço do ingresso e a previsão
+  do próximo jogo em casa ganharam um cartão compacto no rodapé, com o público e a renda
+  previstos inteiros, e o seletor de preço não encosta mais nas linhas do balanço.
+
+### Interno
+
+- `CLAUDE.md`: o script da release roda com o PowerShell 7 (`pwsh`).
+- `docs/release.md`: a descrição da release precisa manter `### Novidades` e `### Correções`,
+  que o aviso de atualização mostra ao jogador.
+
 ## [0.2.7] - 2026-11-03
 
 ### Novidades

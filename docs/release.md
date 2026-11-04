@@ -118,7 +118,9 @@ repositório do Juan.
 2. **Choose a tag**: `v0.2.4-beta`.
 3. **Release title**: `ReFoot98 0.2.4 beta` (o nome do jogo é ReFoot98, não RetroFoot).
 4. **Descrição**: use o modelo abaixo; em **Novidades** e **Correções**, copie os itens da
-   seção da versão no `CHANGELOG.md` (o Interno fica de fora).
+   seção da versão no `CHANGELOG.md` (o Interno fica de fora). Mantenha os títulos
+   `### Novidades` e `### Correções` e os itens em `- `: o aviso de atualização do jogo lê
+   essas duas seções da descrição e mostra os itens ao jogador (`Atualizacao.Notas`).
 5. Arraste os três arquivos de `dist\` para "Attach binaries" e espere terminar de enviar
    (o APK tem uns 140 MB).
 6. Marque **Set as a pre-release**.

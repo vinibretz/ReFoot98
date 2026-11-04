@@ -494,7 +494,8 @@ public sealed partial class TelaEquipa : UserControl
             MostrarEscolhido();
             _contexto = new Menu("", new List<Item>
             {
-                new(T("Vender"), "V", Vender, () => _sel != null),
+                // (esmaecido quando a venda e recusada; o motivo continua no menu Jogador > Vender)
+                new(T("Vender"), "V", Vender, () => _sel != null && MercadoJogo.ImpedimentoVenda(_e, _sel) == MercadoJogo.PodeVender),
                 new(T("Renovar contrato..."), "", Renovar, () => _sel != null && MercadoJogo.PodeMudarSalario(_sel)),
                 new("-"),
                 new(T("Ver ficha"), "", MostrarFicha),

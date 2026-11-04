@@ -161,7 +161,24 @@ public sealed partial class TelaInicio
                 agora.Habilitado = depois.Habilitado = true;
             }
         });
-        SobreporCelular(CUi.Caixa_(T("Nova versão do ReFoot98"), new StackPanel { Spacing = 10, Children = { texto, estado, navegador } }, depois, agora));
+        var corpo = new StackPanel { Spacing = 10, Children = { texto } };
+        // o que mudou (as notas das releases), rolando se for longo
+        if (nova.Notas.Count > 0)
+        {
+            var notas = new StackPanel { Spacing = 4 };
+            foreach (var n in nova.Notas)
+            {
+                var titulo = CUi.Txt(n.Titulo, 14, null, FontWeight.Bold, true);
+                if (notas.Children.Count > 0) titulo.Margin = new Thickness(0, 6, 0, 0);
+                notas.Children.Add(titulo);
+                foreach (var i in n.Itens)
+                    notas.Children.Add(CUi.Txt("•  " + i, 13.5, null, FontWeight.Normal, true));
+            }
+            corpo.Children.Add(new ScrollViewer { MaxHeight = 300, Content = notas, HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled });
+        }
+        corpo.Children.Add(estado);
+        corpo.Children.Add(navegador);
+        SobreporCelular(CUi.Caixa_(T("Nova versão do ReFoot98"), corpo, depois, agora));
     }
 
     void PaginaCelular(Control cabecalho, Control corpo, Control? rodape, Action? enter, Action? esc, Control? foco)
