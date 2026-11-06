@@ -14,6 +14,14 @@ As versões até a 0.2.6 estão descritas nas [releases do GitHub](https://githu
 
 ### Novidades
 
+### Correções
+
+### Interno
+
+## [0.2.9] - 2026-11-06
+
+### Novidades
+
 - Configurações: o que vinha junto com os cartões amarelos virou opção separada na versão
   Atual: Nota e risco de lesão, Preço do ingresso (com a torcida pesando no árbitro) e Campinho
   e árbitro. As opções da página Regras ficam agrupadas pelo que afetam (Partida, Jogadores,

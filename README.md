@@ -39,10 +39,10 @@ Roda no Linux, no Windows e (em desenvolvimento) no Android.
 
 | Sistema | |
 |---|---|
-| 🐧 Linux (x64) | [Baixar v0.2.8 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.8-beta/refoot98-0.2.8-beta-linux-x64.tar.gz) |
-| 🪟 Windows (x64) | [Baixar v0.2.8 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.8-beta/refoot98-0.2.8-beta-windows-x64.zip) |
+| 🐧 Linux (x64) | [Baixar v0.2.9 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.9-beta/refoot98-0.2.9-beta-linux-x64.tar.gz) |
+| 🪟 Windows (x64) | [Baixar v0.2.9 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.9-beta/refoot98-0.2.9-beta-windows-x64.zip) |
 | 🍎 macOS | em breve... |
-| 🤖 Android | [Baixar v0.2.8 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.8-beta/refoot98-0.2.8-beta-android.apk) |
+| 🤖 Android | [Baixar v0.2.9 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.9-beta/refoot98-0.2.9-beta-android.apk) |
 
 ### Como instalar
 
@@ -70,8 +70,9 @@ A partir da 0.1.1 o jogo avisa ao abrir quando sai uma versão nova e se atualiz
 - **Dois visuais:** o **Retrô**, com a cara das janelas do Windows 95, e o **Moderno**,
   com o tema verde e amarelo. A tela pode ser 4:3 ou 16:9.
 - **Duas versões de regras:** a **Retrô**, igual ao jogo clássico, e a **Atual**, com
-  5 substituições, banco maior, acréscimos, cartões amarelos, premiação ampliada e outras
-  novidades (Configurações > Regras).
+  5 substituições, banco maior, acréscimos, cartões amarelos, nota e risco de lesão, preço do
+  ingresso, premiação ampliada e outras novidades, cada uma ligada ou desligada à parte
+  (Configurações > Regras).
 - **Hub de ferramentas:** Editor de Equipas (com escudos), Editor de Save, Scout, Patches
   e Árbitros, tudo dentro do jogo.
 - **Dados abertos:** equipas em JSON (uma por arquivo), países e árbitros em TSV, logos em
