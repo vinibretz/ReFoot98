@@ -8,5 +8,6 @@ namespace RetroFoot.App;
 // ainda nao tem versao propria abrem as do Moderno, ajustadas a largura.
 public static class Celular
 {
-    public static bool Ativo { get; } = OperatingSystem.IsAndroid() || Environment.GetEnvironmentVariable("RETROFOOT_CELULAR") == "1";
+    // (internal set: os testes da interface, RetroFoot.App.Testes, alternam computador e celular)
+    public static bool Ativo { get; internal set; } = OperatingSystem.IsAndroid() || Environment.GetEnvironmentVariable("RETROFOOT_CELULAR") == "1";
 }

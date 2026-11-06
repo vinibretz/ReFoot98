@@ -23,7 +23,7 @@ Versão	Version
 Modificada	Current
 versão Retrô	Retro version
 versão Atual	Current version
-Nota e Risco de lesão, a tática 5-0-5, até 30 jogadores, desempate por vitórias e as regras que você escolher.	Rating and Injury risk, the 5-0-5 formation, up to 30 players, wins as tie-breaker and the rules you choose.
+A tática 5-0-5, até 30 jogadores, desempate por vitórias e as regras que você escolher.	The 5-0-5 formation, up to 30 players, wins as tie-breaker and the rules you choose.
 Equipas por divisão	Teams per division
 Equipas por divisão:	Teams per division:
 (só na versão Atual)	(Current version only)
@@ -124,3 +124,27 @@ Moderno: cartões, logos e cores à escolha	Modern: cards, logos and a choice of
 Verde: o verde e amarelo da marca	Green: the brand green and yellow
 Escuro: grafite e âmbar, cansa menos a vista	Dark: graphite and amber, easier on the eyes
 Claro: cinza-claro e verde, bom de dia	Light: light grey and green, good by day
+# --- opcoes separadas do launcher (grupos nas Regras) ---
+Partida	Match
+Estádio e dinheiro	Stadium and money
+Tela da equipa	Team screen
+A nota e o risco de lesão nas fichas e listas de jogadores e, no Procurar, os filtros e a ordem por eles e o botão Comprar.	Rating and injury risk on player cards and lists and, in Search, the filters and sorting by them and the Buy button.
+Você escolhe o preço nos jogos em casa (em Finanças); o público que ele atrai pesa no árbitro. Desligado: preço de tabela, como no Retrô.	You set the ticket price for home games (in Finances); the crowd it draws sways the referee. Off: list price, as in Retro.
+O campinho com a escalação e, no árbitro, a chance de pênalti para cada equipa.	The pitch with the line-up and, for the referee, each team's penalty chance.
+As adições só existem na versão Atual. A escolha fica guardada para quando você usar a Atual.	The additions only exist in the Current version. Your choice is kept for when you use it.
+Nota e risco de lesão	Rating and injury risk
+Campinho e árbitro	Pitch and referee
+nota e risco de lesão	rating and injury risk
+preço do ingresso	ticket price
+campinho e árbitro	pitch and referee
+O que acontece em campo.	What happens on the pitch.
+O que você vê de cada jogador.	What you see about each player.
+Bilheteira, patrocínio e prémios.	Gate receipts, sponsorship and prizes.
+Informações extras na preparação do jogo.	Extra information when preparing the match.
+Partida, jogadores, estádio	Match, players, stadium
+Na versão Retrô as regras são as de 1998: sem as adições da versão Atual.	In the Retro version the rules are those of 1998: none of the Current version's additions.
+Nota e risco	Rating and risk
+Ingresso	Ticket
+Escolhido	Chosen
+Preço de tabela	List price
+Campinho	Pitch

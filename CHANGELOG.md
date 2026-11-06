@@ -14,9 +14,63 @@ As versões até a 0.2.6 estão descritas nas [releases do GitHub](https://githu
 
 ### Novidades
 
+- Configurações: o que vinha junto com os cartões amarelos virou opção separada na versão
+  Atual: Nota e risco de lesão, Preço do ingresso (com a torcida pesando no árbitro) e Campinho
+  e árbitro. As opções da página Regras ficam agrupadas pelo que afetam (Partida, Jogadores,
+  Estádio e dinheiro, Tela da equipa), no Retrô, no Moderno e no celular. Quem já tinha as
+  Configurações gravadas continua com tudo como estava.
+- Moderno: na aba Escalação, clicar na formação no canto do campinho abre a lista de táticas
+  (com Automático e Melhores) para escalar dali mesmo.
+
 ### Correções
 
+- Moderno, tema claro: no campinho da Escalação, os nomes dos jogadores, a formação e
+  "Titulares · Reservas" voltam a aparecer (estavam com letra escura sobre a etiqueta escura).
+- Desligar os cartões amarelos não esconde mais a nota e o risco de lesão, o preço do ingresso,
+  o campinho e as chances do árbitro.
+- Preço do ingresso desligado (e na versão Retrô): o público e a bilheteria usam o preço de
+  tabela, mesmo que o save tenha um preço escolhido antes; ao religar, ele volta.
+- Preço do ingresso: um jogo salvo no meio da rodada e reaberto com a opção trocada refaz o
+  público do jogo em casa dessa rodada com o preço que vale agora.
+- Online: quem entra na sala joga com as opções da versão Atual do host (amarelos, nota e
+  risco, preço do ingresso, campinho), não com as do próprio aparelho; a previsão do público
+  não mostra mais um preço que o host não cobra.
+- Configurações: a ajuda de "Nota e risco de lesão" avisa que o botão Comprar do Procurar
+  também depende dela.
+- Moderno 16:9: no resumo das Configurações, "Campinho" (e, em inglês e espanhol, "Sobem e
+  descem") não fica mais espremido contra o valor.
+- Clássico 4:3: nas Finanças, a previsão do público do próximo jogo em casa não sai mais cortada
+  no fim (com um adversário de nome comprido, a ocupação sai da linha).
+- Moderno: na ficha do jogador da tela do time, "Valor de mercado" e "Comportamento" aparecem
+  inteiros (a letra encolhe um pouco em vez de cortar o rótulo).
+- Inglês: o título da coluna dos gols na temporada do elenco ("Seas.") não fica mais por cima
+  do de gols no Clássico 16:9.
+
 ### Interno
+
+- Testes do preço do ingresso desligado, religado e na Retrô (`IngressosTestes`) e da torcida
+  no árbitro sem os amarelos (`IngressosPublicoTestes`), do save reaberto com a opção trocada
+  (`IngressosTestes.SaveReaberto*`) e das opções do host no online (`OnlineOpcoesDoHostTestes`).
+- Testes sem o jogo original: os que leem saves reais rodam com os saves do próprio jogo e do
+  SoakUI (`saves-locais.txt`; `GUARDAR_SAVE=caminho` no SoakUI guarda o save do fim do soak).
+  `IngressosPublicoTestes` descarta os jogos do save em vez de jogá-los até o fim;
+  `ClassificacaoNosSaves` aceita o desempate por vitórias; `SemAcrescimosIgualAoOriginal` tem a
+  impressão de cada conjunto de saves. Os que precisam do jogo original (a pasta do jogo, o
+  oráculo, os saves do launcher) aparecem como ignorados, com o motivo, quando os arquivos não
+  existem (`Requisitos.cs`: `[FactComOriginal]`, `[FactComArquivo]`, `[TheoryDoOraculo]`): a
+  suíte fica verde e uma falha é sempre um problema de verdade.
+- `scripts/testar-tudo.ps1` (`docs/testes.md`, e a seção Testes do README): os testes do motor e da interface, três soaks
+  (as opções da versão Atual ligadas, desligadas e o online) e as capturas de cada tela em cada
+  visual, com uma página para passar o olho e o resumo em `dist\testes\`.
+- `RetroFoot.App.Testes`: os testes da interface. As telas de verdade numa janela sem tela, em
+  8 visuais, com os textos desenhados lidos de volta: nada sobreposto nem cortado (nos 4
+  idiomas), cada opção mostrando só o que é dela, os interruptores e a versão Retrô travada nas
+  Configurações, o `config.json`. A tela do time no celular abre nas Finanças ou no árbitro com
+  `RETROFOOT_PAGINA` (também no FichasPrint).
+- `ferramentas/FichasPrint`: capturas da tela do time (`RETROFOOT_PAGINA`), do Procurar e das
+  Configurações (`RETROFOOT_SECAO`), em 4:3 ou 16:9 (`RETROFOOT_FORMATO`), com cada opção ligada
+  ou desligada (`RETROFOOT_AMARELOS`, `_NOTA`, `_INGRESSO`, `_CAMPINHO`). SoakUI e SoakOnline:
+  `SEM_AMARELOS`, `SEM_NOTA`, `SEM_INGRESSO`, `SEM_CAMPINHO`.
 
 - `scripts/gerar-release.ps1`: libera o servidor de build antes de cada publish e tenta de novo
   uma vez se o publish ou o build do Android falhar (falta de memória do ILLink); o log do erro

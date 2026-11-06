@@ -69,7 +69,7 @@ sealed class TelaLeilao : DialogoMercado
         // (Moderno: a ficha e o painel no tema escuro; as mesmas posicoes do painel do lance)
         this.s = s; this.v = v; this.p = p;
         var moeda = Moeda.DoSave(s.S);
-        ficha = new Ficha(s, v, p, preco, salario, moeda, s.J.M.Regras.CartoesAmarelos);
+        ficha = new Ficha(s, v, p, preco, salario, moeda, s.J.M.Regras.NotaERisco, s.J.M.Regras.CartoesAmarelos);
         Por(ficha, 0, 0, CW, CH);
 
         // PanelHumanOffer (12, 252, 561x73), escondido ate um humano licitar
@@ -97,7 +97,7 @@ sealed class TelaLeilao : DialogoMercado
         if (Celular.Ativo)
         {
             // a mesma janela, desenhada pela folha: o texto do lance vai para a caixa daqui
-            cel = new LeilaoCelular(s, v, p, preco, salario, s.J.M.Regras.CartoesAmarelos);
+            cel = new LeilaoCelular(s, v, p, preco, salario, s.J.M.Regras.NotaERisco, s.J.M.Regras.CartoesAmarelos);
             cel.Mudou += t => oferta.Texto = t;
             cel.Licitou += () => { Ok(); if (painel.IsVisible) cel.Excedeu(); };
             Content = cel;
@@ -386,12 +386,12 @@ sealed class TelaLeilao : DialogoMercado
         readonly SEquipa v;
         readonly SJogador p;
         readonly string basePreco, salario, valorMercado;
-        readonly bool launcher;
+        readonly bool nota, amarelos;   // as opcoes Nota e risco de lesao e Cartoes amarelos (Regras)
         readonly IBrush letraV, fundoV;
 
-        public Ficha(Sessao s, SEquipa v, SJogador p, int? preco, int sal, Moeda m, bool launcher)
+        public Ficha(Sessao s, SEquipa v, SJogador p, int? preco, int sal, Moeda m, bool nota, bool amarelos)
         {
-            this.v = v; this.p = p; this.launcher = launcher;
+            this.v = v; this.p = p; this.nota = nota; this.amarelos = amarelos;
             basePreco = preco is int b ? FormatoDinheiro.Valor(m, b) : "";
             salario = FormatoDinheiro.Valor(m, sal);
             valorMercado = T.TextoValorMercado(s, p);
@@ -456,7 +456,7 @@ sealed class TelaLeilao : DialogoMercado
             using (dc.PushTransform(Matrix.CreateTranslation(328, 72)))
             {
                 double gy;
-                if (launcher)
+                if (nota)
                 {
                     E(dc, Idioma.T("Comportamento"), 0, 8, a11); E(dc, T.Comportamento(p), 104, 8, a11);
                     E(dc, Idioma.T("Nota"), 0, 23, a11); E(dc, p.Nota.ToString(), 104, 23, a11);
@@ -479,7 +479,7 @@ sealed class TelaLeilao : DialogoMercado
                 dc.FillRectangle(Amarelo, new Rect(6, gy, tit.WidthIncludingTrailingWhitespace + 4, 14));
                 dc.DrawText(tit, new Point(8, gy));
                 // (os gols com a media por jogo, do RetroFoot)
-                (string, string, double)[] linhas = launcher
+                (string, string, double)[] linhas = amarelos
                     ? new[]
                     {
                         (Idioma.T("Jogos"), T.Hist(p, Mem.HistJogos).ToString(), 16.0), (Idioma.T("Gols"), T.GolsComMedia(p, false), 32),
@@ -581,13 +581,14 @@ sealed class TelaLeilao : DialogoMercado
             var cp = new Rect(330, 76, 238, 172);
             MM.Cartao_(dc, cp, MM.Barra, 10, MM.Linha);
             var itens = new List<(string, string)> { (Idioma.T("Comportamento"), T.Comportamento(p)) };
-            if (launcher) { itens.Add((Idioma.T("Nota"), p.Nota.ToString())); itens.Add((Idioma.T("Risco de lesão"), p.Lesao.ToString())); }
+            if (nota) { itens.Add((Idioma.T("Nota"), p.Nota.ToString())); itens.Add((Idioma.T("Risco de lesão"), p.Lesao.ToString())); }
             itens.Add((Idioma.T("Gols na Temporada"), T.GolsComMedia(p, true)));
             var hist = new List<(string, string)> { (Idioma.T("Jogos"), T.Hist(p, Mem.HistJogos).ToString()), (Idioma.T("Gols"), T.GolsComMedia(p, false)) };
-            if (launcher) hist.Add((Idioma.T("Cartões amarelos"), T.Amarelos(p).ToString()));
+            if (amarelos) hist.Add((Idioma.T("Cartões amarelos"), T.Amarelos(p).ToString()));
             hist.Add((Idioma.T("Cartões vermelhos"), T.Hist(p, Mem.HistVermelhos).ToString()));
             hist.Add((Idioma.T("Lesões"), T.Hist(p, Mem.HistLesoes).ToString()));
-            double passo = launcher ? 14.5 : 16, y = cp.Y + 8;
+            // (com as 9 linhas do launcher o passo aperta; ate 7, o de sempre)
+            double passo = itens.Count + hist.Count >= 8 ? 14.5 : 16, y = cp.Y + 8;
             foreach (var (r, val) in itens)
             {
                 T_(dc, r, 342, y, 11.5, MM.Fraco, FontWeight.Normal, 124, linhas: 1);

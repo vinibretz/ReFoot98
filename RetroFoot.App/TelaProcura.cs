@@ -16,7 +16,7 @@ namespace RetroFoot.App;
 // os jogadores da minha equipa") e a lista do que foi achado. "Equipa..." (ou o duplo
 // clique) fecha a janela e abre o plantel da equipa do jogador.
 //
-// Com as regras do launcher (Regras.CartoesAmarelos), o que as EXEs do launcher acrescentam:
+// Com a opcao Nota e risco de lesao (Regras.NotaERisco), o que as EXEs do launcher acrescentam:
 // os filtros de Comportamento, Nota e Risco de lesao (tools/divisoes/filtros.py), as colunas
 // Nota e RL na lista, com a janela 50 pontos mais larga (procura.py) e o botao Comprar
 // (comprar.py: compra direta do escolhido, sem confirmar; a linha fica sem preco).
@@ -89,7 +89,7 @@ public static partial class TelaProcura
     {
         readonly SEquipa _e;
         readonly Action<ushort> _escolher;
-        readonly bool _launcher;
+        readonly bool _notaRisco;
         // o deslocamento do lado direito (procura.py: a janela 50 pontos mais larga)
         readonly double _mais;
         readonly List<(string Cod, string Nome)> _paises;
@@ -101,11 +101,11 @@ public static partial class TelaProcura
         readonly bool _porFaixas = OpcoesDoJogo.ForcaPorFaixasGravada;
 
         public Form(Sessao s, SEquipa e, Action<ushort> escolher)
-            : base(s, 632 + (s.J.M.Regras.CartoesAmarelos ? 50 : 0), 453)
+            : base(s, 632 + (s.J.M.Regras.NotaERisco ? 50 : 0), 453)
         {
             _e = e;
             _escolher = escolher;
-            _launcher = s.J.M.Regras.CartoesAmarelos;
+            _notaRisco = s.J.M.Regras.NotaERisco;
             // o dinheiro em caixa (desenhado aqui) muda com uma compra feita no plantel aberto
             // pelo "Time...": enquanto a janela esta aberta, ela se refaz
             void Mudou(SEquipa x) { if (x == _e) Redesenhar(); }
@@ -113,7 +113,7 @@ public static partial class TelaProcura
             // refaz pelo Redesenhar)
             TelaDinheiro.Mudou += Mudou;
             Fechou += () => TelaDinheiro.Mudou -= Mudou;
-            _mais = _launcher ? 50 : 0;
+            _mais = _notaRisco ? 50 : 0;
             Titulo = T("Lista de Jogadores");
             FundoCliente = Amarelo;
             // a caixa e Sorted: os paises pelo nome
@@ -168,7 +168,7 @@ public static partial class TelaProcura
             }));
             Comps.Add(Caixa(new Rect(108, 148, 201, 24), () => _precos, () => _preco, i => _preco = i));
             Comps.Add(Pequeno(new Rect(316, 148, 25, 25), "clearPriceBtn", () => { _preco = -1; Alterado(); }));
-            if (_launcher)
+            if (_notaRisco)
             {
                 // filtros.py: na coluna da direita, nas linhas do Nome, da Forca e da Posicao; o X
                 // de cada um (fora do launcher, como os da esquerda) volta ao "Qualquer"
@@ -207,11 +207,11 @@ public static partial class TelaProcura
             Comps.Add(_procurarBtn);
             _equipaBtn = new Botao
             {
-                R = new Rect(bx, _launcher ? 252 : 284, 64, 64), Texto = T("Time..."), Glifo = "Mercado/TcheckPlayerDlg.teamBtn.png",
+                R = new Rect(bx, _notaRisco ? 252 : 284, 64, 64), Texto = T("Time..."), Glifo = "Mercado/TcheckPlayerDlg.teamBtn.png",
                 Negrito = true, Habilitado = () => Escolhido() != null, Clique = Equipa,
             };
             Comps.Add(_equipaBtn);
-            if (_launcher)
+            if (_notaRisco)
                 // comprar.py: o icone do Comprar da janela da equipa; ligado so com o jogador compravel
                 Comps.Add(new Botao
                 {
@@ -220,7 +220,7 @@ public static partial class TelaProcura
                 });
             Comps.Add(new Botao
             {
-                R = new Rect(bx, _launcher ? 388 : 359, 64, 64), Texto = T("Fechar"), Glifo = "Mercado/TcheckPlayerDlg.OKBtn.png",
+                R = new Rect(bx, _notaRisco ? 388 : 359, 64, 64), Texto = T("Fechar"), Glifo = "Mercado/TcheckPlayerDlg.OKBtn.png",
                 Negrito = true, Cancelar = true, Clique = () => { _treinador = _e.Treinador; Fechar(); },
             });
 
@@ -259,7 +259,7 @@ public static partial class TelaProcura
             Escolher = i => { TrocarOrdem(i); Redesenhar(); },
         };
 
-        string[] Ordens => OrdensChaves.Take(_launcher ? OrdensChaves.Length : OrdensChaves.Length - 2).Select(x => T(x)).ToArray();
+        string[] Ordens => OrdensChaves.Take(_notaRisco ? OrdensChaves.Length : OrdensChaves.Length - 2).Select(x => T(x)).ToArray();
 
         void TrocarOrdem(int i)
         {
@@ -395,7 +395,7 @@ public static partial class TelaProcura
                 else if (v < _faixasPreco[7][0]) return false;
             }
             if (_naoMinha && eq.ID == _e.ID) return false;
-            if (_launcher)
+            if (_notaRisco)
             {
                 if (_comp > 0 && p.Comportamento != _comp - 1) return false;
                 if (_nota > 0 && (short)p.Nota + _nota < 11) return false;
@@ -442,7 +442,7 @@ public static partial class TelaProcura
             // o TEdit (a TextBox fica por cima)
             dc.FillRectangle(Branco, new Rect(108, 8, 200, 24));
             Afundada(dc, new Rect(108, 8, 200, 24));
-            if (_launcher)
+            if (_notaRisco)
             {
                 Escreve(dc, T("Comportamento"), 385, 12, 13, Preto);
                 Escreve(dc, T("Nota"), 385, 44, 13, Preto);
@@ -485,7 +485,7 @@ public static partial class TelaProcura
             int v = S.Mercado.PrecoDeVenda(eq, _e, p, MercadoJogo.ForcaMedia(eq));
             c.Col(80, v > 0 ? Dinheiro(v) : "", true);
             c.Col(20, ComportamentoCurto(p));
-            if (_launcher)
+            if (_notaRisco)
             {
                 // procura.asm: Canvas.TextOut(Left + x, Top, IntToStr(campo))
                 Escreve(dc, p.Nota.ToString(), r.X + 466, r.Y, 11, cor);

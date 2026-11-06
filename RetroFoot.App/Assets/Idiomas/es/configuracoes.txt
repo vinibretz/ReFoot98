@@ -19,7 +19,7 @@ Versão do jogo	Versión del juego
 Versão	Versión
 versão Retrô	versión Retro
 versão Atual	versión Actual
-Nota e Risco de lesão, a tática 5-0-5, até 30 jogadores, desempate por vitórias e as regras que você escolher.	Nota y Riesgo de lesión, la táctica 5-0-5, hasta 30 jugadores, desempate por victorias y las reglas que elijas.
+A tática 5-0-5, até 30 jogadores, desempate por vitórias e as regras que você escolher.	La táctica 5-0-5, hasta 30 jugadores, desempate por victorias y las reglas que elijas.
 Equipas por divisão	Equipos por división
 Equipas por divisão:	Equipos por división:
 (só na versão Atual)	(solo en la versión Actual)
@@ -118,3 +118,27 @@ Moderno: cartões, logos e cores à escolha	Moderno: tarjetas, escudos y colores
 Verde: o verde e amarelo da marca	Verde: el verde y amarillo de la marca
 Escuro: grafite e âmbar, cansa menos a vista	Oscuro: grafito y ámbar, cansa menos la vista
 Claro: cinza-claro e verde, bom de dia	Claro: gris claro y verde, bueno de día
+# --- opcoes separadas do launcher (grupos nas Regras) ---
+Partida	Partido
+Estádio e dinheiro	Estadio y dinero
+Tela da equipa	Pantalla del equipo
+A nota e o risco de lesão nas fichas e listas de jogadores e, no Procurar, os filtros e a ordem por eles e o botão Comprar.	La nota y el riesgo de lesión en las fichas y listas de jugadores y, en Buscar, los filtros y el orden por ellos y el botón Comprar.
+Você escolhe o preço nos jogos em casa (em Finanças); o público que ele atrai pesa no árbitro. Desligado: preço de tabela, como no Retrô.	Eliges el precio de la entrada en los partidos en casa (en Finanzas); el público que atrae influye en el árbitro. Desactivado: precio de tabla, como en el Retro.
+O campinho com a escalação e, no árbitro, a chance de pênalti para cada equipa.	El campito con la alineación y, en el árbitro, la probabilidad de penalti para cada equipo.
+As adições só existem na versão Atual. A escolha fica guardada para quando você usar a Atual.	Los añadidos solo existen en la versión Actual. La elección queda guardada para cuando la uses.
+Nota e risco de lesão	Nota y riesgo de lesión
+Campinho e árbitro	Campito y árbitro
+nota e risco de lesão	nota y riesgo de lesión
+preço do ingresso	precio de la entrada
+campinho e árbitro	campito y árbitro
+O que acontece em campo.	Lo que pasa en el campo.
+O que você vê de cada jogador.	Lo que ves de cada jugador.
+Bilheteira, patrocínio e prémios.	Taquilla, patrocinio y premios.
+Informações extras na preparação do jogo.	Información extra al preparar el partido.
+Partida, jogadores, estádio	Partido, jugadores, estadio
+Na versão Retrô as regras são as de 1998: sem as adições da versão Atual.	En la versión Retro las reglas son las de 1998: sin los añadidos de la versión Actual.
+Nota e risco	Nota y riesgo
+Ingresso	Entrada
+Escolhido	Elegido
+Preço de tabela	Precio de tabla
+Campinho	Campito

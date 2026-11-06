@@ -40,7 +40,8 @@ namespace RetroFoot.App;
 // (a Sessao grava). As escalacoes automaticas usam o Random do jogo (sessao.J.R), como o
 // original. O que as EXEs do launcher acrescentam (amarelos, Nota e Risco de lesao,
 // campinho, % do preco dos ingressos, chances na Ajuda do Arbitro, 5-0-5) so aparece com
-// as regras do launcher (Regras.CartoesAmarelos).
+// as regras do launcher, cada um com a sua opcao (Regras.CartoesAmarelos, NotaERisco,
+// PrecoIngresso, CampinhoArbitro; o 5-0-5 com a versao Atual).
 public sealed partial class TelaEquipa : UserControl
 {
     // ESBOCO (contrato): dispara Terminou(false) em "Jogar" e Terminou(true) em RetroFoot >
@@ -248,7 +249,8 @@ public sealed partial class TelaEquipa : UserControl
         readonly SEquipa _e;
         readonly SJogo? _jogo;
         readonly SEquipa? _adv;
-        readonly bool _launcher, _505;
+        // o que os EXEs do launcher acrescentam, cada um com a sua opcao (Regras)
+        readonly bool _amarelos, _nota, _ingresso, _campinho, _505;
         readonly bool _patrocinio;     // Opcoes.Patrocinios: a aba Patrocinio
         readonly IBrush _letra, _fundo, _advLetra, _advFundo;
         readonly List<Menu> _menus;
@@ -313,7 +315,7 @@ public sealed partial class TelaEquipa : UserControl
             ClipToBounds = true;
             Focusable = true;
             var rg = s.J.M.Regras;
-            _launcher = rg.CartoesAmarelos;
+            _amarelos = rg.CartoesAmarelos; _nota = rg.NotaERisco; _ingresso = rg.PrecoIngresso; _campinho = rg.CampinhoArbitro;
             _505 = rg.Tatica505;
             _patrocinio = s.J.Op.Patrocinios;
             if (jogo != null) _adv = s.Equipa(jogo.Casa == e.ID ? jogo.Fora : jogo.Casa);
@@ -321,6 +323,17 @@ public sealed partial class TelaEquipa : UserControl
             (_advLetra, _advFundo) = Cores(_adv);
             _menus = MontarMenus();
             ConferirEscalacao();
+            // RETROFOOT_PAGINA (capturas de tela, ferramentas/FichasPrint): jogador (com o
+            // jogador mais pendurado ou o de nota mais alta), financas ou arbitro
+            switch (Environment.GetEnvironmentVariable("RETROFOOT_PAGINA"))
+            {
+                case "jogador":
+                    _pagina = PgJogador;
+                    _sel = _e.Jogadores.OrderByDescending(j => Amarelos(j)).ThenByDescending(j => j.Nota).FirstOrDefault();
+                    break;
+                case "financas": _pagina = PgFinancas; break;
+                case "arbitro": _arbitro = true; break;
+            }
         }
 
         // o foco do teclado (F1-F12, A, M, T, espaco...) fica na tela
@@ -500,6 +513,17 @@ public sealed partial class TelaEquipa : UserControl
                 new("-"),
                 new(T("Ver ficha"), "", MostrarFicha),
             });
+            _contextoPos = p;
+            _menuAberto = Contexto;
+            InvalidateVisual();
+        }
+
+        // (Moderno) o chip da formacao no campinho: o menu Escalar (as taticas, Automatico e
+        // Melhores) aberto como o do botao direito, logo abaixo do chip
+        void AbrirTaticas(Point p)
+        {
+            _itemSobre = -1;
+            _contexto = new Menu("", _menus[1].Itens);
             _contextoPos = p;
             _menuAberto = Contexto;
             InvalidateVisual();
@@ -1102,7 +1126,7 @@ public sealed partial class TelaEquipa : UserControl
             Direita(dc, forca, x + 20, y, t, cor, true);
             x += 30;
             if (p.Suspensao != 0) Escreve(dc, " S", x, y, t, cor, true);
-            else if (_launcher && Amarelos(p) > 0) Escreve(dc, " A", x, y, t, cor, true);
+            else if (_amarelos && Amarelos(p) > 0) Escreve(dc, " A", x, y, t, cor, true);
             x += 20;
             if (p.JogosLesao != 0) Escreve(dc, " L", x, y, t, cor, true);
             x += 20;
@@ -1119,7 +1143,7 @@ public sealed partial class TelaEquipa : UserControl
             Direita(dc, Hist(p, Mem.HistJogos).ToString(), x += PassoLargo, y, t, cor, true);
             Direita(dc, Hist(p, Mem.HistGolos).ToString(), x += PassoLargo, y, t, cor, true);
             Direita(dc, Mem.Golos14(p).ToString(), x += PassoLargo, y, t, cor, true);
-            if (_launcher) Direita(dc, p.Nota.ToString(), x += PassoLargo, y, t, cor, true);
+            if (_nota) Direita(dc, p.Nota.ToString(), x += PassoLargo, y, t, cor, true);
         }
 
         const double ColunasLargas = 334, PassoLargo = 31;   // a Nota longe da barra de rolagem
@@ -1142,7 +1166,7 @@ public sealed partial class TelaEquipa : UserControl
             Direita(dc, S("Jogos") + T("Jogos"), x += PassoLargo, y, t, cor);
             Direita(dc, S("Gols") + T("Gols"), x += PassoLargo, y, t, cor);
             Direita(dc, S("Temp.") + T("Temp."), x += PassoLargo, y, t, cor);
-            if (_launcher) Direita(dc, S("Nota") + T("Nota"), x += PassoLargo, y, t, cor);
+            if (_nota) Direita(dc, S("Nota") + T("Nota"), x += PassoLargo, y, t, cor);
         }
 
         // 16:9 classico: a coluna sob o x (relativo a RTitulos) para ordenar
@@ -1152,7 +1176,7 @@ public sealed partial class TelaEquipa : UserControl
             if (x < 182) return "Força";
             if (x < 262) return "País";
             if (x < ColunasLargas) return "Salário";
-            string[] c = _launcher ? new[] { "Jogos", "Gols", "Temp.", "Nota" } : new[] { "Jogos", "Gols", "Temp." };
+            string[] c = _nota ? new[] { "Jogos", "Gols", "Temp.", "Nota" } : new[] { "Jogos", "Gols", "Temp." };
             return c[Math.Clamp((int)((x - ColunasLargas) / PassoLargo), 0, c.Length - 1)];
         }
 
@@ -1390,7 +1414,7 @@ public sealed partial class TelaEquipa : UserControl
                 const double t = 11;
                 string comp = p.Comportamento < Comportamentos.Length ? T(Comportamentos[p.Comportamento]) : p.Comportamento.ToString();
                 double gy;
-                if (_launcher)
+                if (_nota)
                 {
                     Escreve(dc, T("Comportamento"), 0, 0, t, _letra); Escreve(dc, comp, 104, 0, t, _letra);
                     Escreve(dc, T("Nota"), 0, 15, t, _letra); Escreve(dc, p.Nota.ToString(), 104, 15, t, _letra);
@@ -1414,7 +1438,7 @@ public sealed partial class TelaEquipa : UserControl
                 Escreve(dc, T("Histórico"), 8, gy, t, _letra);
                 // (os gols com a media por jogo entre parenteses, do RetroFoot)
                 var linhas = new List<(string, string, double)>();
-                if (_launcher)
+                if (_amarelos)
                 {
                     linhas.Add(("Jogos", Hist(p, Mem.HistJogos).ToString(), 16));
                     linhas.Add(("Gols", TextosMercado.GolsComMedia(p, false), 32));
@@ -1436,10 +1460,10 @@ public sealed partial class TelaEquipa : UserControl
                 }
             }
             // suspenso / lesionado (4:2251...); no launcher, sem suspensao, os amarelos
-            double ys = _launcher ? 252 : 248, yl = _launcher ? 266 : 264;
+            double ys = _nota ? 252 : 248, yl = _nota ? 266 : 264;
             string sus = "";
             if (p.Suspensao > 0) sus = p.Suspensao == 1 ? T("Suspenso por 1 jogo") : T("Suspenso por {0} jogos", p.Suspensao);
-            else if (_launcher && Amarelos(p) > 0) sus = Amarelos(p) == 1 ? T("1 amarelo acumulado") : T("{0} amarelos acumulados", Amarelos(p));
+            else if (_amarelos && Amarelos(p) > 0) sus = Amarelos(p) == 1 ? T("1 amarelo acumulado") : T("{0} amarelos acumulados", Amarelos(p));
             if (sus != "") Escreve(dc, sus, 8, ys, 11, _letra, true, italico: true);
             if (p.JogosLesao > 0)
                 Escreve(dc, p.JogosLesao == 1 ? T("Lesionado por 1 jogo") : T("Lesionado por {0} jogos", p.JogosLesao), 8, yl, 11, _letra, true, italico: true);
@@ -1476,7 +1500,7 @@ public sealed partial class TelaEquipa : UserControl
                 Direita(dc, v, 257, y, 13, _letra, neg);
             }
             // (no launcher os totais sobem para caber a previsao do ingresso antes do preco)
-            double yt = _launcher ? 237 : 251, yj = _launcher ? 251 : 264, yc = _launcher ? 265 : 288;
+            double yt = _ingresso ? 237 : 251, yj = _ingresso ? 251 : 264, yc = _ingresso ? 265 : 288;
             Escreve(dc, T("Total de salários"), 16, yt, 11, _letra);
             Direita(dc, Dinheiro(MercadoJogo.FolhaSalarial(_e)), 257, yt - 3, 13, _letra, true);
             Escreve(dc, T("Juros do empréstimo"), 16, yj, 11, _letra);
@@ -1487,7 +1511,7 @@ public sealed partial class TelaEquipa : UserControl
             {
                 Escreve(dc, T("Preço do ingresso"), 16, 312, 11, _letra);
                 long preco = Ext.Bytes(_jogo.B36.AsSpan(0, 10)).Round();
-                if (!_launcher) Escreve(dc, Dinheiro(preco), 112, 312, 13, _letra);
+                if (!_ingresso) Escreve(dc, Dinheiro(preco), 112, 312, 13, _letra);
                 else
                 {
                     // launcher (ingressos.py): o preco direto (de 50% a 300% da tabela, as setas
@@ -1496,6 +1520,8 @@ public sealed partial class TelaEquipa : UserControl
                     int razao = Ingressos.Razao(_e);
                     CampoNumero(dc, RIngressos, Dinheiro(Ingressos.PrecoCom(Ext.Bytes(_jogo.B36.AsSpan(0, 10)), razao)));
                     var (l1, l2) = LinhasPrevisao(razao);
+                    // (um nome comprido com o publico em faixa nao cabe nos 241: sem a ocupacao)
+                    if (Largura(l1, 11) > 241) (l1, _) = LinhasPrevisao(razao, ocupacao: false);
                     using (dc.PushClip(new Rect(16, 280, 241, 26)))
                     {
                         Escreve(dc, l1, 16, 280, 11, _letra);
@@ -1507,7 +1533,7 @@ public sealed partial class TelaEquipa : UserControl
 
         // a previsao do proximo jogo em casa em duas linhas curtas (o adversario, o publico e a
         // ocupacao; a renda)
-        (string, string) LinhasPrevisao(int razao)
+        (string, string) LinhasPrevisao(int razao, bool ocupacao = true)
         {
             var pv = IngressosPrevisao.ProximoEmCasa(_e, _jogo, razao, id => _s.Equipa(id));
             if (pv == null) return (T("Sem jogo em casa pela frente nesta temporada."), "");
@@ -1515,6 +1541,7 @@ public sealed partial class TelaEquipa : UserControl
             string N(int v) => v.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
             int Oc(int v) => pv.Capacidade > 0 ? (int)Math.Round(100.0 * v / pv.Capacidade) : 0;
             string pub = pv.Minimo == pv.Maximo ? $"{N(pv.Minimo)} ({Oc(pv.Minimo)}%)" : $"{N(pv.Minimo)}–{N(pv.Maximo)} ({Oc(pv.Minimo)}–{Oc(pv.Maximo)}%)";
+            if (!ocupacao) pub = pv.Minimo == pv.Maximo ? N(pv.Minimo) : $"{N(pv.Minimo)}–{N(pv.Maximo)}";
             string renda = pv.RendaMinima == pv.RendaMaxima ? Dinheiro(pv.RendaMinima) : Dinheiro(pv.RendaMinima) + "–" + Dinheiro(pv.RendaMaxima);
             return ((pv.Definido ? T("Este jogo") : T("Próx. em casa")) + $" ({adv}): " + pub,
                 T("Renda prevista") + ": " + renda);
@@ -1571,7 +1598,7 @@ public sealed partial class TelaEquipa : UserControl
         // ------------------------------------------------------------ pagina Escalacao
         void PaginaEscalacao(DrawingContext dc)
         {
-            if (_launcher) Campinho(dc, new Rect(8, 8, 256, 166));
+            if (_campinho) Campinho(dc, new Rect(8, 8, 256, 166));
             BotaoImagem(dc, RJogar, "jogar", T("Jogar"), JogarHabilitado(), 10);
         }
 
@@ -1636,7 +1663,7 @@ public sealed partial class TelaEquipa : UserControl
         const double ArbCliL = 412, ArbCliA = 397, ArbCliCurta = 212;
         static readonly Rect RArbFechar = new(337, 148, 64, 64);
 
-        bool ArbitroCompleto => _launcher || Registo.AddIn(0x23);
+        bool ArbitroCompleto => _campinho || Registo.AddIn(0x23);
 
         Rect JanelaArbitro()
         {
@@ -1691,13 +1718,13 @@ public sealed partial class TelaEquipa : UserControl
             var r = new Rect(34, y, 343, 24);
             dc.FillRectangle(fundo, r);
             string t = Texto(eq.NomeCurto);
-            if (_launcher)
+            if (_campinho)
             {
                 int k = Math.Min(v, 15);
                 t += T("   Pênalti: {0}%   Cartões: -{1}%", penalti[k], 2 * (k + 1));
             }
             // MS Sans Serif no DFM; o do app nao tem o "ê" e o "õ" do texto do launcher
-            using (dc.PushClip(r)) Escreve(dc, t, r.X, r.Y, _launcher ? 13 : 16, letra);
+            using (dc.PushClip(r)) Escreve(dc, t, r.X, r.Y, _campinho ? 13 : 16, letra);
             Medidor(dc, new Rect(34, y + 32, 343, 24), v, 15, Pincel(0, 0, 255), 2);
         }
 
@@ -1914,9 +1941,9 @@ public sealed partial class TelaEquipa : UserControl
                 case PgJogo when _jogo != null && _jogo.Casa != 0 && _jogo.Fora != 0 && RArbitro.Contains(pn):
                     _arbitro = true; InvalidateVisual(); break;
                 // o juro do emprestimo e o rotulo dele (4:3e45, 4:3e27), com o add-in 0x13
-                case PgFinancas when Registo.AddIn(0x13) && new Rect(16, _launcher ? 251 : 264, 241, 16).Contains(pn):
+                case PgFinancas when Registo.AddIn(0x13) && new Rect(16, _ingresso ? 251 : 264, 241, 16).Contains(pn):
                     TelaEmprestimo.Abrir(_s, _e, Voltar); break;
-                case PgFinancas when _launcher && RIngressos.Contains(pn):
+                case PgFinancas when _ingresso && RIngressos.Contains(pn):
                     // as setas do TSpinButton (o clique no texto nao muda nada)
                     if (pn.X >= RIngressos.Right - 17) MudarIngressos(pn.Y < RIngressos.Y + RIngressos.Height / 2 ? 1 : -1);
                     break;
@@ -1982,7 +2009,7 @@ public sealed partial class TelaEquipa : UserControl
         {
             if (_arbitro) return;
             var pw = Cliente(e.GetPosition(this));
-            if (_pagina == PgFinancas && _launcher && e.Delta.Y != 0 &&
+            if (_pagina == PgFinancas && _ingresso && e.Delta.Y != 0 &&
                 (_moderno ? _mIngressos.Contains(pw) : RIngressos.Contains(new Point(pw.X - PNotebook.X, pw.Y - PNotebook.Y))))
             {
                 MudarIngressos(e.Delta.Y > 0 ? 1 : -1);

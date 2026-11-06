@@ -40,7 +40,7 @@ public class NovoJogoTestes(ITestOutputHelper saida)
     static readonly JsonSerializerOptions Json = new() { IncludeFields = true };
     static string J(object? o) => JsonSerializer.Serialize(o, Json);
 
-    [Fact]
+    [FactComOriginal]
     public void GravarELer()
     {
         var (e, _) = JogoNovo();
@@ -54,7 +54,7 @@ public class NovoJogoTestes(ITestOutputHelper saida)
         Assert.Equal("Teste e Outro\r10/11/2026 09:41", txt);
     }
 
-    [Fact]
+    [FactComOriginal]
     public void Estrutura()
     {
         var (e, sel) = JogoNovo();

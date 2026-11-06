@@ -6,7 +6,7 @@ Salvar	Gravar
 # secoes
 Registro	Registo
 # Jogo
-Nota e Risco de lesão, a tática 5-0-5, até 30 jogadores, desempate por vitórias e as regras que você escolher.	Nota e Risco de lesão, a táctica 5-0-5, até 30 jogadores, desempate por vitórias e as regras que escolher.
+A tática 5-0-5, até 30 jogadores, desempate por vitórias e as regras que você escolher.	A táctica 5-0-5, até 30 jogadores, desempate por vitórias e as regras que escolher.
 8 equipas como no Retrô: 14 rodadas; o jogo novo precisa de pelo menos {0} equipas nos países escolhidos.	8 equipas como no Retrô: 14 jornadas; o jogo novo precisa de pelo menos {0} equipas nos países escolhidos.
 {0} equipas: {1} rodadas; o jogo novo precisa de pelo menos {2} equipas nos países escolhidos	{0} equipas: {1} jornadas; o jogo novo precisa de pelo menos {2} equipas nos países escolhidos
 {0} equipas por divisão ({1} rodadas)	{0} equipas por divisão ({1} jornadas)
@@ -27,3 +27,11 @@ Como o Retrô: as telas no formato de 800x600.	Como o original: os ecrãs no for
 Janela larga: a jornada com as divisões lado a lado e as telas aproveitando a largura.	Janela larga: a jornada com as divisões lado a lado e os ecrãs a aproveitar a largura.
 16:9: janela larga, as telas aproveitam a largura	16:9: janela larga, os ecrãs aproveitam a largura
 # Idioma
+# --- opcoes separadas do launcher (grupos nas Regras) ---
+Você escolhe o preço nos jogos em casa (em Finanças); o público que ele atrai pesa no árbitro. Desligado: preço de tabela, como no Retrô.	Escolhe o preço dos bilhetes nos jogos em casa (em Finanças); o público que atrai pesa no árbitro. Desligado: preço de tabela, como no Retrô.
+O campinho com a escalação e, no árbitro, a chance de pênalti para cada equipa.	O campinho com a escalação e, no árbitro, a probabilidade de penálti para cada equipa.
+As adições só existem na versão Atual. A escolha fica guardada para quando você usar a Atual.	As adições só existem na versão Actual. A escolha fica guardada para quando usar a Actual.
+preço do ingresso	preço dos bilhetes
+O que você vê de cada jogador.	O que vê de cada jogador.
+Ingresso	Bilhetes
+Tela da equipa	Ecrã da equipa

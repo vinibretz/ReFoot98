@@ -72,8 +72,15 @@ public sealed class HostOnline : IDisposable
         // (fora da preparacao e da rodada, so recusa; na rodada, parar/trocar/retomar vao para a
         // fila da rodada, atendida pelo motor entre os minutos)
         _vida = new Timer(_ => _ = Vida(), null, 0, 10_000);
+        // (as opcoes da versao Atual deste jogo, para os outros jogarem com as mesmas)
+        _ = OpcoesNaSala();
         foreach (var t in j.M.S.Transferencias) _transfVistas.Add(t);
         MapearTimes();
+    }
+
+    async Task OpcoesNaSala()
+    {
+        try { await _sala.DefinirOpcoes(_j.M.Regras); } catch { }
     }
 
     async Task Vida()

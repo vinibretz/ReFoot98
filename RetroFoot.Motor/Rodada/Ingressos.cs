@@ -77,6 +77,21 @@ public static class Ingressos
         e.Cabeca[CabecaByte] = (byte)System.Math.Clamp((r + 1250) / 2500, 2, 12);
     }
 
+    // A razao que entrou no publico do jogo em casa desta jornada (Mundo.Publico e
+    // RecalcularPublico), num ushort nos bytes 28 e 29 do cabecalho (zerados no original e no
+    // launcher): 10000 = o preco de tabela (a opcao "Preco do ingresso" desligada). So e marcada
+    // quando a equipa tem um preco escolhido; 0 = nao marcada (o preco de tabela, ou um save de
+    // antes). Ao reabrir um save com a opcao trocada, o publico e refeito
+    // (Mundo.AjustarPublicoAoPreco).
+    public const int AplicadaByte = 28;
+
+    public static int Aplicada(Equipa e) => e.Cabeca[AplicadaByte] | e.Cabeca[AplicadaByte + 1] << 8;
+
+    internal static void MarcarAplicada(Equipa e, int razao)
+    {
+        e.Cabeca[AplicadaByte] = (byte)razao; e.Cabeca[AplicadaByte + 1] = (byte)(razao >> 8);
+    }
+
     // a escolha guardada (2 a 12), ou 0 se nao ha
     public static byte Escolha(Equipa? e)
     {

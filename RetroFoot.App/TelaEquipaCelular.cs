@@ -112,6 +112,18 @@ public sealed partial class TelaEquipa
             // o Painel avisa quando algo mudou (o fim de uma janela, a renovacao, o dinheiro)
             _p.Redesenhou = () => Dispatcher.UIThread.Post(Refazer);
             Refazer();
+            // RETROFOOT_PAGINA (capturas e testes: ferramentas/FichasPrint, RetroFoot.App.Testes): a
+            // gaveta das Financas ou a do arbitro aberta
+            switch (Environment.GetEnvironmentVariable("RETROFOOT_PAGINA"))
+            {
+                case "financas":
+                    _naPagina = true;
+                    Control fin;
+                    try { fin = PaginaFinancas(); } finally { _naPagina = false; }
+                    AbrirGaveta(T("Finanças"), fin, cores: true);
+                    break;
+                case "arbitro": AbrirArbitro(); break;
+            }
             AttachedToVisualTree += (_, _) =>
             {
                 _s.SemDialogos -= DepoisDeJanela;
@@ -349,7 +361,7 @@ public sealed partial class TelaEquipa
                 {
                     if (eq == null) return;
                     int k = Math.Min(v, 15);
-                    string extra = _p._launcher ? T("   Pênalti: {0}%   Cartões: -{1}%", pen[k], 2 * (k + 1)).Trim() : null!;
+                    string extra = _p._campinho ? T("   Pênalti: {0}%   Cartões: -{1}%", pen[k], 2 * (k + 1)).Trim() : null!;
                     p.Children.Add(CaixaAdversario(eq, Painel.TextoCelular(eq.NomeCurto), extra));
                     p.Children.Add(new ProgressBar
                     {
@@ -423,7 +435,7 @@ public sealed partial class TelaEquipa
             if (_tela._jogo is { } jogo)
             {
                 long preco = RetroFoot.Motor.Base.Ext.Bytes(jogo.B36.AsSpan(0, 10)).Round();
-                if (!_s.J.M.Regras.CartoesAmarelos)
+                if (!_s.J.M.Regras.PrecoIngresso)
                 {
                     // o jogo classico: so o preco de tabela
                     p.Children.Add(Linha(T("Preço do ingresso"), _p.DinheiroCelular(preco)));
@@ -671,8 +683,8 @@ public sealed partial class TelaEquipa
             return caixa;
         }
 
-        // nota e risco de lesao so na versao Atual (as regras do launcher), como no computador
-        bool Atual => _s.J.M.Regras.CartoesAmarelos;
+        // os amarelos acumulados so com a opcao dos cartoes amarelos (Regras), como no computador
+        bool Amarelos => _s.J.M.Regras.CartoesAmarelos;
 
         // as colunas da lista (titulos ou um jogador): marca, P, nome, forca, [nota, RL], S, L,
         // salario (com o + de ja revisto)
@@ -692,7 +704,7 @@ public sealed partial class TelaEquipa
                 Grid.SetColumn(x, col);
                 g.Children.Add(x);
             }
-            string S(SJogador p) => p.Suspensao != 0 ? "S" : Atual && Painel.AmarelosCelular(p) > 0 ? "A" : "";
+            string S(SJogador p) => p.Suspensao != 0 ? "S" : Amarelos && Painel.AmarelosCelular(p) > 0 ? "A" : "";
             int c = 1;
             Por(titulos ? "P" : Posicao(Math.Min((int)j!.Posicao, 3)), c++);
             Por(titulos ? T("Nome") : Painel.NomeCelular(j!), c++);
@@ -870,7 +882,7 @@ public sealed partial class TelaEquipa
                 s.Children.Add(c);
             }
             if (!salario) Cel(CUi.SiglaComp(j), T("Comp"));
-            if (_s.J.M.Regras.CartoesAmarelos) { Cel(j.Nota.ToString(), T("Nota")); Cel(j.Lesao.ToString(), "RL"); }
+            if (_s.J.M.Regras.NotaERisco) { Cel(j.Nota.ToString(), T("Nota")); Cel(j.Lesao.ToString(), "RL"); }
             Cel(_p.HistCelular(j, Mem.HistJogos).ToString(), T("Jogos"));
             Cel(_p.HistCelular(j, Mem.HistGolos).ToString(), T("Gols"));
             Cel(Mem.Golos14(j).ToString(), T("Temp."));
@@ -952,7 +964,7 @@ public sealed partial class TelaEquipa
                 (T("Jogos na Temporada"), TextosMercado.JogosTemporada(j).ToString()),
                 (T("Média na Temporada"), TextosMercado.MediaGols(j, true)),
             };
-            if (_s.J.M.Regras.CartoesAmarelos) { dados.Add((T("Nota"), j.Nota.ToString())); dados.Add((T("Risco de lesão"), j.Lesao.ToString())); }
+            if (_s.J.M.Regras.NotaERisco) { dados.Add((T("Nota"), j.Nota.ToString())); dados.Add((T("Risco de lesão"), j.Lesao.ToString())); }
             p.Children.Add(Pares(dados));
             var hist = new List<(string, string)>
             {

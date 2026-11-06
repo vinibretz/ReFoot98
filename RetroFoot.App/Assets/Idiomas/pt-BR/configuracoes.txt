@@ -24,3 +24,7 @@ Janela larga: a jornada com as divisões lado a lado e as telas aproveitando a l
 # Idioma
 O texto das telas do jogo (equipa, jornada, classificação, listas, mercado), de 80% a 120%. O que não couber ganha a dica com o texto inteiro.	O texto das telas do jogo (equipe, rodada, classificação, listas, mercado), de 80% a 120%. O que não couber ganha a dica com o texto inteiro.
 O apito do começo, do intervalo e do fim, o golo e o aviso de expulsão ou lesão nos jogos com treinador humano.	O apito do começo, do intervalo e do fim, o gol e o aviso de expulsão ou lesão nos jogos com técnico humano.
+# --- opcoes separadas do launcher (grupos nas Regras) ---
+Tela da equipa	Tela do time
+O campinho com a escalação e, no árbitro, a chance de pênalti para cada equipa.	O campinho com a escalação e, no árbitro, a chance de pênalti para cada time.
+Bilheteira, patrocínio e prémios.	Bilheteria, patrocínio e prêmios.

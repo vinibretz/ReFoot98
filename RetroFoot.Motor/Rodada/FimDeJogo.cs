@@ -104,7 +104,7 @@ public sealed partial class Mundo
         var casa = Equipa(j.Casa); var fora = Equipa(j.Fora);
         if (j.Taca == TipoJogo.Campeonato)
         {
-            Lancamento(casa!, Arred(Xi((int)j.D40).Mul(Ingressos.Preco(DeExt80(j.B36), casa))), BalBilheteira);
+            Lancamento(casa!, Arred(Xi((int)j.D40).Mul(Ingressos.Preco(DeExt80(j.B36), MandanteComPreco(casa)))), BalBilheteira);
             short dif = (short)(EqW(casa!, EqGolosJogo) - EqW(fora!, EqGolosJogo));
             ResultadoNoCalendario(casa!, fora!, j, false);
             var tc = TreinadorDa(casa)!; var tf = TreinadorDa(fora)!;
@@ -138,7 +138,7 @@ public sealed partial class Mundo
         }
         else if (j.Taca == TipoJogo.Taca)
         {
-            int Metade() => Arred(Xi((int)j.D40).Mul(Ingressos.Preco(DeExt80(j.B36), casa)).Div(X(2)));
+            int Metade() => Arred(Xi((int)j.D40).Mul(Ingressos.Preco(DeExt80(j.B36), MandanteComPreco(casa))).Div(X(2)));
             Lancamento(casa!, Metade(), BalBilheteira);
             Lancamento(fora!, Metade(), BalBilheteira);
             short dif = (short)(EqW(casa!, EqGolosJogo) - EqW(fora!, EqGolosJogo));

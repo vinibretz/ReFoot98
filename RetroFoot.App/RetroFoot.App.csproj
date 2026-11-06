@@ -21,6 +21,7 @@
     <InternalsVisibleTo Include="SoakUI" />
     <InternalsVisibleTo Include="SoakOnline" />
     <InternalsVisibleTo Include="FichasPrint" />
+    <InternalsVisibleTo Include="RetroFoot.App.Testes" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RetroFoot.Motor\RetroFoot.Motor.csproj" />

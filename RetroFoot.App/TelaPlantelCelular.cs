@@ -186,7 +186,7 @@ public static partial class TelaPlantel
                 var s = _f.S;
                 var e = _f.Mostrada();
                 if (e == null) return;
-                bool launcher = s.J.M.Regras.CartoesAmarelos;
+                bool nota = s.J.M.Regras.NotaERisco, amarelos = s.J.M.Regras.CartoesAmarelos;
                 var antes = new List<(string, string)>();
                 var nac = Nacional(p);
                 if (nac.Length > 0) antes.Add((T("Nacionalidade"), nac.StartsWith("* ") ? NomePais(nac[2..]) + " *" : NomePais(nac)));
@@ -201,7 +201,7 @@ public static partial class TelaPlantel
                     antes.Add((T("Salário pretendido"), FormatoDinheiro.Valor(s.S, s.Mercado.Salario(p, Ext.Bytes(c.B79)))));
                 var corpo = new StackPanel { Spacing = 12 };
                 corpo.Children.Add(CUi.Cartao_(null, MercadoCelular.Cabecalho(p, e, Texto(e.NomeCurto))));
-                corpo.Children.Add(MercadoCelular.Ficha(p, launcher, antes, TextosMercado.TextoValorMercado(s, p)));
+                corpo.Children.Add(MercadoCelular.Ficha(p, nota, amarelos, antes, TextosMercado.TextoValorMercado(s, p)));
                 var bs = new List<Control>();
                 if (c != null)
                 {
@@ -351,7 +351,7 @@ public static partial class TelaPlantel
                 var e = _f.Mostrada();
                 if (e == null) return;
                 var (letra, fundo) = Cores(e);
-                bool launcher = s.J.M.Regras.CartoesAmarelos;
+                bool nota = s.J.M.Regras.NotaERisco, amarelos = s.J.M.Regras.CartoesAmarelos;
                 var corpo = new StackPanel { Spacing = 6 };
                 var cab = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
                 if (CUi.Bandeira(TM.PaisDe(p.Pais), 26) is { } b) cab.Children.Add(b);
@@ -366,7 +366,7 @@ public static partial class TelaPlantel
                     int v = s.Mercado.PrecoDeVenda(e, c, p, MercadoJogo.ForcaMedia(e));
                     corpo.Children.Add(MercadoRetro.Linha(T("Preço"), v > 0 ? _f.Dinheiro(v) : "–", letra, 170, 14, true));
                 }
-                corpo.Children.Add(MercadoRetro.Ficha(p, launcher, fundo, letra, TextosMercado.TextoValorMercado(s, p)));
+                corpo.Children.Add(MercadoRetro.Ficha(p, nota, amarelos, fundo, letra, TextosMercado.TextoValorMercado(s, p)));
                 MercadoRetro.Avisos(corpo, p, letra);
                 if (c != null && _f._preco > 0 && _f.PodeComprarAqui())
                     corpo.Children.Add(MercadoRetro.Linha(T("Salário pretendido:"), FormatoDinheiro.Valor(s.S, s.Mercado.Salario(p, Ext.Bytes(c.B79))), letra, 170, 14, true));

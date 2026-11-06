@@ -927,6 +927,9 @@ public sealed partial class TelaInicio : UserControl
         // os jogos ja existem, mas ninguem foi preparado. Retomar < 0 prepara todas sem
         // criar os jogos de novo (como IniciarMotor do Go).
         if (novo) sessao.J.M.Retomar = -1;
+        // (um save do meio da jornada reaberto com a opcao "Preco do ingresso" trocada: o publico
+        // dos jogos dela refeito com o preco que vale agora; o retrato online ja traz a procura)
+        else if (retrato == null) sessao.J.M.AjustarPublicoAoPreco();
         RetroFoot.Motor.Online.HostOnline? hostOnline = null;
         // (o jogo sozinho: o destaque de todos os times humanos; o online liga o deste aparelho)
         if (online == null) TelaJornada.SoTime = null;

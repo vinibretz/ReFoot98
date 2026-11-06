@@ -37,7 +37,7 @@ País	Country
 Salário	Wage
 Jogos	Games
 Gols	Goals
-Temp.	Season
+Temp.	Seas.
 Nota	Rating
 Elenco	Squad
 {0} jogadores  ·  {1} titulares  ·  {2} reservas	{0} players  ·  {1} starters  ·  {2} subs

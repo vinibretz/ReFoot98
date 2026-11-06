@@ -25,7 +25,7 @@ public class IngressosTestes
         return e;
     }
 
-    static (Mundo, Equipa, Equipa) Mundo2(byte escolha, uint semente = 1234)
+    static (Mundo, Equipa, Equipa) Mundo2(byte escolha, uint semente = 1234, bool preco = true)
     {
         var s = new Jogo98();
         X(1).Bytes().CopyTo(s.Cabecalho.Real2B46, 0);
@@ -34,7 +34,121 @@ public class IngressosTestes
         var casa = Time(10, escolha);
         var fora = Time(20);
         s.Equipas.Add(casa); s.Equipas.Add(fora);
-        return (new Mundo(s, semente), casa, fora);
+        var m = new Mundo(s, semente);
+        m.Regras = m.Regras with { PrecoIngresso = preco };
+        return (m, casa, fora);
+    }
+
+    static int PublicoDe(Mundo m, Equipa casa, Equipa fora)
+    {
+        var j = new Jogo { Taca = 0, Casa = casa.ID, Fora = fora.ID };
+        m.Publico(j);
+        return (int)j.D40;
+    }
+
+    static int BilheteiraDe(Mundo m, Equipa casa, Equipa fora)
+    {
+        var j = new Jogo { Taca = 0, Casa = casa.ID, Fora = fora.ID, D40 = 12345 };
+        X(7).Bytes().CopyTo(j.B36, 0);
+        m.FimDeJogo(j);
+        return Mundo.Saldo(casa, Mundo.BalBilheteira);
+    }
+
+    // a opcao "Preco do ingresso" desligada: o preco gravado no save nao vale (publico e
+    // bilheteira de tabela), mas fica guardado para quando a opcao for religada
+    [Fact]
+    public void PrecoDesligadoUsaTabela()
+    {
+        var (m0, c0, f0) = Mundo2(0);
+        int tabela = PublicoDe(m0, c0, f0);
+        var (m, casa, fora) = Mundo2(12, preco: false);
+        Assert.Equal(tabela, PublicoDe(m, casa, fora));
+        var (mb, cb, fb) = Mundo2(12, preco: false);
+        Assert.Equal(12345 * 7, BilheteiraDe(mb, cb, fb));
+    }
+
+    [Fact]
+    public void PrecoReligadoVoltaOEscolhido()
+    {
+        var (mq, cq, fq) = Mundo2(12);
+        int escolhido = PublicoDe(mq, cq, fq);
+        var (md, cd, fd) = Mundo2(12, preco: false);
+        Assert.NotEqual(escolhido, PublicoDe(md, cd, fd));
+        Assert.Equal(12, cd.Cabeca[4]);   // o preco escolhido continua no save
+        // a mesma equipa (mesmo sorteio) com a opcao religada: volta o preco escolhido
+        var (m, casa, fora) = Mundo2(12, preco: false);
+        m.Regras = m.Regras with { PrecoIngresso = true };
+        Assert.Equal(escolhido, PublicoDe(m, casa, fora));
+        var (mb, cb, fb) = Mundo2(12, preco: false);
+        mb.Regras = mb.Regras with { PrecoIngresso = true };
+        Assert.Equal(12345 * 21, BilheteiraDe(mb, cb, fb));
+    }
+
+    // um save gravado no meio da jornada (a marca do preco que entrou no publico vai no cabecalho
+    // da equipa) e reaberto com a opcao trocada: o publico do jogo da jornada e refeito
+    static (Mundo, Jogo, Equipa) Reaberto(bool criadoCom, bool reabertoCom, byte escolha = 12)
+    {
+        var (m, casa, fora) = Mundo2(escolha, preco: criadoCom);
+        var j = new Jogo { Taca = 0, Casa = casa.ID, Fora = fora.ID };
+        m.S.Jogos.Add(j);
+        m.Publico(j);
+        m.S.Cabecalho.G271E = casa.ID;   // gravado na preparacao do mandante
+        var m2 = new Mundo(m.S, 99);
+        m2.Regras = m2.Regras with { PrecoIngresso = reabertoCom };
+        return (m2, j, casa);
+    }
+
+    [Fact]
+    public void SaveReabertoSemAOpcaoVoltaATabela()
+    {
+        var (m, j, casa) = Reaberto(true, true);
+        uint com = j.D40;
+        m.AjustarPublicoAoPreco();
+        Assert.Equal(com, j.D40);   // a mesma opcao: nada muda
+        Assert.Equal(30000, Ingressos.Aplicada(casa));
+        (m, j, casa) = Reaberto(true, false);
+        m.AjustarPublicoAoPreco();
+        // 300% tirava ~76% do publico: sem o preco, ~1/0,2397 (com o sorteio no meio)
+        Assert.InRange(j.D40 / (double)com, 1 / 0.2397 * 0.8, 1 / 0.2397 * 1.25);
+        Assert.Equal(Ingressos.Cem, Ingressos.Aplicada(casa));
+        uint depois = j.D40;
+        m.AjustarPublicoAoPreco();
+        Assert.Equal(depois, j.D40);   // ja refeito: nao muda de novo
+    }
+
+    [Fact]
+    public void SaveReabertoComAOpcaoAplicaOPreco()
+    {
+        var (m, j, casa) = Reaberto(false, true);
+        uint sem = j.D40;
+        Assert.Equal(Ingressos.Cem, Ingressos.Aplicada(casa));
+        m.AjustarPublicoAoPreco();
+        Assert.InRange(j.D40 / (double)sem, 0.2397 * 0.8, 0.2397 * 1.25);
+        // sem preco escolhido nao ha marca (o save fica como o do original)
+        var (m0, j0, c0) = Reaberto(false, true, 0);
+        uint p0 = j0.D40;
+        m0.AjustarPublicoAoPreco();
+        Assert.Equal(p0, j0.D40);
+        Assert.Equal(0, Ingressos.Aplicada(c0));
+    }
+
+    // a versao Retro (Regras.Original) como o jogo de 1998: um preco gravado (do launcher ou de
+    // uma carreira na Atual) nao vale
+    [Fact]
+    public void RetroIgnoraPrecoGravado()
+    {
+        var (m0, c0, f0) = Mundo2(0);
+        int tabela = PublicoDe(m0, c0, f0);
+        var s = new Jogo98();
+        X(1).Bytes().CopyTo(s.Cabecalho.Real2B46, 0);
+        s.Treinadores.Add(new Treinador { ID = 10 });
+        s.Treinadores.Add(new Treinador { ID = 20 });
+        var casa = Time(10, 12); var fora = Time(20);
+        s.Equipas.Add(casa); s.Equipas.Add(fora);
+        var m = new Mundo(s, 1234);
+        Assert.False(m.Regras.PrecoIngresso);
+        Assert.Equal(tabela, PublicoDe(m, casa, fora));
+        Assert.Equal(12345 * 7, BilheteiraDe(m, casa, fora));
     }
 
     [Fact]

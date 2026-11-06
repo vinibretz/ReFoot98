@@ -74,22 +74,32 @@ public sealed partial class TelaConfiguracoes
             }
             case 1:
             {
-                if (!mod) p.Children.Add(Texto(T("Na versão Retrô as regras são as de 1998: só cartões vermelhos, sem patrocínios nem acréscimos."), 13.5, W95.Vermelho, true));
+                if (!mod) p.Children.Add(Texto(T("Na versão Retrô as regras são as de 1998: sem as adições da versão Atual."), 13.5, W95.Vermelho, true));
                 // na Retro aparecem como no jogo original (desligadas) e travadas; o _cfg guarda a escolha
                 Control Marca(string nome, bool valor, Action<bool> mudou) =>
                     CR95.Marca(nome, mod && valor, v => { if (_cfg.Modificada) mudou(v); }, mod);
-                p.Children.Add(new StackPanel
+                // as adicoes agrupadas pelo que afetam
+                p.Children.Add(CUi.GrupoRetro(GrupoPartida, new StackPanel
                 {
                     Children =
                     {
                         Marca(T("Cartões amarelos"), _cfg.CartoesAmarelos, v => _cfg.CartoesAmarelos = v),
-                        Marca(T("Patrocínios"), _cfg.Patrocinios, v => _cfg.Patrocinios = v),
                         Marca(T("Acréscimos"), _cfg.Acrescimos, v => _cfg.Acrescimos = v),
                         Marca(T("5 substituições (FIFA)"), _cfg.CincoSubstituicoes, v => _cfg.CincoSubstituicoes = v),
                         Marca(T("9 reservas no banco"), _cfg.NoveReservas, v => _cfg.NoveReservas = v),
+                    },
+                }));
+                p.Children.Add(CUi.GrupoRetro(GrupoJogadores, Marca(T("Nota e risco de lesão"), _cfg.NotaERisco, v => _cfg.NotaERisco = v)));
+                p.Children.Add(CUi.GrupoRetro(GrupoEstadio, new StackPanel
+                {
+                    Children =
+                    {
+                        Marca(T("Preço do ingresso"), _cfg.PrecoIngresso, v => _cfg.PrecoIngresso = v),
+                        Marca(T("Patrocínios"), _cfg.Patrocinios, v => _cfg.Patrocinios = v),
                         Marca(T("Premiação ampliada"), _cfg.PremiacaoAmpliada, v => _cfg.PremiacaoAmpliada = v),
                     },
-                });
+                }));
+                p.Children.Add(CUi.GrupoRetro(GrupoTela, Marca(T("Campinho e árbitro"), _cfg.CampinhoArbitro, v => _cfg.CampinhoArbitro = v)));
                 var sobem = new CR95.Combo(OpcoesSobem, mod ? _cfg.SobemDescem : 0, 16) { IsEnabled = mod };
                 sobem.Mudou += i => { if (!_cfg.Modificada) return; _cfg.SobemDescem = i; Refazer(); };
                 var rot = new StackPanel { Spacing = 6 };

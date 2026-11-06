@@ -31,7 +31,7 @@ public class EditorEquipasTestes(ITestOutputHelper saida)
         return raiz;
     }
 
-    [Fact]
+    [FactComOriginal]
     public void OriginaisAbremGravamIguaisEValidas()
     {
         var raiz = PastaOriginal();

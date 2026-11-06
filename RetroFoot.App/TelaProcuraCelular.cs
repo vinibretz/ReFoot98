@@ -112,7 +112,7 @@ public static partial class TelaProcura
                 Pilula(T("Nacionalidade"), _pais >= 0 && _pais < _f._paises.Count ? _f._paises[_pais].Nome : "", EscolherPais);
                 Pilula(T("Preço"), _preco >= 0 && _preco < _f._precos.Length ? _f._precos[_preco].Trim() : "", () =>
                     Escolher(T("Preço"), _f._precos.Select(x => x.Trim()).ToList(), _preco, true, i => _preco = i));
-                if (_f._launcher)
+                if (_f._notaRisco)
                 {
                     Pilula(T("Comportamento"), _comp > 0 ? T(ComportamentosLauncher[_comp]) : "", () =>
                         Escolher(T("Comportamento"), ComportamentosLauncher.Select(x => T(x)).ToList(), _comp, false, i => _comp = i));
@@ -288,7 +288,7 @@ public static partial class TelaProcura
                     var p = eq.Jogadores[k];
                     int v = s.Mercado.PrecoDeVenda(eq, _f._e, p, MercadoJogo.ForcaMedia(eq));
                     string baixo = Texto(eq.NomeCurto);
-                    if (_f._launcher) baixo += " · " + T("Nota") + " " + p.Nota + " · RL " + p.Lesao;
+                    if (_f._notaRisco) baixo += " · " + T("Nota") + " " + p.Nota + " · RL " + p.Lesao;
                     int ii = i;
                     linhas.Add(CUi.Toque(MercadoCelular.Jogador(p, MercadoCelular.Selos(p), MercadoCelular.Extra(v > 0 ? _f.Dinheiro(v) : "", baixo)), () => Tocar(ii), 48));
                 }
@@ -308,9 +308,9 @@ public static partial class TelaProcura
                 int v = s.Mercado.PrecoDeVenda(eq, _f._e, p, MercadoJogo.ForcaMedia(eq));
                 var corpo = new StackPanel { Spacing = 12 };
                 corpo.Children.Add(CUi.Cartao_(null, MercadoCelular.Cabecalho(p, eq, Texto(eq.NomeCurto))));
-                corpo.Children.Add(MercadoCelular.Ficha(p, _f._launcher, new[] { (T("Preço"), v > 0 ? _f.Dinheiro(v) : "–") }, TextosMercado.TextoValorMercado(s, p)));
+                corpo.Children.Add(MercadoCelular.Ficha(p, _f._notaRisco, _f.S.J.M.Regras.CartoesAmarelos, new[] { (T("Preço"), v > 0 ? _f.Dinheiro(v) : "–") }, TextosMercado.TextoValorMercado(s, p)));
                 var bs = new List<Control>();
-                if (_f._launcher)
+                if (_f._notaRisco)
                     bs.Add(new CUi.Botao(T("Comprar"), false, () =>
                     {
                         FecharFolha();
@@ -344,7 +344,7 @@ public static partial class TelaProcura
                 _equipaR = MercadoRetro.Botao(T("Time..."), "Mercado/TcheckPlayerDlg.teamBtn.png", 2, () => _f.Equipa());
                 var fechar = MercadoRetro.Botao(T("Fechar"), "Mercado/TcheckPlayerDlg.OKBtn.png", 2, Fechar, false, 36);
                 var bs = new List<Control> { _botao, _equipaR };
-                if (_f._launcher)
+                if (_f._notaRisco)
                 {
                     _comprarR = MercadoRetro.Botao(T("Comprar"), "Mercado/TPlantelDlg.buyBtn.png", 2, () => { _f.Comprar(); Lista(); });
                     bs.Add(_comprarR);
@@ -428,7 +428,7 @@ public static partial class TelaProcura
                 p.Children.Add(Criterio(T("Preço"), Combo(_preco >= 0 && _preco < _f._precos.Length ? _f._precos[_preco].Trim() : "", () =>
                     Escolher(T("Preço"), _f._precos.Select(x => x.Trim()).ToList(), _preco, true, i => _preco = i)),
                     Pequeno("clearPriceBtn", () => _preco = -1)));
-                if (_f._launcher)
+                if (_f._notaRisco)
                 {
                     p.Children.Add(Criterio(T("Comportamento"), Combo(T(ComportamentosLauncher[Math.Clamp(_comp, 0, ComportamentosLauncher.Length - 1)]), () =>
                         Escolher(T("Comportamento"), ComportamentosLauncher.Select(x => T(x)).ToList(), _comp, false, i => _comp = i)),
@@ -469,7 +469,7 @@ public static partial class TelaProcura
                     int v = s.Mercado.PrecoDeVenda(eq, _f._e, p, MercadoJogo.ForcaMedia(eq));
                     var b = new List<(string, double, bool)> { (PaisDe(p.Pais), 40, false), (ComportamentoCurto(p), 36, false) };
                     // (launcher: as colunas Nota e RL)
-                    if (_f._launcher) { b.Add((p.Nota.ToString(), 24, true)); b.Add((p.Lesao.ToString(), 24, true)); }
+                    if (_f._notaRisco) { b.Add((p.Nota.ToString(), 24, true)); b.Add((p.Lesao.ToString(), 24, true)); }
                     var c = MercadoRetro.Jogador2(cor, Idioma.Posicao(Math.Min((int)p.Posicao, 3)), TM.NomeJogador(p),
                         new[] { (p.Forca.ToString(), 24.0, true), (v > 0 ? _f.Dinheiro(v) : "", 100, true) }, Texto(eq.NomeCurto), b.ToArray());
                     int ii = i;

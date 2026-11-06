@@ -15,7 +15,7 @@ namespace RetroFoot.Motor.Testes;
 // preco antigo e o ingresso no maximo dava uma renda absurda.
 public class IngressosPublicoTestes
 {
-    static (JogoEmCurso J, Jogo Jogo, Equipa Casa) Cenario(bool torcida = true)
+    static (JogoEmCurso J, Jogo Jogo, Equipa Casa) Cenario(bool torcida = true, TRegras? regras = null)
     {
         string? arq = null;
         for (var d = AppContext.BaseDirectory; d != null && arq == null; d = Path.GetDirectoryName(d))
@@ -25,10 +25,13 @@ public class IngressosPublicoTestes
         }
         Assert.NotNull(arq);
         var s = Jogo98.Ler(File.ReadAllBytes(arq!));
-        var j = new JogoEmCurso(s, 1, Opcoes.Padrao with { Regras = TRegras.Launcher(8), TorcidaNoArbitro = torcida }, new Humano());
+        var j = new JogoEmCurso(s, 1, Opcoes.Padrao with { Regras = regras ?? TRegras.Launcher(8), TorcidaNoArbitro = torcida }, new Humano());
         // o estadio grande (o publico nao bate no limite) e o preco de tabela
         foreach (var e in s.Equipas) { e.Estadio = 24; Ingressos.Escolher(e, 100); }
-        j.M.LimparJogos();
+        // (os jogos que o save trouxer sao descartados, sem fechar: LimparJogos os jogaria ate o
+        // fim, e um save gravado na preparacao da Taca levava um empate aos penaltis com times
+        // ainda sem escalacao)
+        s.Jogos.Clear();
         j.M.CriarJogosDivisao(0);
         var jogo = s.Jogos.First(x => x.Casa != 0 && x.Fora != 0 && x.Arbitro != 0);
         return (j, jogo, s.Equipas.First(e => e.ID == jogo.Casa));
@@ -71,6 +74,19 @@ public class IngressosPublicoTestes
         Ingressos.Escolher(casa2, 300);
         j2.M.RecalcularPublico(jogo2);
         Assert.Equal(antes, jogo2.W4C);
+    }
+
+    // a torcida no arbitro vem com o "Preco do ingresso", nao com os cartoes amarelos
+    [Fact]
+    public void TorcidaSemAmarelos()
+    {
+        var (j, jogo, casa) = Cenario(regras: TRegras.Launcher(8) with { CartoesAmarelos = false });
+        Ingressos.Escolher(casa, 300);
+        j.M.RecalcularPublico(jogo);
+        int vazio = jogo.W4C;
+        Ingressos.Escolher(casa, 50);
+        j.M.RecalcularPublico(jogo);
+        Assert.Equal(3, jogo.W4C - vazio);
     }
 
     // sem mexer no preco: o +2 do classico em todos os jogos

@@ -48,7 +48,7 @@ public static partial class TelaPlantel
     sealed partial class Form : MercadoForm
     {
         const double B = 16;    // larguras.py
-        readonly bool _launcher;
+        readonly bool _nota, _amarelos;   // as opcoes Nota e risco de lesao e Cartoes amarelos (Regras)
         ushort _equipa, _inicial, _sel;
         readonly ushort _comprador;
         int _preco;
@@ -61,7 +61,7 @@ public static partial class TelaPlantel
         public Form(Sessao s, SEquipa mostrada, SEquipa? comprador, ushort jogador)
             : base(s, 632 + B, 453)
         {
-            _launcher = s.J.M.Regras.CartoesAmarelos;
+            _nota = s.J.M.Regras.NotaERisco; _amarelos = s.J.M.Regras.CartoesAmarelos;
             _equipa = mostrada.ID;
             _inicial = jogador;
             _comprador = comprador?.ID ?? 0;
@@ -280,7 +280,9 @@ public static partial class TelaPlantel
             Rect grupo;
             double ySus, yLes, ySal;
             var linhas = new List<(string Rot, string Valor, double Y)>();
-            if (_launcher)
+            // em cima, Nota e Risco de lesao (opcao Nota e risco); no Historico, os amarelos
+            // (opcao Cartoes amarelos): o grupo desce com as duas linhas de cima
+            if (_nota)
             {
                 Escreve(dc, T("Comportamento"), px, py, t, _letra);
                 Escreve(dc, T("Nota"), px, py + 15, t, _letra);
@@ -294,9 +296,6 @@ public static partial class TelaPlantel
                     Escreve(dc, TextosMercado.GolsComMedia(p, true), px + 104, py + 45, t, _letra);
                 }
                 grupo = new Rect(px, 164, 185, 97);
-                foreach (var (rot, y, qual) in new[] { (T("Jogos"), 16.0, Mem.HistJogos), (T("Gols"), 32, Mem.HistGolos), (T("Cartões amarelos"), 48, -1), (T("Cartões vermelhos"), 64, Mem.HistVermelhos), (T("Lesões"), 80, Mem.HistLesoes) })
-                    linhas.Add((rot, p == null ? "" : qual < 0 ? RetroFoot.Motor.Rodada.Campos.JgB(p, RetroFoot.Motor.Rodada.Campos.JgAmarelosAcumulados).ToString()
-                        : qual == Mem.HistGolos ? TextosMercado.GolsComMedia(p, false) : Hist(p, qual).ToString(), y));
                 ySus = py + 158; yLes = py + 172; ySal = 291;
             }
             else
@@ -310,9 +309,18 @@ public static partial class TelaPlantel
                     Escreve(dc, TextosMercado.GolsComMedia(p, true), px + 104, py + 20, t, _letra);
                 }
                 grupo = new Rect(px, 140, 185, 105);
-                foreach (var (rot, y, qual) in new[] { (T("Jogos"), 24.0, Mem.HistJogos), (T("Gols"), 43, Mem.HistGolos), (T("Cartões vermelhos"), 61, Mem.HistVermelhos), (T("Lesões"), 80, Mem.HistLesoes) })
-                    linhas.Add((rot, p == null ? "" : qual == Mem.HistGolos ? TextosMercado.GolsComMedia(p, false) : Hist(p, qual).ToString(), y));
                 ySus = py + 143; yLes = py + 159; ySal = 284;
+            }
+            if (_amarelos)
+                foreach (var (rot, y, qual) in new[] { (T("Jogos"), 16.0, Mem.HistJogos), (T("Gols"), 32, Mem.HistGolos), (T("Cartões amarelos"), 48, -1), (T("Cartões vermelhos"), 64, Mem.HistVermelhos), (T("Lesões"), 80, Mem.HistLesoes) })
+                    linhas.Add((rot, p == null ? "" : qual < 0 ? RetroFoot.Motor.Rodada.Campos.JgB(p, RetroFoot.Motor.Rodada.Campos.JgAmarelosAcumulados).ToString()
+                        : qual == Mem.HistGolos ? TextosMercado.GolsComMedia(p, false) : Hist(p, qual).ToString(), y));
+            else
+            {
+                // 4 linhas: no grupo mais baixo (com Nota e Risco) a partir de 16, senao de 24
+                var ys = _nota ? new[] { 16.0, 37, 58, 79 } : new[] { 24.0, 43, 61, 80 };
+                foreach (var (rot, y, qual) in new[] { (T("Jogos"), ys[0], Mem.HistJogos), (T("Gols"), ys[1], Mem.HistGolos), (T("Cartões vermelhos"), ys[2], Mem.HistVermelhos), (T("Lesões"), ys[3], Mem.HistLesoes) })
+                    linhas.Add((rot, p == null ? "" : qual == Mem.HistGolos ? TextosMercado.GolsComMedia(p, false) : Hist(p, qual).ToString(), y));
             }
             Grupo(dc, grupo, T("Histórico"), t, _letra, _fundo);
             foreach (var (rot, v, y) in linhas)

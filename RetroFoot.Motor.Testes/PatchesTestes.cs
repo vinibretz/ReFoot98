@@ -69,7 +69,7 @@ public class PatchesTestes(ITestOutputHelper saida)
         return z;
     }
 
-    [Fact]
+    [FactComOriginal]
     public void PatchDoJogoClassicoAplicaEReverte()
     {
         var raiz = Pasta();
@@ -141,7 +141,7 @@ public class PatchesTestes(ITestOutputHelper saida)
         finally { Directory.Delete(raiz, true); Directory.Delete(fora, true); }
     }
 
-    [Fact]
+    [FactComOriginal]
     public void ConflitosEOrdemDeReverter()
     {
         var raiz = Pasta();
@@ -191,7 +191,7 @@ public class PatchesTestes(ITestOutputHelper saida)
     }
 
     // o patch do RetroFoot (Editor de Equipas): equipas em JSON e logos com o indice
-    [Fact]
+    [FactComOriginal]
     public void PatchDoRetroFootComLogos()
     {
         var origem = Pasta();
@@ -240,7 +240,7 @@ public class PatchesTestes(ITestOutputHelper saida)
 
     // o zip do Editor de Equipas (PatchEquipas): retrofoot-patch.json, a equipa em JSON e tambem em
     // EQUIPAS/*.EFT (vale o JSON, conta uma vez, nao sugere trocar todas); entradas com ../ ficam de fora
-    [Fact]
+    [FactComOriginal]
     public void PatchDoEditorDeEquipasEInseguro()
     {
         var raiz = Pasta();

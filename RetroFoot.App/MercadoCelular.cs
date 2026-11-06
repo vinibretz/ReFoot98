@@ -154,7 +154,7 @@ static class MercadoCelular
     // a ficha (2:3002, 10:1fa7): o comportamento, a nota e o risco (launcher), os gols da
     // temporada, o historico, o suspenso e o lesionado; antes, as linhas que quem chama der
     // (valorMercado: o valor de mercado do RetroFoot, ja formatado)
-    public static Control Ficha(SJogador p, bool launcher, IEnumerable<(string Rotulo, string Valor)>? antes = null, string? valorMercado = null)
+    public static Control Ficha(SJogador p, bool nota, bool amarelos, IEnumerable<(string Rotulo, string Valor)>? antes = null, string? valorMercado = null)
     {
         var s = new StackPanel { Spacing = 10 };
         if (p.Suspensao > 0 || p.JogosLesao > 0)
@@ -170,7 +170,7 @@ static class MercadoCelular
         if (antes != null) foreach (var (r, v) in antes) dados.Add(Linha(r, v));
         if (valorMercado != null) dados.Add(Linha(T("Valor de mercado"), valorMercado));
         dados.Add(Linha(T("Comportamento"), TM.Comportamento(p)));
-        if (launcher)
+        if (nota)
         {
             dados.Add(Linha(T("Nota"), p.Nota.ToString()));
             dados.Add(Linha(T("Risco de lesão"), p.Lesao.ToString()));
@@ -186,7 +186,7 @@ static class MercadoCelular
             Linha(T("Gols"), TM.Hist(p, Mem.HistGolos).ToString()),
             Linha(T("Média de gols"), TM.MediaGols(p, false)),
         };
-        if (launcher) hist.Add(Linha(T("Cartões amarelos"), TM.Amarelos(p).ToString()));
+        if (amarelos) hist.Add(Linha(T("Cartões amarelos"), TM.Amarelos(p).ToString()));
         hist.Add(Linha(T("Cartões vermelhos"), TM.Hist(p, Mem.HistVermelhos).ToString()));
         hist.Add(Linha(T("Lesões"), TM.Hist(p, Mem.HistLesoes).ToString()));
         s.Children.Add(CUi.Grupo(hist));

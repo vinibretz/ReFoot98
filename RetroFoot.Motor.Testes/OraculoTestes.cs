@@ -41,7 +41,7 @@ public class OraculoTestes(ITestOutputHelper saida)
         return s.Gravar();
     }
 
-    [Theory]
+    [TheoryDoOraculo]
     [MemberData(nameof(Casos))]
     public void Oraculo(string nome)
     {

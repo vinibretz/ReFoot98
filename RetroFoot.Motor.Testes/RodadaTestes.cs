@@ -96,12 +96,20 @@ public class RodadaTestes(ITestOutputHelper saida)
     [Fact]
     public void ClassificacaoNosSaves()
     {
+        // (o save nao diz o desempate: o do original, ou por vitorias na versao Atual do
+        // RetroFoot; a ordem gravada bate com um dos dois)
         foreach (var (a, s) in SavesReais())
         {
-            var m = new Mundo(s, 0);
             var antes = s.Divisoes.Take(4).Select(d => d.Equipas.ToList()).ToList();
-            m.OrdenarClassificacao();
-            for (int d = 0; d < antes.Count; d++) Assert.Equal(antes[d], s.Divisoes[d].Equipas);
+            bool Bate(bool vitorias)
+            {
+                var c = Jogo98.Ler(s.Gravar());
+                var m = new Mundo(c, 0);
+                m.Regras = m.Regras with { DesempateVitorias = vitorias };
+                m.OrdenarClassificacao();
+                return Enumerable.Range(0, antes.Count).All(d => antes[d].SequenceEqual(c.Divisoes[d].Equipas));
+            }
+            Assert.True(Bate(false) || Bate(true), a);
         }
     }
 

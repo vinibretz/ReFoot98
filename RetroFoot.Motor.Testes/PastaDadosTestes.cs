@@ -86,7 +86,7 @@ public class PastaDadosTestes(ITestOutputHelper saida)
         Assert.Equal(2, d.Paises.Count);
     }
 
-    [Fact]
+    [FactComOriginal]
     public void EftJsonEftIgual()
     {
         var arqs = Eqs();
@@ -105,7 +105,7 @@ public class PastaDadosTestes(ITestOutputHelper saida)
     }
 
     // bytes fora do normal (reservado, 4o byte das cores, sobra no fim) tambem voltam iguais
-    [Fact]
+    [FactComOriginal]
     public void EftEstranhoVoltaIgual()
     {
         var a = Eqs()[0];
@@ -148,7 +148,7 @@ public class PastaDadosTestes(ITestOutputHelper saida)
     }
 
     // a pasta do jogo classico importada para a pasta nova da os mesmos Dados e o mesmo jogo novo
-    [Fact]
+    [FactComOriginal]
     public void PastaNovaIgualAOriginal()
     {
         var raiz = Temp();
@@ -201,7 +201,7 @@ public class PastaDadosTestes(ITestOutputHelper saida)
     }
 
     // os arquivos do jogo classico deixados na pasta sao convertidos; os originais vao para backup/
-    [Fact]
+    [FactComOriginal]
     public void ArquivosSoltosConvertidos()
     {
         var raiz = Temp();
@@ -248,7 +248,7 @@ public class PastaDadosTestes(ITestOutputHelper saida)
     static readonly Dictionary<string, string> Corrigidas = new() { ["CRUZEIRO.EFT"] = "Levir Culpi", ["INTER_BR.EFT"] = "Márcio Araújo" };
 
     // os dados que vao com o jogo (RetroFoot.App/Assets/Dados) sao as equipas originais de 1998
-    [Fact]
+    [FactComOriginal]
     public void PacoteSaoAsEquipasOriginais()
     {
         string? pacote = null;

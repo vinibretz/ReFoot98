@@ -119,17 +119,38 @@ aparece no hub, com o botão **Abrir pasta de dados**. Formatos em
 | `RetroFoot.Desktop` | O executável para Linux, Windows e macOS |
 | `RetroFoot.Android` | O app Android (em desenvolvimento) |
 | `RetroFoot.Motor.Testes` | Os testes do motor (xUnit) |
-| `ferramentas/` | Conversor da pasta de dados e o teste de resistência da interface (SoakUI) |
-| `docs/` | Notas de projeto: build, pasta de dados, regras, idiomas, tema |
+| `RetroFoot.App.Testes` | Os testes da interface: as telas de verdade, sem janela, em cada visual (xUnit) |
+| `ferramentas/` | Conversor da pasta de dados, os testes de resistência (SoakUI e SoakOnline) e as capturas das telas (FichasPrint) |
+| `scripts/` | Gerar a release e testar tudo antes dela |
+| `docs/` | Notas de projeto: build, pasta de dados, regras, idiomas, tema, testes |
 
 ### Testes
 
+Antes de lançar uma versão, rode tudo de uma vez (PowerShell 7, uns 12 minutos):
+
 ```sh
-dotnet test RetroFoot.Motor.Testes
+pwsh -File ./scripts/testar-tudo.ps1
 ```
 
-Parte dos testes compara o motor, byte a byte, com saves gravados pelo jogo clássico.
-Esses saves não estão no repositório; sem eles, esses testes falham.
+O script roda quatro passos e grava tudo em `dist/testes/<data>/`, com um resumo no fim:
+
+1. **Testes do motor:** regras, saves e o online.
+2. **Testes da interface:** as telas abrem nos 8 visuais (Clássico e Moderno, 4:3 e 16:9, os
+   temas, o celular). O teste acusa texto por cima de outro, texto cortado (nos 4 idiomas) e
+   opção da versão Atual que não esconde o que é dela.
+3. **Três soaks:** o jogo com as opções ligadas, o jogo com elas desligadas e o online.
+4. **Capturas** de cada tela em cada visual, numa página (`index.html`) para conferir de olho.
+
+Para rodar só os testes:
+
+```sh
+dotnet test RetroFoot.Motor.Testes
+dotnet test RetroFoot.App.Testes
+```
+
+Parte dos testes do motor compara o motor, byte a byte, com saves gravados pelo jogo clássico.
+Esses arquivos não estão no repositório. Sem eles, esses testes aparecem como ignorados, com o
+motivo, e a suíte continua sem falhas. Detalhes em [docs/testes.md](docs/testes.md).
 
 ## Licença
 

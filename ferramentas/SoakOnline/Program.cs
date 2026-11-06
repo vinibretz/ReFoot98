@@ -61,7 +61,12 @@ static class Programa
 
         var cfg = new Configuracoes
         {
-            Modificada = mod, EquipasPorDivisao = n, CartoesAmarelos = mod, Patrocinios = mod,
+            Modificada = mod, EquipasPorDivisao = n, Patrocinios = mod,
+            // SEM_AMARELOS / SEM_NOTA / SEM_INGRESSO / SEM_CAMPINHO = 1: desliga essa opcao
+            CartoesAmarelos = mod && Environment.GetEnvironmentVariable("SEM_AMARELOS") != "1",
+            NotaERisco = mod && Environment.GetEnvironmentVariable("SEM_NOTA") != "1",
+            PrecoIngresso = mod && Environment.GetEnvironmentVariable("SEM_INGRESSO") != "1",
+            CampinhoArbitro = mod && Environment.GetEnvironmentVariable("SEM_CAMPINHO") != "1",
         };
         // SOAK_CLIENTES=1..5 convidados; SOAK_AMIGO=1 o modo "jogar com um amigo" (o save e do host,
         // os convidados recebem um time da 4a divisao); SOAK_FIREBASE=1 o banco de verdade

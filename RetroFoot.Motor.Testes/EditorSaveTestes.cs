@@ -114,7 +114,8 @@ public class EditorSaveTestes
         try
         {
             var arq = Path.Combine(pasta, "TESTE.e98");
-            var orig = File.ReadAllBytes(Oraculo("j4-entrada.e98"));
+            // (o j4 do oraculo; sem ele, qualquer save: o teste e da gravacao, nao do conteudo)
+            var orig = File.ReadAllBytes(Todos().FirstOrDefault(p => Path.GetFileName(p) == "j4-entrada.e98") ?? Todos().First());
             File.WriteAllBytes(arq, orig);
             var s = SaveEditavel.Abrir(arq);
             s.Equipas[0].Dinheiro = 42;

@@ -74,10 +74,13 @@ public sealed partial class TelaConfiguracoes : UserControl
         FocusAdorner = null;
         AttachedToVisualTree += (_, _) => Dispatcher.UIThread.Post(() => Focus(), DispatcherPriority.Loaded);
         // no celular: a lista das secoes e uma pagina por secao (TelaConfiguracoesCelular.cs)
-        if (Celular.Ativo) { MontarCelular(idiomaInicial != null ? 3 : -1); return; }
+        // RETROFOOT_SECAO=0..4 (capturas de tela, ferramentas/FichasPrint): abre nessa secao
+        int secao = idiomaInicial != null ? 3
+            : int.TryParse(Environment.GetEnvironmentVariable("RETROFOOT_SECAO"), out var sc) && sc is >= 0 and < 5 ? sc : -1;
+        if (Celular.Ativo) { MontarCelular(secao); return; }
         if (Visual.Moderno) MontarModerno(); else MontarClassico();
         _atualizar?.Invoke();
-        if (idiomaInicial != null) { if (_nb != null) _nb.Atual = 3; else Secao(3); }
+        if (secao >= 0) { if (_nb != null) _nb.Atual = secao; else Secao(secao); }
     }
 
     // RETROFOOT_TELA=configuracoes: a tela sozinha (Salvar grava no config.json de verdade)
@@ -92,7 +95,7 @@ public sealed partial class TelaConfiguracoes : UserControl
     static string TextoPastaDados => T("teams (equipas em JSON, uma pasta por país), logos, saves, patches, flags, sponsors, country-groups, countries.tsv e referees.tsv. Arquivos Retrô (EQUIPAS, .EFT, COUNTRY.TXE, REFEREE.TXE, CTRGROUP) deixados lá são convertidos no próximo jogo novo.");
 
     static string DescOriginal => T("As regras de 1998: 8 equipas por divisão, só cartões vermelhos, sem patrocínios.");
-    static string DescModificada => T("Nota e Risco de lesão, a tática 5-0-5, até 30 jogadores, desempate por vitórias e as regras que você escolher.");
+    static string DescModificada => T("A tática 5-0-5, até 30 jogadores, desempate por vitórias e as regras que você escolher.");
 
     string AjudaEquipas()
     {
@@ -121,6 +124,17 @@ public sealed partial class TelaConfiguracoes : UserControl
         return T("Sobem e descem {0}; o jogo novo precisa de pelo menos {1} equipas.", k, _cfg.MinimoDeEquipas(n));
     }
 
+    // as adicoes agrupadas pelo que afetam (Moderno, celular; o Classico junta em Partida e Clube)
+    static string GrupoPartida => T("Partida");
+    static string GrupoJogadores => T("Jogadores");
+    static string GrupoEstadio => T("Estádio e dinheiro");
+    static string GrupoTela => T("Tela da equipa");
+    static string AjudaAmarelos => T("Três amarelos acumulados suspendem por um jogo. Desligados: só vermelhos, como no Retrô.");
+    static string AjudaNota => T("A nota e o risco de lesão nas fichas e listas de jogadores e, no Procurar, os filtros e a ordem por eles e o botão Comprar.");
+    static string AjudaIngresso => T("Você escolhe o preço nos jogos em casa (em Finanças); o público que ele atrai pesa no árbitro. Desligado: preço de tabela, como no Retrô.");
+    static string AjudaCampinho => T("O campinho com a escalação e, no árbitro, a chance de pênalti para cada equipa.");
+    static string TextoTravado => T("As adições só existem na versão Atual. A escolha fica guardada para quando você usar a Atual.");
+
     string Desempate() => _cfg.Modificada
         ? T("Pontos, vitórias, saldo de golos e golos marcados.")
         : T("Pontos, saldo de golos e golos marcados (como no Retrô).");
@@ -142,6 +156,9 @@ public sealed partial class TelaConfiguracoes : UserControl
             T("{0} equipas por divisão ({1} rodadas)", r.N, r.Jornadas),
             r.CartoesAmarelos ? T("cartões amarelos ligados") : T("só cartões vermelhos"),
         };
+        if (r.NotaERisco) partes.Add(T("nota e risco de lesão"));
+        if (r.PrecoIngresso) partes.Add(T("preço do ingresso"));
+        if (r.CampinhoArbitro) partes.Add(T("campinho e árbitro"));
         if (mod) partes.Add(op.Patrocinios ? T("patrocínios ligados") : T("patrocínios desligados"));
         if (mod) partes.Add(r.Acrescimos ? T("acréscimos ligados") : T("acréscimos desligados"));
         partes.Add(T("sobem e descem {0}", r.SobemDescem));
@@ -167,6 +184,9 @@ public sealed partial class TelaConfiguracoes : UserControl
         var equipas = new EscolhaModerna(listaN, Math.Max(0, Array.IndexOf(Configuracoes.OpcoesEquipas, _cfg.EquipasPorDivisao)), chips: true);
         var ajudaEquipas = Ajuda("");
         var cartoes = Interruptor(_cfg.CartoesAmarelos);
+        var notaRisco = Interruptor(_cfg.NotaERisco);
+        var ingresso = Interruptor(_cfg.PrecoIngresso);
+        var campinho = Interruptor(_cfg.CampinhoArbitro);
         var patrocinios = Interruptor(_cfg.Patrocinios);
         var acrescimos = Interruptor(_cfg.Acrescimos);
         var cincoSubst = Interruptor(_cfg.CincoSubstituicoes);
@@ -208,21 +228,36 @@ public sealed partial class TelaConfiguracoes : UserControl
         };
         var travadoTxt = new StackPanel { Spacing = 8 };
         travadoTxt.Children.Add(Titulo(T("Na versão Retrô as regras são as de 1998"), 14.5, Azul));
-        travadoTxt.Children.Add(Ajuda(T("Cartões amarelos, patrocínios e acréscimos só existem na versão Atual. A escolha fica guardada para quando você usar a Modificada.")));
+        travadoTxt.Children.Add(Ajuda(TextoTravado));
         var usarMod = Botao(T("Usar a versão Atual"), false, () => versao.Mover(1));
         usarMod.HorizontalAlignment = HorizontalAlignment.Left;
         travadoTxt.Children.Add(usarMod);
         travado.Child = travadoTxt;
-        var adicoes = new StackPanel { Spacing = 16 };
-        adicoes.Children.Add(LinhaInterruptor(T("Cartões amarelos"), T("Três amarelos acumulados suspendem por um jogo. Desligados: só vermelhos, como no Retrô."), cartoes));
-        adicoes.Children.Add(Separador());
-        adicoes.Children.Add(LinhaInterruptor(T("Patrocínios"), T("Propostas e contratos de patrocínio master ao longo da temporada."), patrocinios));
-        adicoes.Children.Add(Separador());
-        adicoes.Children.Add(LinhaInterruptor(T("Acréscimos"), T("De 1 a 5 minutos no fim do 1º tempo e de 1 a 10 no fim do 2º, com golos, cartões e lesões (45'+2'). Desligados: como no Retrô."), acrescimos));
-        adicoes.Children.Add(LinhaInterruptor(T("5 substituições"), T("A regra da FIFA: até 5 substituições por jogo. Desligado: 3, como no Retrô. Na prorrogação da Taça, mais uma."), cincoSubst));
-        adicoes.Children.Add(LinhaInterruptor(T("9 reservas"), T("Até 9 reservas no banco (20 relacionados). Desligado: 5, como no Retrô."), noveRes));
-        adicoes.Children.Add(Separador());
-        adicoes.Children.Add(LinhaInterruptor(T("Premiação ampliada"), AjudaPremiacao, premiacao));
+        // as adicoes em quatro cartoes, pelo que afetam
+        StackPanel Grupo(params Control[] linhas)
+        {
+            var g = new StackPanel { Spacing = 16 };
+            for (int i = 0; i < linhas.Length; i++)
+            {
+                if (i > 0) g.Children.Add(Separador());
+                g.Children.Add(linhas[i]);
+            }
+            return g;
+        }
+        var gPartida = Grupo(
+            LinhaInterruptor(T("Cartões amarelos"), AjudaAmarelos, cartoes),
+            LinhaInterruptor(T("Acréscimos"), T("De 1 a 5 minutos no fim do 1º tempo e de 1 a 10 no fim do 2º, com golos, cartões e lesões (45'+2'). Desligados: como no Retrô."), acrescimos),
+            LinhaInterruptor(T("5 substituições"), T("A regra da FIFA: até 5 substituições por jogo. Desligado: 3, como no Retrô. Na prorrogação da Taça, mais uma."), cincoSubst),
+            LinhaInterruptor(T("9 reservas"), T("Até 9 reservas no banco (20 relacionados). Desligado: 5, como no Retrô."), noveRes));
+        var gJogadores = Grupo(LinhaInterruptor(T("Nota e risco de lesão"), AjudaNota, notaRisco));
+        var gEstadio = Grupo(
+            LinhaInterruptor(T("Preço do ingresso"), AjudaIngresso, ingresso),
+            LinhaInterruptor(T("Patrocínios"), T("Propostas e contratos de patrocínio master ao longo da temporada."), patrocinios),
+            LinhaInterruptor(T("Premiação ampliada"), AjudaPremiacao, premiacao));
+        var gTela = Grupo(LinhaInterruptor(T("Campinho e árbitro"), AjudaCampinho, campinho));
+        var grupos = new[] { gPartida, gJogadores, gEstadio, gTela };
+        Control CartaoGrupo(string titulo, string sub, StackPanel g) =>
+            Cartao(titulo, null, new StackPanel { Spacing = 12, Children = { Ajuda(sub, 13), g } });
         var equipasBloco = new StackPanel { Spacing = 10, Children = { equipas, ajudaEquipas } };
 
         // as paginas
@@ -230,7 +265,11 @@ public sealed partial class TelaConfiguracoes : UserControl
         var pJogo = Pagina(T("Jogo"), T("A versão do jogo e o tamanho das divisões."),
             aviso, Cartao(T("Versão do jogo"), null, versao), Cartao(T("Equipas por divisão"), Etiqueta(T("Atual"), Azul, AzulFundo), equipasBloco));
         var pRegras = Pagina(T("Regras"), T("O que vale dentro do jogo."),
-            travado, Cartao(T("Adições"), null, adicoes),
+            travado,
+            CartaoGrupo(GrupoPartida, T("O que acontece em campo."), gPartida),
+            CartaoGrupo(GrupoJogadores, T("O que você vê de cada jogador."), gJogadores),
+            CartaoGrupo(GrupoEstadio, T("Bilheteira, patrocínio e prémios."), gEstadio),
+            CartaoGrupo(GrupoTela, T("Informações extras na preparação do jogo."), gTela),
             Cartao(T("Sobem e descem por divisão"), Etiqueta(T("Atual"), Azul, AzulFundo), sobemBloco),
             Cartao(T("Jogadores estrangeiros"), null, estrangeiros),
             Cartao(T("Desempate na classificação"), null, desempate));
@@ -260,7 +299,7 @@ public sealed partial class TelaConfiguracoes : UserControl
 
         // a navegacao
         var nav = new StackPanel { Spacing = 4, Margin = new Thickness(12, 20, 12, 12) };
-        var subt = new[] { "Versão e equipas", "Cartões, patrocínios, estrangeiros", "Visual e formato", "Idioma do jogo", "Pasta de dados" };
+        var subt = new[] { "Versão e equipas", "Partida, jogadores, estádio", "Visual e formato", "Idioma do jogo", "Pasta de dados" };
         var pags = new Control[] { pJogo, pRegras, pAparencia, pIdioma, pDados };
         for (int i = 0; i < Secoes.Length; i++)
         {
@@ -362,6 +401,9 @@ public sealed partial class TelaConfiguracoes : UserControl
         versao.Mudou += i => { _cfg.Modificada = i == 1; _atualizar!(); };
         equipas.Mudou += i => { _cfg.EquipasPorDivisao = Configuracoes.OpcoesEquipas[i]; _atualizar!(); };
         cartoes.IsCheckedChanged += (_, _) => { if (_cfg.Modificada) { _cfg.CartoesAmarelos = cartoes.IsChecked == true; _atualizar!(); } };
+        notaRisco.IsCheckedChanged += (_, _) => { if (_cfg.Modificada) { _cfg.NotaERisco = notaRisco.IsChecked == true; _atualizar!(); } };
+        ingresso.IsCheckedChanged += (_, _) => { if (_cfg.Modificada) { _cfg.PrecoIngresso = ingresso.IsChecked == true; _atualizar!(); } };
+        campinho.IsCheckedChanged += (_, _) => { if (_cfg.Modificada) { _cfg.CampinhoArbitro = campinho.IsChecked == true; _atualizar!(); } };
         patrocinios.IsCheckedChanged += (_, _) => { if (_cfg.Modificada) { _cfg.Patrocinios = patrocinios.IsChecked == true; _atualizar!(); } };
         acrescimos.IsCheckedChanged += (_, _) => { if (_cfg.Modificada) { _cfg.Acrescimos = acrescimos.IsChecked == true; _atualizar!(); } };
         cincoSubst.IsCheckedChanged += (_, _) => { if (_cfg.Modificada) { _cfg.CincoSubstituicoes = cincoSubst.IsChecked == true; _atualizar!(); } };
@@ -381,11 +423,13 @@ public sealed partial class TelaConfiguracoes : UserControl
             bool mod = _cfg.Modificada;
             equipasBloco.IsEnabled = mod;
             equipasBloco.Opacity = mod ? 1 : 0.45;
-            adicoes.IsEnabled = mod;
-            adicoes.Opacity = mod ? 1 : 0.45;
+            foreach (var g in grupos) { g.IsEnabled = mod; g.Opacity = mod ? 1 : 0.45; }
             travado.IsVisible = !mod;
             equipas.Selecionado = mod ? Array.IndexOf(Configuracoes.OpcoesEquipas, _cfg.EquipasPorDivisao) : 0;
             cartoes.IsChecked = mod && _cfg.CartoesAmarelos;
+            notaRisco.IsChecked = mod && _cfg.NotaERisco;
+            ingresso.IsChecked = mod && _cfg.PrecoIngresso;
+            campinho.IsChecked = mod && _cfg.CampinhoArbitro;
             patrocinios.IsChecked = mod && _cfg.Patrocinios;
             acrescimos.IsChecked = mod && _cfg.Acrescimos;
             cincoSubst.IsChecked = mod && _cfg.CincoSubstituicoes;
@@ -403,7 +447,8 @@ public sealed partial class TelaConfiguracoes : UserControl
             foreach (var (k, v) in Resumo())
             {
                 var g = new Grid { ColumnDefinitions = new ColumnDefinitions("110,*") };
-                g.Children.Add(new TextBlock { Text = k, FontSize = 12.5, Foreground = TextoFraco });
+                // (o rotulo quebra a linha: "Ascienden y descienden" nao cabe nos 110)
+                g.Children.Add(new TextBlock { Text = k, FontSize = 12.5, Foreground = TextoFraco, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 6, 0) });
                 var tv = new TextBlock { Text = v, FontSize = 13, Foreground = Texto, TextWrapping = TextWrapping.Wrap };
                 Grid.SetColumn(tv, 1);
                 g.Children.Add(tv);
@@ -427,6 +472,10 @@ public sealed partial class TelaConfiguracoes : UserControl
         var r = new List<(string, string)> { (T("Versão"), _cfg.Modificada ? T("Atual") : T("Retrô")) };
         r.Add((T("Equipas"), T("{0} por divisão · {1} rodadas", _cfg.N, 2 * (_cfg.N - 1))));
         r.Add((T("Cartões"), _cfg.Modificada && _cfg.CartoesAmarelos ? T("Amarelos e vermelhos") : T("Só vermelhos")));
+        r.Add((T("Nota e risco"), _cfg.Modificada && _cfg.NotaERisco ? T("Ligados") : T("Desligados")));
+        r.Add((T("Ingresso"), _cfg.Modificada && _cfg.PrecoIngresso ? T("Escolhido") : T("Preço de tabela")));
+        // (a coluna do rotulo tem 110: "Campinho e árbitro" nao cabe)
+        r.Add((T("Campinho"), _cfg.Modificada && _cfg.CampinhoArbitro ? T("Ligados") : T("Desligados")));
         r.Add((T("Patrocínios"), _cfg.Modificada && _cfg.Patrocinios ? T("Ligados") : T("Desligados")));
         r.Add((T("Acréscimos"), _cfg.Modificada && _cfg.Acrescimos ? T("Ligados") : T("Desligados")));
         r.Add((T("Substituições"), _cfg.Modificada ? (_cfg.CincoSubstituicoes ? "5 (+1)" : "3 (+1)") : "3"));
@@ -607,22 +656,29 @@ public sealed partial class TelaConfiguracoes : UserControl
         Texto(pJogo, Nota(), 24, 272, 448, 40, a11, W95.Cinzento);
 
         // Regras
-        var trav = Texto(pRegras, T("Na versão Retrô as regras são as de 1998: só cartões vermelhos, sem patrocínios nem acréscimos."), 24, 8, 448, 30, W95.Arial11b, W95.Vermelho);
-        var cartoes = nb.Por(pRegras, new Marca { Texto = T("Cartões amarelos") }, 24, 40, 210, 17);
-        var patrocinios = nb.Por(pRegras, new Marca { Texto = T("Patrocínios") }, 24, 62, 210, 17);
-        var acrescimos = nb.Por(pRegras, new Marca { Texto = T("Acréscimos") }, 24, 84, 210, 17);
-        var cincoSubstC = nb.Por(pRegras, new Marca { Texto = T("5 substituições (FIFA)") }, 244, 40, 220, 17);
-        var noveResC = nb.Por(pRegras, new Marca { Texto = T("9 reservas no banco") }, 244, 62, 220, 17);
-        var premiacaoC = nb.Por(pRegras, new Marca { Texto = T("Premiação ampliada") }, 244, 84, 220, 17);
-        Texto(pRegras, T("Sobem e descem por divisão:"), 24, 112, 190, 16, W95.Arial13);
-        var sobem = nb.Por(pRegras, new Combo { Fonte = W95.Arial13, AlturaItem = 16 }, 218, 108, 110, 22);
+        var trav = Texto(pRegras, T("Na versão Retrô as regras são as de 1998: sem as adições da versão Atual."), 24, 8, 448, 30, W95.Arial11b, W95.Vermelho);
+        // as adicoes em dois grupos lado a lado: Partida (o que acontece em campo) e Clube
+        nb.Por(pRegras, new Grupo { Titulo = GrupoPartida }, 12, 38, 226, 116);
+        nb.Por(pRegras, new Grupo { Titulo = T("Clube") }, 246, 38, 226, 116);
+        Marca MarcaEm(double x, int linha, string t) => nb.Por(pRegras, new Marca { Texto = t }, x, 55 + 19 * linha, 206, 17);
+        var cartoes = MarcaEm(24, 0, T("Cartões amarelos"));
+        var acrescimos = MarcaEm(24, 1, T("Acréscimos"));
+        var cincoSubstC = MarcaEm(24, 2, T("5 substituições (FIFA)"));
+        var noveResC = MarcaEm(24, 3, T("9 reservas no banco"));
+        var patrocinios = MarcaEm(258, 0, T("Patrocínios"));
+        var ingressoC = MarcaEm(258, 1, T("Preço do ingresso"));
+        var premiacaoC = MarcaEm(258, 2, T("Premiação ampliada"));
+        var notaC = MarcaEm(258, 3, T("Nota e risco de lesão"));
+        var campinhoC = MarcaEm(258, 4, T("Campinho e árbitro"));
+        Texto(pRegras, T("Sobem e descem por divisão:"), 24, 162, 190, 16, W95.Arial13);
+        var sobem = nb.Por(pRegras, new Combo { Fonte = W95.Arial13, AlturaItem = 16 }, 218, 158, 110, 22);
         sobem.Itens.AddRange(OpcoesSobem);
         _combos.Add(sobem);
-        var ajudaSobem = Texto(pRegras, "", 24, 136, 448, 28);
-        var estrangeiros = NovoGrupo(pRegras, T("Jogadores estrangeiros"), 12, 166, 460, 74, _cfg.EstrangeirosLiberados ? 1 : 0,
+        var ajudaSobem = Texto(pRegras, "", 24, 182, 448, 28);
+        var estrangeiros = NovoGrupo(pRegras, T("Jogadores estrangeiros"), 12, 212, 460, 62, _cfg.EstrangeirosLiberados ? 1 : 0,
             T("Realístico: até 5 por equipa (Bosman e lusófonos não contam)"), T("Liberado: sem limite de estrangeiros"));
-        nb.Por(pRegras, new Grupo { Titulo = T("Desempate na classificação") }, 12, 246, 460, 54);
-        var desempate = Texto(pRegras, "", 24, 270, 440, 24, W95.Arial13);
+        nb.Por(pRegras, new Grupo { Titulo = T("Desempate na classificação") }, 12, 276, 460, 40);
+        var desempate = Texto(pRegras, "", 24, 295, 440, 18, W95.Arial13);
 
         // Aparencia
         var visual = NovoGrupo(pAparencia, T("Visual"), 12, 10, 460, 74, _cfg.Moderno ? 1 : 0,
@@ -654,6 +710,9 @@ public sealed partial class TelaConfiguracoes : UserControl
         versao.Mudou += () => { _cfg.Modificada = versao.Indice == 1; _atualizar!(); };
         equipas.Mudou += () => { if (_cfg.Modificada && equipas.Indice >= 0) { _cfg.EquipasPorDivisao = Configuracoes.OpcoesEquipas[equipas.Indice]; ajudaEquipas.Texto = AjudaEquipas(); ajudaEquipas.InvalidateVisual(); ajudaSobem.Texto = AjudaSobem(); ajudaSobem.InvalidateVisual(); } };
         cartoes.Clique += () => { if (_cfg.Modificada) _cfg.CartoesAmarelos = cartoes.Marcado; };
+        notaC.Clique += () => { if (_cfg.Modificada) _cfg.NotaERisco = notaC.Marcado; };
+        ingressoC.Clique += () => { if (_cfg.Modificada) _cfg.PrecoIngresso = ingressoC.Marcado; };
+        campinhoC.Clique += () => { if (_cfg.Modificada) _cfg.CampinhoArbitro = campinhoC.Marcado; };
         patrocinios.Clique += () => { if (_cfg.Modificada) _cfg.Patrocinios = patrocinios.Marcado; };
         acrescimos.Clique += () => { if (_cfg.Modificada) _cfg.Acrescimos = acrescimos.Marcado; };
         cincoSubstC.Clique += () => { if (_cfg.Modificada) _cfg.CincoSubstituicoes = cincoSubstC.Marcado; };
@@ -684,6 +743,9 @@ public sealed partial class TelaConfiguracoes : UserControl
             trav.IsVisible = !mod;
             cartoes.Marcado = mod && _cfg.CartoesAmarelos;
             cartoes.Habilitado = mod;
+            notaC.Marcado = mod && _cfg.NotaERisco; notaC.Habilitado = mod;
+            ingressoC.Marcado = mod && _cfg.PrecoIngresso; ingressoC.Habilitado = mod;
+            campinhoC.Marcado = mod && _cfg.CampinhoArbitro; campinhoC.Habilitado = mod;
             patrocinios.Marcado = mod && _cfg.Patrocinios;
             patrocinios.Habilitado = mod;
             acrescimos.Marcado = mod && _cfg.Acrescimos;

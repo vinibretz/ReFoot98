@@ -119,7 +119,7 @@ public class PatrocinioTestes(ITestOutputHelper saida)
     }
 
     // ------------------------------------------------------------ o save
-    [Fact]
+    [FactComArquivo("Patrocinio", "l20-2026-j1.e98")]
     public void ContratoNoCabecalhoDaEquipa()
     {
         var bytes = File.ReadAllBytes(Path.Combine(Pasta(), "l20-2026-j1.e98"));
@@ -138,7 +138,7 @@ public class PatrocinioTestes(ITestOutputHelper saida)
     }
 
     // ------------------------------------------------------------ contas
-    [Fact]
+    [FactComArquivo("Patrocinio", "l20-2026-j1.e98")]
     public void QuotaPorDivisao()
     {
         // cota x inflacao / 2 no milhar (frndint ao par) x (5 - d) / 2: o simular.py
@@ -169,7 +169,7 @@ public class PatrocinioTestes(ITestOutputHelper saida)
     // patrocinador ainda, pais aceito, divisao do nivel da marca, verba suficiente) com o valor
     // da quota; quem nao tem b nunca era obrigado a ter (o Random decide). O humano recebe
     // proposta de toda marca que chega a ele.
-    [Fact]
+    [FactComArquivo("Patrocinio", "l20-2026-j1.e98")]
     public void DistribuicaoDoLauncherBateComARegra()
     {
         var s = Save("l20-2026-j1.e98");
@@ -220,7 +220,7 @@ public class PatrocinioTestes(ITestOutputHelper saida)
     // ------------------------------------------------------------ distribuicao com Random fixo
     // a regra do simular.py (tools/patrocinios) com o Random do Delphi e o humano: o mesmo
     // resultado e a mesma semente no fim
-    [Fact]
+    [FactComArquivo("Patrocinio", "l20-2026-j1.e98")]
     public void DistribuicaoIgualAoSimulador()
     {
         foreach (uint semente in new uint[] { 0, 1, 12345, 0xDEADBEEF })
@@ -287,7 +287,7 @@ public class PatrocinioTestes(ITestOutputHelper saida)
         return (m, p, h, vistas);
     }
 
-    [Fact]
+    [FactComArquivo("Oraculo", "j3-original.e98")]
     public void PropostasRenovacaoNaFrenteEAceitarPara()
     {
         // sem renovacao: as 3 primeiras marcas que chegam ao humano, na ordem do arquivo
@@ -353,7 +353,7 @@ public class PatrocinioTestes(ITestOutputHelper saida)
         Assert.Equal(1u, m.R.Semente);
     }
 
-    [Fact]
+    [FactComArquivo("Oraculo", "j3-original.e98")]
     public void RodadaForaDosMomentosNaoUsaORandom()
     {
         var (m, p, _, vistas) = Mundo8(1234);
@@ -374,7 +374,7 @@ public class PatrocinioTestes(ITestOutputHelper saida)
         saida.WriteLine($"lugar {lugar}, jornada 3: {vistas.Count} proposta(s)");
     }
 
-    [Fact]
+    [FactComArquivo("Oraculo", "j3-original.e98")]
     public void PontualPagaPorJogo()
     {
         // a 1a semente em que o sorteio (12 tentativas) acha uma marca com reserva que chega a
@@ -419,7 +419,7 @@ public class PatrocinioTestes(ITestOutputHelper saida)
 
     static int MultasDesde(List<Proposta> v, int i) => v.Skip(i).Sum(x => x.Multa);
 
-    [Fact]
+    [FactComArquivo("Oraculo", "j3-original.e98")]
     public void TrocaDeMasterPagaMulta()
     {
         // com contrato, so proposta maior; a multa e tudo o que falta (epocas x valor)
@@ -443,7 +443,7 @@ public class PatrocinioTestes(ITestOutputHelper saida)
     // jornada de 2027, regras do launcher) com os patrocinadores ligados: no fim da epoca nao
     // havia contratos; no comeco de 2027 a distribuicao assina com as equipas do computador e
     // o humano recebe propostas; os amarelos acumulados zeram
-    [Fact]
+    [FactComArquivo("Oraculo", "f20-entrada.e98")]
     public void CicloComPatrocinios()
     {
         var d = AppContext.BaseDirectory;

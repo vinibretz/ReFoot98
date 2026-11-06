@@ -214,6 +214,28 @@ public sealed class Sala
     public Task DefinirPrazo(int minutos, CancellationToken ct = default) =>
         B.Atualizar($"{Raiz}/info", new JsonObject { ["prazo"] = Math.Clamp(minutos, 1, 5) }, ct);
 
+    // as opcoes da versao Atual do jogo do host (info/opcoes): quem entra joga com as do host,
+    // nao com as das Configuracoes do proprio aparelho (senao a tela mostrava, por exemplo, a
+    // previsao com um preco de ingresso que o host nao cobra)
+    public Task DefinirOpcoes(Regras.Regras r, CancellationToken ct = default) =>
+        B.Atualizar($"{Raiz}/info", new JsonObject
+        {
+            ["opcoes"] = new JsonObject
+            {
+                ["amarelos"] = r.CartoesAmarelos, ["nota"] = r.NotaERisco,
+                ["ingresso"] = r.PrecoIngresso, ["campinho"] = r.CampinhoArbitro,
+            },
+        }, ct);
+
+    // as regras r com as opcoes do host (o JSON de info/opcoes); sem elas (null), r
+    public static Regras.Regras ComOpcoesDoHost(Regras.Regras r, JsonNode? o) => o is not JsonObject x ? r : r with
+    {
+        CartoesAmarelos = (bool?)x["amarelos"] ?? r.CartoesAmarelos,
+        NotaERisco = (bool?)x["nota"] ?? r.NotaERisco,
+        PrecoIngresso = (bool?)x["ingresso"] ?? r.PrecoIngresso,
+        CampinhoArbitro = (bool?)x["campinho"] ?? r.CampinhoArbitro,
+    };
+
     // o sinal de vida do host (HostOnline de 10 em 10 s; na sala, antes do jogo, a TelaSala)
     public async Task SinalDeVida(CancellationToken ct = default)
     {

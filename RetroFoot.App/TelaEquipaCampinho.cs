@@ -111,6 +111,10 @@ public sealed partial class TelaEquipa
         }
 
         static Color Cor(string s) => Color.Parse(s);
+        // o texto sobre o relvado: o campinho e sempre escuro (a noite do estadio), entao as
+        // letras sao fixas e nao seguem o tema (no claro, o MTexto escuro sumia nas etiquetas)
+        static readonly IBrush CampoTexto = new ImmutableSolidColorBrush(Color.Parse("#f2f7f2"));
+        static readonly IBrush CampoEscuro = new ImmutableSolidColorBrush(Color.Parse("#1a1206"));
         static Color Mist(Color a, Color b, double t)
         {
             t = Math.Clamp(t, 0, 1);
@@ -415,24 +419,32 @@ public sealed partial class TelaEquipa
             foreach (var (p, u, d, a, v) in desenhar)
                 Peca(dc, p, P(u, d), S * Esc(d), a, v, numero.TryGetValue(p, out var nn) ? nn : 0, corFundo, corLetra);
 
-            // a formacao (D-M-A) no canto, num chip de vidro
+            // a formacao (D-M-A) no canto, num chip de vidro; o clique abre as taticas (o menu
+            // Escalar) logo abaixo do chip
             string form = porPos[1] + "-" + porPos[2] + "-" + porPos[3];
-            var tf = TM(form, 12, MTexto, true);
-            var rf = new Rect(r.X + 10, r.Y + 4, tf.WidthIncludingTrailingWhitespace + 18, 20);
-            dc.DrawRectangle(Vertical((Alfa(Colors.White, 0.16), 0), (Alfa(Colors.White, 0.05), 1)), new Pen(new ImmutableSolidColorBrush(Alfa(Colors.White, 0.2)), 1), rf, 10, 10);
+            var tf = TM(form, 12, CampoTexto, true);
+            var rf = new Rect(r.X + 10, r.Y + 4, tf.WidthIncludingTrailingWhitespace + 32, 20);
+            double sf = Anim("formacao:s", rf.Contains(_ponteiro) ? 1 : 0, 16);
+            dc.DrawRectangle(Vertical((Alfa(Colors.White, 0.16 + 0.12 * sf), 0), (Alfa(Colors.White, 0.05 + 0.08 * sf), 1)),
+                new Pen(new ImmutableSolidColorBrush(Alfa(Colors.White, 0.2 + 0.3 * sf)), 1), rf, 10, 10);
             dc.DrawText(tf, new Point(rf.X + 9, rf.Center.Y - tf.Height / 2));
+            // a setinha de lista
+            double sx = rf.Right - 14, sy = rf.Center.Y + 1;
+            dc.DrawGeometry(CampoTexto, null, Poli(new Point(sx - 4, sy - 2.5), new Point(sx + 4, sy - 2.5), new Point(sx, sy + 2.5)));
+            _alvos.Add((rf, () => AbrirTaticas(new Point(rf.X, rf.Bottom + 4))));
+            _brilhos.Add((rf, "formacao"));
             int res = _e.Jogadores.Count(p => Mem.Escalacao(p) == Mem.EscReserva);
             double xd = r.Right - 10;
             if (!JogarHabilitado())
             {
                 // o aviso (o Jogar desligado), num chip laranja
-                var ta = TM(T("Escalação incompleta"), 11, MEscuro, true);
+                var ta = TM(T("Escalação incompleta"), 11, CampoEscuro, true);
                 var ra = new Rect(xd - ta.WidthIncludingTrailingWhitespace - 18, rf.Y, ta.WidthIncludingTrailingWhitespace + 18, 20);
                 dc.DrawRectangle(Vertical((Cor("#ffc58f"), 0), (Cor("#f29b4c"), 1)), null, ra, 10, 10);
                 dc.DrawText(ta, new Point(ra.X + 9, ra.Center.Y - ta.Height / 2));
                 xd = ra.X - 10;
             }
-            var to = TM(T("Titulares") + " " + tit.Count + "  ·  " + T("Reservas") + " " + res, 11, MTexto, medio: true);
+            var to = TM(T("Titulares") + " " + tit.Count + "  ·  " + T("Reservas") + " " + res, 11, CampoTexto, medio: true);
             var ro = new Rect(xd - to.WidthIncludingTrailingWhitespace - 18, rf.Y, to.WidthIncludingTrailingWhitespace + 18, 20);
             if (ro.X > rf.Right + 6)
             {
@@ -562,15 +574,15 @@ public sealed partial class TelaEquipa
             if (p.JogosLesao > 0 || p.Suspensao > 0)
             {
                 var ra = new Point(pe.X + w * 1.2, cy - hm);
-                dc.DrawEllipse(p.Suspensao > 0 ? MLaranja : MVermelho, new Pen(MEscuro, 1), ra, t * 0.2, t * 0.2);
-                CentroM(dc, p.Suspensao > 0 ? "S" : "L", ra.X, ra.Y, Math.Max(7, t * 0.24), MEscuro, true);
+                dc.DrawEllipse(p.Suspensao > 0 ? MLaranja : MVermelho, new Pen(CampoEscuro, 1), ra, t * 0.2, t * 0.2);
+                CentroM(dc, p.Suspensao > 0 ? "S" : "L", ra.X, ra.Y, Math.Max(7, t * 0.24), CampoEscuro, true);
             }
 
             // o nome numa etiqueta escura por baixo da peca
             double tn = Math.Clamp(t * 0.42, 8.5, 11);
             double maxN = Math.Max(t * 1.6, Math.Min(t * 3.4, vizinho * esc - 14));
             var nomeJ = NomeJogador(p);
-            var tx = TM(nomeJ, tn, sel ? MEscuro : MTexto, true, maxN);
+            var tx = TM(nomeJ, tn, sel ? new ImmutableSolidColorBrush(TemaVerde.Cores.SobreDestaque) : CampoTexto, true, maxN);
             double wn = Math.Min(tx.WidthIncludingTrailingWhitespace, maxN) + 10;
             var rn = new Rect(pe.X - wn / 2, pe.Y + 1, wn, tn + 5);
             dc.DrawRectangle(new ImmutableSolidColorBrush(sel ? Alfa(TemaVerde.Cores.Destaque, 0.95) : Alfa(Cor("#062414"), 0.72 + 0.2 * s)), null, rn, rn.Height / 2, rn.Height / 2);

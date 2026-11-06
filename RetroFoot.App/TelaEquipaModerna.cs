@@ -424,7 +424,7 @@ public sealed partial class TelaEquipa
                 ("Gols", _largo ? 42 : 36, p => Hist(p, Mem.HistGolos).ToString()),
             };
             if (_largo) r.Add(("Temp.", 46, p => Mem.Golos14(p).ToString()));
-            if (_largo && _launcher) r.Add(("Nota", 42, p => p.Nota.ToString()));
+            if (_largo && _nota) r.Add(("Nota", 42, p => p.Nota.ToString()));
             return r;
         }
 
@@ -524,7 +524,7 @@ public sealed partial class TelaEquipa
             CentroM(dc, Posicao(pos), rp.Center.X, yc, 10.5, MCorPosicao[pos], true);
             // o nome e, logo depois, os selos: amarelos, suspensao, lesao
             var cor = fora ? MFraco : MTexto;
-            var selos = Selos(p, _launcher);
+            var selos = Selos(p, _amarelos);
             double max = Math.Max(1, xMaxNome - xNome - 24 * selos.Count);
             var nomeJ = NomeJogador(p);
             double wn = EscreveM(dc, nomeJ, xNome, yc, 13, cor, sel, max, medio: !sel);
@@ -769,7 +769,7 @@ public sealed partial class TelaEquipa
                 default: Estado(T("Fora da escalação"), MFraco); break;
             }
             // os mesmos selos da lista, com o texto ao lado (2 amarelos: "pendurado")
-            foreach (var (tipo, n) in Selos(p, _launcher))
+            foreach (var (tipo, n) in Selos(p, _amarelos))
             {
                 string txt = tipo == SeloAmarelo && n >= 2 ? T("Pendurado") : DicaSelo(tipo, n).Split('\n')[0];
                 var t = TM(txt, 11, tipo == SeloVermelho ? MLaranja : tipo == SeloAmarelo ? MAmarelo : MVermelho, true);
@@ -791,11 +791,11 @@ public sealed partial class TelaEquipa
                 (_largo ? "Jogos na temporada" : "Jogos na temp.", TextosMercado.JogosTemporada(p).ToString()),
                 (_largo ? "Média na temporada" : "Média na temp.", TextosMercado.MediaGols(p, true)),
                 ("Salário", Dinheiro(p.Salario)), ("Valor de mercado", TextosMercado.TextoValorMercado(_s, p)), ("Comportamento", comp) };
-            if (_launcher) { ficha.Add(("Nota", p.Nota.ToString())); ficha.Add(("Risco de lesão", p.Lesao.ToString())); }
+            if (_nota) { ficha.Add(("Nota", p.Nota.ToString())); ficha.Add(("Risco de lesão", p.Lesao.ToString())); }
             // o Historial do original como uma tabela: rotulo a esquerda, numero a direita
             var hist = new List<(string, string)> { ("Jogos", Hist(p, Mem.HistJogos).ToString()), ("Gols", Hist(p, Mem.HistGolos).ToString()),
                 ("Média de gols", TextosMercado.MediaGols(p, false)) };
-            if (_launcher) hist.Add(("Cartões amarelos", Amarelos(p).ToString()));
+            if (_amarelos) hist.Add(("Cartões amarelos", Amarelos(p).ToString()));
             hist.Add(("Cartões vermelhos", Hist(p, Mem.HistVermelhos).ToString()));
             hist.Add(("Lesões", Hist(p, Mem.HistLesoes).ToString()));
             // Ficha e Historico como duas tabelas lado a lado (rotulo a esquerda, numero a
@@ -837,8 +837,18 @@ public sealed partial class TelaEquipa
                     if (i % 2 == 1) dc.FillRectangle(MZebra, r);
                     if (i > 0) dc.FillRectangle(MLinha, new Rect(r.X, r.Y, r.Width, 1));
                     var tv = TM(itens[i].V, tv0, MTexto, true);
-                    double wv = tv.WidthIncludingTrailingWhitespace;
-                    EscreveM(dc, T(itens[i].R), r.X + 10, r.Center.Y, tr0, MFraco, max: r.Width - wv - 26);
+                    double wv = tv.WidthIncludingTrailingWhitespace, tr = tr0;
+                    // o rotulo e o valor nao cabem juntos (um comportamento comprido na coluna
+                    // estreita do 4:3): os dois encolhem, ate 65%; so depois o rotulo ganha "..."
+                    double wr = LarguraM(T(itens[i].R), tr0);
+                    if (wr + wv + 26 > r.Width)
+                    {
+                        double f = Math.Max(0.65, (r.Width - 26) / (wr + wv));
+                        tv = TM(itens[i].V, tv0 * f, MTexto, true);
+                        wv = tv.WidthIncludingTrailingWhitespace;
+                        tr = tr0 * f;
+                    }
+                    EscreveM(dc, T(itens[i].R), r.X + 10, r.Center.Y, tr, MFraco, max: r.Width - wv - 26);
                     dc.DrawText(tv, new Point(r.Right - 10 - wv, r.Center.Y - tv.Height / 2));
                 }
             return c.Bottom;
@@ -894,17 +904,17 @@ public sealed partial class TelaEquipa
                 ("Dinheiro em caixa", Dinheiro((int)_e.Dinheiro), 2),
             };
             // (no launcher o preco e o campo com as setas, e a previsao ocupa mais 2 linhas)
-            if (_jogo != null && !_launcher) res.Add(("Preço do ingresso", Dinheiro(Ext.Bytes(_jogo.B36.AsSpan(0, 10)).Round()), 0));
+            if (_jogo != null && !_ingresso) res.Add(("Preço do ingresso", Dinheiro(Ext.Bytes(_jogo.B36.AsSpan(0, 10)).Round()), 0));
             bool duas = _largo;
             // estreito (4:3) com o launcher: o ingresso vai num cartao proprio no rodape, com
             // altura fixa (o seletor e as 3 linhas da previsao), e o balanco fica com o resto;
             // antes tudo dividia o mesmo passo e o seletor invadia as linhas vizinhas
-            bool cartaoIngresso = _launcher && !duas;
+            bool cartaoIngresso = _ingresso && !duas;
             // (compacto: o "Prox. em casa (time)" e subtitulo ao lado do seletor e so o publico
             // e a renda descem, para o balanco nao ficar com a letra miuda)
             const double lhPrev = 14, hSeletor = 30;
             double hIngresso = cartaoIngresso ? 6 + hSeletor + (_jogo != null ? 2 * lhPrev : 0) + 6 : 0;
-            int extra = _launcher && duas ? (_jogo != null ? 5 : 1) : 0;
+            int extra = _ingresso && duas ? (_jogo != null ? 5 : 1) : 0;
             int n = duas ? Math.Max(bal.Count, res.Count + extra + 1) : bal.Count + 1 + res.Count;
             double passo = Math.Min(22, (pg.Height - 4 - (cartaoIngresso ? hIngresso + 8 : 0)) / n);
             // passo curto: a letra encolhe junto, para as linhas nao se encostarem
@@ -933,7 +943,7 @@ public sealed partial class TelaEquipa
             double xr = duas ? pg.X + w + 24 : pg.X;
             Linhas(res, xr);
             // launcher (ingressos.py): o % do preco de tabela nos jogos em casa
-            if (_launcher)
+            if (_ingresso)
             {
                 double xf = xr + w;
                 if (cartaoIngresso)
@@ -1124,7 +1134,7 @@ public sealed partial class TelaEquipa
                 LogoM(dc, eq, new Rect(c.X + 18, y - 9, 18, 18));
                 EscreveM(dc, Texto(eq.NomeCurto), c.X + 44, y, 13, MTexto, true, 170);
                 int k = Math.Min(v, 15);
-                if (_launcher) DireitaM(dc, T("Pênalti: {0}%   Cartões: -{1}%", pen[k], 2 * (k + 1)), c.Right
+                if (_campinho) DireitaM(dc, T("Pênalti: {0}%   Cartões: -{1}%", pen[k], 2 * (k + 1)), c.Right
  - 18, y, 11.5, MFraco);
                 var r = new Rect(c.X + 18, y + 16, w - 36, 8);
                 dc.DrawRectangle(MLinha, null, r, 4, 4);

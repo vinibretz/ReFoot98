@@ -86,7 +86,7 @@ public class BaseTestes(ITestOutputHelper saida)
         Assert.Equal(939, Atributos.Soma(Encoding.Latin1.GetBytes("ryan Giggs")));
     }
 
-    [Fact]
+    [FactComOriginal]
     public void TodasAsEquipes()
     {
         var raiz = Arquivos.Raiz();

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
@@ -89,11 +90,14 @@ public sealed partial class TelaConfiguracoes
         var regras = string.Join(" · ", new[]
         {
             mod && _cfg.CartoesAmarelos ? T("Amarelos e vermelhos") : T("Só vermelhos"),
+            mod && _cfg.NotaERisco ? T("nota e risco de lesão") : null,
+            mod && _cfg.PrecoIngresso ? T("preço do ingresso") : null,
+            mod && _cfg.CampinhoArbitro ? T("campinho e árbitro") : null,
             mod && _cfg.Patrocinios ? T("patrocínios ligados") : T("patrocínios desligados"),
             T("sobem e descem {0}", k),
             mod && _cfg.PremiacaoAmpliada ? T("premiação ampliada") : T("premiação clássica"),
             _cfg.EstrangeirosLiberados ? T("Liberado") : T("Realístico"),
-        });
+        }.Where(x => x != null));
         return new[]
         {
             jogo, regras, T("Visual") + ": " + (_cfg.Moderno ? T("Moderno") + " (" + NomeTema(_cfg.Tema) + ")" : T("Retrô")), Nomes[IndiceIdioma], DadosJogo.Raiz,
@@ -142,20 +146,33 @@ public sealed partial class TelaConfiguracoes
             p.Children.Add(CUi.Cartao_(T("Na versão Retrô as regras são as de 1998"), new StackPanel
             {
                 Spacing = 10,
-                Children = { CCfg.Ajuda(T("Cartões amarelos, patrocínios e acréscimos só existem na versão Atual. A escolha fica guardada para quando você usar a Modificada.")), usar },
+                Children = { CCfg.Ajuda(TextoTravado), usar },
             }));
         }
         // na Retro aparecem como no jogo original (desligadas) e travadas; o _cfg guarda a escolha
         Control Adicao(string nome, string ajuda, bool valor, Action<bool> mudou) =>
             CUi.Interruptor(nome, ajuda, mod && valor, v => { if (_cfg.Modificada) mudou(v); }, mod);
-        p.Children.Add(CCfg.Bloco(T("Adições"), new[]
+        // as adicoes agrupadas pelo que afetam
+        p.Children.Add(CCfg.Bloco(GrupoPartida, new[]
         {
-            Adicao(T("Cartões amarelos"), T("Três amarelos acumulados suspendem por um jogo. Desligados: só vermelhos, como no Retrô."), _cfg.CartoesAmarelos, v => _cfg.CartoesAmarelos = v),
-            Adicao(T("Patrocínios"), T("Propostas e contratos de patrocínio master ao longo da temporada."), _cfg.Patrocinios, v => _cfg.Patrocinios = v),
+            Adicao(T("Cartões amarelos"), AjudaAmarelos, _cfg.CartoesAmarelos, v => _cfg.CartoesAmarelos = v),
             Adicao(T("Acréscimos"), T("De 1 a 5 minutos no fim do 1º tempo e de 1 a 10 no fim do 2º, com golos, cartões e lesões (45'+2'). Desligados: como no Retrô."), _cfg.Acrescimos, v => _cfg.Acrescimos = v),
             Adicao(T("5 substituições"), T("A regra da FIFA: até 5 substituições por jogo. Desligado: 3, como no Retrô. Na prorrogação da Taça, mais uma."), _cfg.CincoSubstituicoes, v => _cfg.CincoSubstituicoes = v),
             Adicao(T("9 reservas"), T("Até 9 reservas no banco (20 relacionados). Desligado: 5, como no Retrô."), _cfg.NoveReservas, v => _cfg.NoveReservas = v),
+        }));
+        p.Children.Add(CCfg.Bloco(GrupoJogadores, new[]
+        {
+            Adicao(T("Nota e risco de lesão"), AjudaNota, _cfg.NotaERisco, v => _cfg.NotaERisco = v),
+        }));
+        p.Children.Add(CCfg.Bloco(GrupoEstadio, new[]
+        {
+            Adicao(T("Preço do ingresso"), AjudaIngresso, _cfg.PrecoIngresso, v => _cfg.PrecoIngresso = v),
+            Adicao(T("Patrocínios"), T("Propostas e contratos de patrocínio master ao longo da temporada."), _cfg.Patrocinios, v => _cfg.Patrocinios = v),
             Adicao(T("Premiação ampliada"), AjudaPremiacao, _cfg.PremiacaoAmpliada, v => _cfg.PremiacaoAmpliada = v),
+        }));
+        p.Children.Add(CCfg.Bloco(GrupoTela, new[]
+        {
+            Adicao(T("Campinho e árbitro"), AjudaCampinho, _cfg.CampinhoArbitro, v => _cfg.CampinhoArbitro = v),
         }));
         var ajudaSobem = CUi.Txt(AjudaSobem(), 14, null, FontWeight.Medium, true);
         var (sobem, _) = CUi.Escolha(OpcoesSobem, mod ? _cfg.SobemDescem : 0,

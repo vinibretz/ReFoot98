@@ -25,6 +25,7 @@ using Jogador = RetroFoot.Motor.Save.Jogador;
 //   (RETROFOOT_JOGO = pasta do jogo original; padrao <pasta ao lado do projeto>/game)
 //   (ACRESCIMOS=1 = com os acrescimos, Regras.Acrescimos)
 //   (SOBEM=1..4 = o K de "Sobem e descem por divisao", Regras.SobemDescemEscolhido; padrao automatico)
+//   (GUARDAR_SAVE=caminho = copia o save do fim do soak para o caminho)
 sealed class SoakApp : Application
 {
     public override void Initialize()
@@ -59,7 +60,12 @@ static class Programa
 
         var cfg = new Configuracoes
         {
-            Modificada = mod, EquipasPorDivisao = n, CartoesAmarelos = mod, Patrocinios = mod,
+            Modificada = mod, EquipasPorDivisao = n, Patrocinios = mod,
+            // SEM_AMARELOS / SEM_NOTA / SEM_INGRESSO / SEM_CAMPINHO = 1: desliga essa opcao
+            CartoesAmarelos = mod && Environment.GetEnvironmentVariable("SEM_AMARELOS") != "1",
+            NotaERisco = mod && Environment.GetEnvironmentVariable("SEM_NOTA") != "1",
+            PrecoIngresso = mod && Environment.GetEnvironmentVariable("SEM_INGRESSO") != "1",
+            CampinhoArbitro = mod && Environment.GetEnvironmentVariable("SEM_CAMPINHO") != "1",
             // ACRESCIMOS=1: com os acrescimos (so na Modificada)
             Acrescimos = mod && Environment.GetEnvironmentVariable("ACRESCIMOS") == "1",
             SobemDescem = mod && int.TryParse(Environment.GetEnvironmentVariable("SOBEM"), out var k) && k is >= 1 and <= 4 ? k : 0,
@@ -170,6 +176,9 @@ static class Programa
         };
         t.Start();
         Dispatcher.UIThread.MainLoop(cts.Token);
+        // (GUARDAR_SAVE=caminho: o save do fim do soak fica la, para os testes que leem saves reais)
+        if (Environment.GetEnvironmentVariable("GUARDAR_SAVE") is { Length: > 0 } guardar && File.Exists(arq))
+            try { File.Copy(arq, guardar, true); } catch (Exception ex) { Console.Error.WriteLine("GUARDAR_SAVE: " + ex.Message); }
         try { File.Delete(arq); } catch { }
         return codigo;
     }

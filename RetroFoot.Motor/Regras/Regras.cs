@@ -37,11 +37,19 @@ public readonly partial record struct Regras(int EquipasPorDivisao, int LimiteJo
     public int MaxSubstituicoes => SubstituicoesEscolhidas > 0 ? SubstituicoesEscolhidas : 3;
     public bool SubstituicaoNaProrrogacao => SubstituicoesEscolhidas > 0;
 
+    // o resto do que os EXEs do launcher acrescentam, cada um com a sua opcao (antes vinham com
+    // os cartoes amarelos): a nota e o risco de lesao nas fichas e no Procurar; o preco do
+    // ingresso escolhido pelo mandante (Ingressos) com a torcida no arbitro; o campinho e o
+    // arbitro completo na tela da equipa. Desligado, o preco gravado no save nao vale (tabela)
+    public bool NotaERisco { get; init; }
+    public bool PrecoIngresso { get; init; }
+    public bool CampinhoArbitro { get; init; }
+
     // o jogo classico (98.003)
     public static readonly Regras Original = new(8, 24, false, false);
 
-    // o ELIFnn.EXE do launcher: limite de 30 jogadores, cartoes amarelos e o 5-0-5
-    public static Regras Launcher(int n) => new(n, 30, true, true);
+    // o ELIFnn.EXE do launcher: limite de 30 jogadores, cartoes amarelos, o 5-0-5 e o resto
+    public static Regras Launcher(int n) => new(n, 30, true, true) { NotaERisco = true, PrecoIngresso = true, CampinhoArbitro = true };
 
     // base com o N do save: o numero de equipas da 1a divisao
     // base com o N e o K do save: o numero de equipas da 1a divisao e a marca do K escolhido

@@ -13,6 +13,15 @@
 - Ao lançar uma versão, siga `docs/release.md`: a seção [Não lançado] vira a da versão e é a
   base do commit, da tag e da descrição da release.
 
+## Testes
+
+- Antes de lançar, `pwsh -File .\scripts\testar-tudo.ps1` (detalhes em `docs/testes.md`): os testes
+  do motor e da interface, 3 soaks e as capturas de cada tela em cada visual (`dist\testes\<data>\index.html`).
+- Mudou uma tela que as opções da versão Atual afetam (ou criou uma)? Rode `RetroFoot.App.Testes`:
+  os testes abrem as telas nos 8 visuais e acusam texto sobreposto ou cortado (nos 4 idiomas) e
+  opção que não esconde o que é dela. Tela nova entra em `Cena` e em `LayoutTestes.Telas`; para
+  ver o que a tela desenha, o `Despejo` (`DESPEJO=pasta`, `DESPEJO_TELA=...`).
+
 ## Release
 
 - Rode `scripts/gerar-release.ps1` sempre com o PowerShell 7: `pwsh -File .\scripts\gerar-release.ps1 -Versao X.Y.Z`.
@@ -36,6 +45,13 @@
 - Testes online (`RetroFoot.Motor.Testes`, filtro `Online`) sem o save do original: copie um
   save criado pelo jogo para `RetroFoot.Motor.Testes/Oraculo/j3-entrada.e98` (ver o
   `LEIA.md` dessa pasta). A conexão real com o Firebase: `dotnet run --project ferramentas/RegrasFirebase`.
+- Testes que leem saves reais: `RetroFoot.Motor.Testes/saves-locais.txt` (fora do git) aponta
+  para `RetroFoot.Motor.Testes/SavesLocais` (saves do jogo e do SoakUI com `GUARDAR_SAVE`). Não
+  ponha lá save com "Sobem e descem" escolhido (`MarcaNoSave` falha). Ao trocar esses saves,
+  registre a impressão nova que `SemAcrescimosIgualAoOriginal` mostra. Sem o jogo original
+  (pasta do jogo, oráculo e `j3` verdadeiro), 23 testes aparecem como ignorados: é esperado;
+  a suíte deve ficar sem falhas. Teste novo que precisa desses arquivos: use os atributos de
+  `RetroFoot.Motor.Testes/Requisitos.cs` (`[FactComOriginal]`, `[FactComArquivo(pasta, arquivo)]`).
 
 ## Soaks (ferramentas/SoakUI e SoakOnline)
 

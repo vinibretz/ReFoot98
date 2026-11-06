@@ -175,6 +175,9 @@ public sealed partial class TelaInicio
             T("{0} equipas por divisão ({1} rodadas)", r.N, r.Jornadas),
             r.CartoesAmarelos ? T("cartões amarelos") : T("só cartões vermelhos"),
         };
+        if (r.NotaERisco) partes.Add(T("nota e risco de lesão"));
+        if (r.PrecoIngresso) partes.Add(T("preço do ingresso"));
+        if (r.CampinhoArbitro) partes.Add(T("campinho e árbitro"));
         if (cfg.Modificada && cfg.Patrocinios) partes.Add(T("patrocínios"));
         if (cfg.Modificada && cfg.Acrescimos) partes.Add(T("acréscimos"));
         if (cfg.Modificada) partes.Add(T("sobem e descem {0}", r.SobemDescem));

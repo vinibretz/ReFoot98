@@ -17,6 +17,23 @@ public partial class PartidaTestes
     // tirada do motor de antes dos acrescimos
     const string ImpressaoOriginal = "438CA9D5AAD671A74A03C1E8558403B212FAF8CCD5EF3A274BF8F091C252BD99";
 
+    // a impressao depende dos saves de entrada: a de cada conjunto conhecido (a chave e o
+    // SHA-256 dos saves, Entradas()); a ImpressaoOriginal e a dos saves do Downloads do autor,
+    // sem saves-locais.txt. Um conjunto novo so mostra a impressao (para registrar aqui)
+    static readonly Dictionary<string, string> Impressoes = new()
+    {
+        // RetroFoot.Motor.Testes/SavesLocais do vinibretz (os do jogo e os do SoakUI, 2026-11-06)
+        ["1B8AFBF0D29EC3410609D66E7DC3E43A911F9E1EAE4E8BF8E907BBE6AE4CA3C4"] = "D42DBB241D325B2549200F084CCBA895992A6C292BCD855495C6E53C79CF776F",
+    };
+
+    static string Entradas()
+    {
+        using var h = SHA256.Create();
+        foreach (var s in Saves()) { var b = s.Gravar(); h.TransformBlock(b, 0, b.Length, null, 0); }
+        h.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+        return Convert.ToHexString(h.Hash!);
+    }
+
     string Impressao(bool acrescimos)
     {
         using var h = SHA256.Create();
@@ -44,8 +61,11 @@ public partial class PartidaTestes
     {
         RetroFoot.Motor.Partida.Memoria.SemJogosDaTemporada = true;   // (igual ao jogo classico)
         if (Saves().Count == 0) return;
-        Assert.Equal(ImpressaoOriginal, Impressao(false));
-        Assert.NotEqual(ImpressaoOriginal, Impressao(true));
+        string sem = Impressao(false), entradas = Entradas();
+        if (Impressoes.TryGetValue(entradas, out var quero)) Assert.Equal(quero, sem);
+        else if (!Arquivos.Locais().Any()) Assert.Equal(ImpressaoOriginal, sem);
+        else saida.WriteLine($"saves sem impressao registrada: [\"{entradas}\"] = \"{sem}\"");
+        Assert.NotEqual(sem, Impressao(true));
         Assert.False(TRegras.Original.Acrescimos);
         Assert.False(TRegras.Launcher(8).Acrescimos);
     }

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Os testes da interface (docs/testes.md): as telas de verdade numa janela sem tela
+       (Avalonia.Headless), em cada visual (Classico 4:3 e 16:9, Moderno nos tres temas, celular
+       Moderno e Retro), com os textos desenhados lidos de volta (Inspecao.cs) -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <IsPackable>false</IsPackable>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageReference Include="Avalonia.Headless" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Skia" Version="12.1.3" />
+    <!-- (so na leitura dos textos: o DrawingGroup do Avalonia nao grava imagens nem recortes
+         arredondados; Inspecao.Remendar) -->
+    <PackageReference Include="Lib.Harmony" Version="2.4.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RetroFoot.App\RetroFoot.App.csproj" />
+  </ItemGroup>
+</Project>

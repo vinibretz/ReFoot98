@@ -152,8 +152,9 @@ public sealed partial class Mundo
         // (a procura antes do preco e a ocupacao media antes deste jogo: o preco escolhido na
         // tela da equipa refaz o publico deste jogo, RecalcularPublico)
         _demanda[j] = (p, (byte[])casa.EstadioReal.Clone());
-        p = Ingressos.Publico(p, casa);   // launcher: o preco escolhido pelo mandante (seg03:B1EC)
+        p = Ingressos.Publico(p, MandanteComPreco(casa));   // launcher: o preco escolhido pelo mandante (seg03:B1EC)
         j.D40 = (uint)PreJogo.LotacaoDoEstadio(casa, Arred(p));
+        MarcarPrecoAplicado(casa);
     }
 
     // o +2 do mandante na influencia do arbitro (seg03:1a66). Na versao Atual (as regras do
@@ -163,9 +164,36 @@ public sealed partial class Mundo
     // mexer no preco, sempre +2, como no jogo classico (que fica sempre com +2)
     public bool TorcidaNoArbitro;
 
+    // o mandante cujo preco escolhido vale (Regras.PrecoIngresso); null = o preco de tabela
+    Equipa? MandanteComPreco(Equipa? casa) => Regras.PrecoIngresso ? casa : null;
+
+    // a razao do preco que vale agora no publico do mandante (a de tabela sem a opcao)
+    int RazaoQueVale(Equipa casa) => Regras.PrecoIngresso ? Ingressos.Razao(casa) : Ingressos.Cem;
+
+    // marca no save a razao que entrou no publico (Ingressos.Aplicada); sem preco escolhido, nada
+    // (o byte fica ou volta a zero)
+    void MarcarPrecoAplicado(Equipa casa) =>
+        Ingressos.MarcarAplicada(casa, Ingressos.Razao(casa) == Ingressos.Cem ? 0 : RazaoQueVale(casa));
+
+    // Um save gravado no meio da jornada e reaberto com a opcao "Preco do ingresso" trocada: o
+    // publico dos jogos desta jornada foi decidido com o preco de antes; refaz o de cada mandante
+    // cuja marca nao bate com o preco que vale agora (como o preco mudado na tela da equipa). Os
+    // saves sem a marca ficam como estao
+    public void AjustarPublicoAoPreco()
+    {
+        if (Retomar <= 0) return;
+        foreach (var j in S.Jogos)
+        {
+            var casa = Equipa(j.Casa);
+            if (casa == null || j.Taca == TipoJogo.SemEquipas) continue;
+            int aplicada = Ingressos.Aplicada(casa);
+            if (aplicada != 0 && aplicada != RazaoQueVale(casa)) RecalcularPublico(j);
+        }
+    }
+
     int BonusDaTorcida(Equipa casa, Jogo j)
     {
-        if (!Regras.CartoesAmarelos || !TorcidaNoArbitro || !_demanda.TryGetValue(j, out var d)) return 2;
+        if (!Regras.PrecoIngresso || !TorcidaNoArbitro || !_demanda.TryGetValue(j, out var d)) return 2;
         long tabela = Math.Min(Arred(d.Procura), PreJogo.CapacidadeDoEstadio(casa));
         return BonusPeloPublico(j.D40, tabela);
     }
@@ -223,14 +251,15 @@ public sealed partial class Mundo
 
     void RecalcularSo(Jogo j, Equipa casa)
     {
+        MarcarPrecoAplicado(casa);
         var d = _demanda[j];
         if (d.Ocupacao != null)
         {
             d.Ocupacao.CopyTo(casa.EstadioReal, 0);
-            j.D40 = (uint)PreJogo.LotacaoDoEstadio(casa, Arred(Ingressos.Publico(d.Procura, casa)));
+            j.D40 = (uint)PreJogo.LotacaoDoEstadio(casa, Arred(Ingressos.Publico(d.Procura, MandanteComPreco(casa))));
             return;
         }
-        j.D40 = (uint)Math.Min(Arred(Ingressos.Publico(d.Procura, casa)), PreJogo.CapacidadeDoEstadio(casa));
+        j.D40 = (uint)Math.Min(Arred(Ingressos.Publico(d.Procura, MandanteComPreco(casa))), PreJogo.CapacidadeDoEstadio(casa));
     }
 
     // seg03:1df4(calendario, fora, adversario): entrada da Taca (+0x07 = 1, +0x08 =

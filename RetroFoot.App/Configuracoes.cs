@@ -18,7 +18,7 @@ namespace RetroFoot.App;
 // jogo original: toda adicao desligada, 8 equipas. Sem registo: o jogo e sempre o da copia
 // registada (todos os add-ins); a chave "registrado" dos arquivos antigos e ignorada.
 //
-// Na versao Original as adicoes (equipas por divisao, amarelos, patrocinios, acrescimos) nao existem: o
+// Na versao Original as adicoes (equipas por divisao, amarelos, nota e risco, ingresso, campinho, patrocinios, acrescimos) nao existem: o
 // que fica guardado nelas e a escolha da Modificada, que volta quando ela e escolhida de
 // novo (como o launcher). Um save com N != 8 abre sempre como Modificada.
 public sealed class Configuracoes
@@ -33,6 +33,11 @@ public sealed class Configuracoes
     public bool Modificada { get; set; }
     public int EquipasPorDivisao { get; set; } = 8;
     public bool CartoesAmarelos { get; set; }
+    // o resto do launcher, cada um com a sua opcao (Regras.NotaERisco, PrecoIngresso,
+    // CampinhoArbitro); um config.json de antes delas herda o valor dos cartoes amarelos
+    public bool NotaERisco { get; set; }
+    public bool PrecoIngresso { get; set; }
+    public bool CampinhoArbitro { get; set; }
     public bool Patrocinios { get; set; }
     // os acrescimos no fim de cada tempo (Regras.Acrescimos)
     public bool Acrescimos { get; set; }
@@ -80,7 +85,7 @@ public sealed class Configuracoes
     // os amarelos, os acrescimos e o K da opcao
     public TRegras RegrasPara(int n, bool forcarModificada = false) =>
         !Modificada && n == 8 && !forcarModificada ? TRegras.Original
-            : TRegras.Launcher(n) with { CartoesAmarelos = CartoesAmarelos, DesempateVitorias = true, Acrescimos = Acrescimos, SobemDescemEscolhido = SobemDescem, PremiacaoAmpliada = PremiacaoAmpliada,
+            : TRegras.Launcher(n) with { CartoesAmarelos = CartoesAmarelos, NotaERisco = NotaERisco, PrecoIngresso = PrecoIngresso, CampinhoArbitro = CampinhoArbitro, DesempateVitorias = true, Acrescimos = Acrescimos, SobemDescemEscolhido = SobemDescem, PremiacaoAmpliada = PremiacaoAmpliada,
                 SubstituicoesEscolhidas = CincoSubstituicoes ? 5 : 3, ReservasEscolhidas = NoveReservas ? 9 : 5 };
 
     // o K que vale no proximo jogo novo (o automatico ou o escolhido, ate o maximo do N)
@@ -198,6 +203,9 @@ public sealed class Configuracoes
             c.Modificada = Texto(o, "versao") is string v ? v == "modificada" : c.Modificada;
             if (Inteiro(o, "equipasPorDivisao") is int n && Array.IndexOf(OpcoesEquipas, n) >= 0) c.EquipasPorDivisao = n;
             c.CartoesAmarelos = Logico(o, "cartoesAmarelos") ?? c.CartoesAmarelos;
+            c.NotaERisco = Logico(o, "notaERisco") ?? c.CartoesAmarelos;
+            c.PrecoIngresso = Logico(o, "precoIngresso") ?? c.CartoesAmarelos;
+            c.CampinhoArbitro = Logico(o, "campinhoArbitro") ?? c.CartoesAmarelos;
             c.Patrocinios = Logico(o, "patrocinios") ?? c.Patrocinios;
             c.Acrescimos = Logico(o, "acrescimos") ?? c.Acrescimos;
             c.CincoSubstituicoes = Logico(o, "cincoSubstituicoes") ?? c.CincoSubstituicoes;
@@ -225,6 +233,9 @@ public sealed class Configuracoes
             ["versao"] = Modificada ? "modificada" : "original",
             ["equipasPorDivisao"] = EquipasPorDivisao,
             ["cartoesAmarelos"] = CartoesAmarelos,
+            ["notaERisco"] = NotaERisco,
+            ["precoIngresso"] = PrecoIngresso,
+            ["campinhoArbitro"] = CampinhoArbitro,
             ["patrocinios"] = Patrocinios,
             ["acrescimos"] = Acrescimos,
             ["cincoSubstituicoes"] = CincoSubstituicoes,

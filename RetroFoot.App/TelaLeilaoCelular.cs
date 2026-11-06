@@ -31,7 +31,7 @@ sealed class LeilaoCelular : UserControl
 
     readonly string _valorMercado;
 
-    public LeilaoCelular(Sessao s, SEquipa v, SJogador p, int? preco, int salario, bool launcher)
+    public LeilaoCelular(Sessao s, SEquipa v, SJogador p, int? preco, int salario, bool nota, bool amarelos)
     {
         _v = v; _preco = preco;
         _moeda = Moeda.DoSave(s.S);
@@ -39,7 +39,7 @@ sealed class LeilaoCelular : UserControl
         if (CUi.Retro)
         {
             // no Retro, a janela amarela do computador (TsellPlayerDlg) em pe
-            _folha = new CUi.Folha(T("Venda de jogador por leilão"), FichaRetro(p, v, preco, salario, launcher), new Border(), fechar: null);
+            _folha = new CUi.Folha(T("Venda de jogador por leilão"), FichaRetro(p, v, preco, salario, nota, amarelos), new Border(), fechar: null);
             MercadoRetro.Pintar(_folha, W95.Amarelo);
             _folha.Rodape(null);
             Content = _folha;
@@ -52,7 +52,7 @@ sealed class LeilaoCelular : UserControl
             (T("Salário pretendido"), FormatoDinheiro.Valor(_moeda, salario)),
             (T("Preço base"), preco is int b ? FormatoDinheiro.Valor(_moeda, b) : "–"),
         };
-        corpo.Children.Add(MercadoCelular.Ficha(p, launcher, linhas, TextosMercado.TextoValorMercado(s, p)));
+        corpo.Children.Add(MercadoCelular.Ficha(p, nota, amarelos, linhas, TextosMercado.TextoValorMercado(s, p)));
         _folha = new CUi.Folha(T("Venda de jogador por leilão"), corpo, Esperando(), TM.NomeEquipa(v), CUi.Escudo(v, 32), fechar: null);
         Content = _folha;
     }
@@ -61,7 +61,7 @@ sealed class LeilaoCelular : UserControl
     // a ficha da janela do computador (2:3002): a esquerda Time (nas cores do vendedor),
     // Jogador, Posicao, Forca, Salario pretendido e Preco base; a direita a Nacionalidade com
     // a bandeira; embaixo o suspenso / lesionado em vermelho e o Panel1 com o Historico
-    Control FichaRetro(SJogador p, SEquipa v, int? preco, int salario, bool launcher)
+    Control FichaRetro(SJogador p, SEquipa v, int? preco, int salario, bool nota, bool amarelos)
     {
         var preto = W95.Preto;
         var s = new StackPanel { Spacing = 6 };
@@ -89,7 +89,7 @@ sealed class LeilaoCelular : UserControl
         Grid.SetColumn(dir, 1); topo.Children.Add(dir);
         s.Children.Add(topo);
         MercadoRetro.Avisos(s, p, W95.Vermelho);
-        var ficha = MercadoRetro.Ficha(p, launcher, W95.Amarelo, preto, _valorMercado);
+        var ficha = MercadoRetro.Ficha(p, nota, amarelos, W95.Amarelo, preto, _valorMercado);
         ficha.Margin = new Thickness(0, 4, 0, 0);
         s.Children.Add(ficha);
         return s;

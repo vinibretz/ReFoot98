@@ -30,6 +30,9 @@ public sealed class JogoRemoto
     string _rodada = "";
     bool _pronto;
     Sessao? _sessao;
+    // as opcoes da versao Atual do jogo do host (Sala.DefinirOpcoes); null = ainda nao vieram
+    // (ou um host de antes delas): as das Configuracoes deste aparelho
+    JsonNode? _opcoesHost;
 
     public event Action? Comecou;
     public Sala Sala => _sala;
@@ -38,6 +41,12 @@ public sealed class JogoRemoto
     {
         _mostrar = mostrar; _voltar = voltar; _sala = sala; _cli = cli;
         cli.NovoRetrato += (r, rodada, versao, instancia) => Dispatcher.UIThread.Post(() => Novo(r, rodada, instancia));
+        sala.B.Observar($"{sala.Raiz}/info/opcoes", (caminho, v) =>
+        {
+            if (caminho != "/") return;
+            var o = v?.DeepClone();
+            Dispatcher.UIThread.Post(() => _opcoesHost = o);
+        });
         // a rodada ao vivo (fase 3): o inicio (o jogo naquele momento) e um tique por minuto; a
         // mesma tela da jornada, numa Sessao sem motor sobre a copia
         sala.B.Observar($"{sala.Raiz}/rodada/aoVivo/inicio", (caminho, v) =>
@@ -363,7 +372,7 @@ public sealed class JogoRemoto
             {
                 var js = Jogo98.Ler(AoVivo.Descomprimir(sv));
                 antes = (App.Raiz as Border)?.Child;
-                s = new Sessao(js, _mostrar, Configuracoes.Ler().OpcoesDoJogo(js, TelaInicio.PastaDoJogo())) { Remoto = this };
+                s = new Sessao(js, _mostrar, OpcoesDoJogo(js)) { Remoto = this };
                 s.Mostrar(Mensagem(T("Jogo online"), T("O jogo está começando…")));
                 copia = true;
                 _sessaoPergunta = s;
@@ -609,7 +618,7 @@ public sealed class JogoRemoto
         try
         {
             var av = new AoVivo.Receptor(ini);
-            var s = new Sessao(av.S, _mostrar, Configuracoes.Ler().OpcoesDoJogo(av.S, TelaInicio.PastaDoJogo())) { Remoto = this };
+            var s = new Sessao(av.S, _mostrar, OpcoesDoJogo(av.S)) { Remoto = this };
             _aoVivo = av;
             _sessao?.EsconderRelogio();
             var titulo = System.Text.Encoding.Latin1.GetBytes(Mundo.TituloNaTela(System.Text.Encoding.Latin1.GetString(av.Titulo)));
@@ -724,13 +733,19 @@ public sealed class JogoRemoto
         _rodada = rodada;
         _pronto = false;
         var s = Jogo98.Ler(r.Save);
-        var cfg = Configuracoes.Ler();
-        var op = cfg.OpcoesDoJogo(s, TelaInicio.PastaDoJogo());
+        var op = OpcoesDoJogo(s);
         Sessao sessao;
         try { sessao = new Sessao(s, _mostrar, op, null, r) { Remoto = this }; }
         catch (Exception ex) { _mostrar(Mensagem(T("Erro"), ex.Message)); return; }
         _sessao = sessao;
         _ = MostrarTime(sessao, nova);
+    }
+
+    // as opcoes da Sessao de uma copia do jogo: as das Configuracoes, com as opcoes do host
+    RetroFoot.Motor.Ciclo.Opcoes OpcoesDoJogo(Jogo98 s)
+    {
+        var op = Configuracoes.Ler().OpcoesDoJogo(s, TelaInicio.PastaDoJogo());
+        return op with { Regras = Sala.ComOpcoesDoHost(op.Regras, _opcoesHost) };
     }
 
     async Task MostrarTime(Sessao sessao, bool nova)
