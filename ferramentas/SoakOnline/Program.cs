@@ -82,8 +82,11 @@ static class Programa
         var op = cfg.OpcoesDoJogo(s, raiz) with
         {
             Marcas = RetroFoot.Motor.Patrocinio.Marcas.Ler(raiz),
-            Patrocinios = true, VerPenaltisCPU = true, VerSorteio = 0, VerExpulsoes = true, VerLesoes = true,
+            Patrocinios = true, VerPenaltisCPU = true, SubstituirNoIntervalo = true, VerSorteio = 0, VerExpulsoes = true, VerLesoes = true,
         };
+        // (como a TelaInicio no online: demissoes e sorteio fixos no motor; cada aparelho mostra
+        // conforme as proprias Opcoes. O intervalo e regra da sala: o do cfg, ligado por padrao)
+        op = OpcoesDoJogo.NoJogoOnline(op);
         TelaLeilao.EsperaInicio = 0; TelaLeilao.EsperaFim = 0;
 
         // os bancos: um so na memoria, ou cada aparelho com a sua identidade anonima no Firebase
@@ -179,6 +182,8 @@ static class Programa
         });
         banco.Observar($"{sh.Raiz}/rodada/classificacao", (c, v) => { if (c == "/" && v is JsonObject o) Console.WriteLine($"  == classificacao publicada: ano {o["ano"]} jornada {o["jornada"]}"); });
         banco.Observar($"{sh.Raiz}/rodada/noticia", (c, v) => { if (c == "/" && v != null) Interlocked.Increment(ref noticias); });
+        // as janelas que so informam (demissoes, fim de temporada, sorteio da Copa), para os convidados tambem
+        banco.Observar($"{sh.Raiz}/rodada/janela", (c, v) => { if (c == "/" && v is JsonObject o) Console.WriteLine($"  == janela publicada: {o["tipo"]} (n {o["n"]})"); });
         // (modo amigo) quem entrou e com que time; quem mudou de time
         banco.Observar($"{sh.Raiz}/jogadores", (c, v) =>
         {

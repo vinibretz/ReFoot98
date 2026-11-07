@@ -20,6 +20,8 @@ static class OpcoesCelularRetro
     public static void Abrir(Dialogos d, OpcoesDoJogo op, Jogo98? save, Mundo? m, Action<OpcoesDoJogo> ok)
     {
         // as escolhas (os indices das caixas do computador)
+        // (o jogo online: lido agora, as paginas podem ser montadas depois)
+        bool noOnline = OpcoesDoJogo.NoOnline;
         int chic = Math.Clamp((int)op.MostrarChicotadas, 0, 2);
         int sort = Math.Clamp((int)op.VerSorteio, -1, 2);
         int grav = Math.Clamp(op.GravarQuando - 1, -1, 2);
@@ -49,14 +51,22 @@ static class OpcoesCelularRetro
             {
                 case 0:
                     p.Children.Add(CR95.Rotulado(T("Mostrar demissões de treinadores"), Combo(chic, i => chic = i, T("Nunca"), T("Dos humanos"), T("Todas"))));
-                    p.Children.Add(CR95.Rotulado(T("Ver sorteio da copa"), Combo(sort, i => sort = i, T("Nunca"), T("Quando houver humanos"), T("Sempre"))));
+                    var cSort = Combo(sort, i => sort = i, T("Nunca"), T("Quando houver humanos"), T("Sempre"));
+                    // (no online o sorteio nao aparece)
+                    if (noOnline) cSort.IsEnabled = false;
+                    p.Children.Add(CR95.Rotulado(noOnline ? T("Ver sorteio da copa") + " — " + T("No jogo online o sorteio da copa não aparece.") : T("Ver sorteio da copa"), cSort));
                     p.Children.Add(CR95.Rotulado(T("Salvar o jogo"), Combo(grav, i => grav = i, T("Todas as rodadas"), T("De 3 em 3 rodadas"), T("No início da temporada"))));
                     p.Children.Add(CR95.Rotulado(T("Habilitar som"), Combo(som ? 0 : 1, i => som = i == 0, T("Sim"), T("Não"))));
                     break;
                 case 1:
                 {
-                    p.Children.Add(CR95.Rotulado(T("Substituições no intervalo"), Combo(inter ? 1 : 0, i => inter = i == 1, T("Não"), T("Sim"))));
-                    p.Children.Add(CR95.Rotulado(T("Ver as disputas de pênaltis nos jogos sem treinadores humanos"), Combo(pen ? 1 : 0, i => pen = i == 1, T("Não"), T("Sim"))));
+                    var cInter = Combo(inter ? 1 : 0, i => inter = i == 1, T("Não"), T("Sim"));
+                    if (noOnline) cInter.IsEnabled = false;
+                    p.Children.Add(CR95.Rotulado(noOnline ? T("Substituições no intervalo") + " — " + T("No jogo online, vale a regra da sala: o host escolhe.") : T("Substituições no intervalo"), cInter));
+                    var cPen = Combo(pen ? 1 : 0, i => pen = i == 1, T("Não"), T("Sim"));
+                    // (no online e regra da sala)
+                    if (noOnline) cPen.IsEnabled = false;
+                    p.Children.Add(CR95.Rotulado(noOnline ? T("Ver as disputas de pênaltis nos jogos sem treinadores humanos") + " — " + T("No jogo online, vale a regra da sala: o host escolhe.") : T("Ver as disputas de pênaltis nos jogos sem treinadores humanos"), cPen));
                     // o tempo de jogo pelo nome (e quanto leva uma partida, que no computador e a dica)
                     var dica = Cinza(OpcoesDoJogo.DicaPerfil(vel));
                     var perfis = Enumerable.Range(0, nPerfis).Select(OpcoesDoJogo.NomePerfil).ToArray();

@@ -50,6 +50,46 @@ public class OnlineOpcoesDoHostTestes
         Assert.True(convidado.CampinhoArbitro);
     }
 
+    // todas as regras: o host na versao Retro e o convidado na Atual (5 substituicoes, 9
+    // reservas, desempate, acrescimos, patrocinios, estrangeiros liberados) jogam com as do host
+    [Fact]
+    public async Task TodasAsRegrasPelaSala()
+    {
+        var banco = new BancoMemoria();
+        var sh = await Sala.Criar(banco, "host", "Juan", "0.2.0");
+        var sc = await Sala.Entrar(banco, "cli", sh.Codigo, "João");
+        Assert.False(Sala.OpcoesCompletas(await sc.Opcoes()));
+        var host = Opcoes.Padrao with { Regras = TRegras.Original, Patrocinios = false, VerPenaltisCPU = true, SubstituirNoIntervalo = false, Bosman = new() { "POR", "ESP" }, PLOP = new() };
+        await sh.DefinirOpcoes(host);
+        var lidas = await sc.Opcoes();
+        Assert.True(Sala.OpcoesCompletas(lidas));
+        // (o N, o K e a premiacao vao so para a sala mostrar)
+        Assert.Equal(8, (int)lidas!["equipas"]!);
+        Assert.Equal(2, (int)lidas["sobem"]!);
+        Assert.False((bool)lidas["premiacao"]!);
+        var convidado = Opcoes.Padrao with
+        {
+            Regras = TRegras.Launcher(8) with { DesempateVitorias = true, Acrescimos = true, SubstituicoesEscolhidas = 5, ReservasEscolhidas = 9 },
+            Patrocinios = true, Bosman = new() { "POR", "ESP", "ITA" }, PLOP = new() { "BRA" },
+        };
+        var r = Sala.ComOpcoesDoHost(convidado, lidas);
+        Assert.Equal(TRegras.Original, r.Regras);
+        Assert.Equal(3, r.Regras.MaxSubstituicoes);
+        Assert.Equal(5, r.Regras.MaxReservas);
+        Assert.False(r.Patrocinios);
+        Assert.True(r.VerPenaltisCPU);   // (os penaltis dos jogos sem humanos: regra da sala)
+        Assert.True(convidado.SubstituirNoIntervalo);
+        Assert.False(r.SubstituirNoIntervalo);   // (o intervalo: regra da sala)
+        Assert.Equal(new[] { "POR", "ESP" }, r.Bosman);
+        Assert.Empty(r.PLOP!);
+        // o N do jogo vem do save, nao das opcoes
+        var dez = convidado with { Regras = TRegras.Launcher(10) };
+        Assert.Equal(10, Sala.ComOpcoesDoHost(dez, lidas).Regras.N);
+        // sem as listas (o host sem a pasta do jogo): ficam as do aparelho
+        var semListas = Sala.OpcoesJson(host with { Bosman = null, PLOP = null });
+        Assert.Equal(convidado.Bosman, Sala.ComOpcoesDoHost(convidado, semListas).Bosman);
+    }
+
     // o HostOnline publica as opcoes do jogo dele ao comecar
     [FactComArquivo("Oraculo", "j3-entrada.e98")]
     public async Task HostPublicaAoComecar()

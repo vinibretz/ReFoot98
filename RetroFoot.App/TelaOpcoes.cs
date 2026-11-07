@@ -153,13 +153,30 @@ public sealed class OpcoesDoJogo
         Acessibilidade.Aplicar(TamanhoTexto);
     }
 
-    // o motor esta parado (na tela da equipa): as opcoes valem a partir de ja
+    // o motor esta parado (na tela da equipa): as opcoes valem a partir de ja. No online, o motor
+    // segue NoJogoOnline e os penaltis da regra da sala; as escolhas daqui sao so deste aparelho
     public void Aplicar(Sessao s)
     {
-        s.J.Op = Em(s.J.Op);
-        s.J.M.MostrarChicotadas = MostrarChicotadas;
-        s.J.M.TacaModo = VerSorteio;
+        var o = Em(s.J.Op);
+        if (s.Online != null || s.Remoto != null) o = NoJogoOnline(o) with { VerPenaltisCPU = s.J.Op.VerPenaltisCPU, SubstituirNoIntervalo = s.J.Op.SubstituirNoIntervalo };
+        s.J.Op = o;
+        s.J.M.MostrarChicotadas = o.MostrarChicotadas;
+        s.J.M.TacaModo = o.VerSorteio;
     }
+
+    // as opcoes gravadas deste aparelho (sem arquivo, as do jogo)
+    public static OpcoesDoJogo Preferencias => Ler() ?? new OpcoesDoJogo();
+
+    // (o dialogo das opcoes aberto num jogo online: os penaltis e o intervalo sao regra da sala, esmaecidos)
+    public static bool NoOnline;
+
+    // O motor do jogo online (docs/multiplayer-online.md): as opcoes que no jogo local so mostram
+    // mas no online decidiriam pelos outros aparelhos ficam fixas. Ele junta todas as demissoes;
+    // cada aparelho mostra ou nao conforme a propria opcao (JanelasOnline.FiltrarChicotadas). O
+    // intervalo e os penaltis da CPU sao regras da sala (o host escolhe, valem para todos). O
+    // sorteio da copa nao aparece no online (a animacao parava o jogo de todos por minutos): sem
+    // ele, o motor tambem nao reordena a lista da copa
+    public static Opcoes NoJogoOnline(Opcoes o) => o with { MostrarChicotadas = 2, VerSorteio = 0 };
 }
 
 // TOptionsDlg (seg06:2cfb, "Opções"): Geral, Jogo e Controle (so com o add-in 0x5C,
@@ -175,7 +192,26 @@ public static class TelaOpcoes
         op.ForcaPorFaixas = OpcoesDoJogo.ForcaPorFaixasGravada;
         op.TamanhoTexto = Acessibilidade.Percentual;
         op.Volume = Som.Volume;
-        Abrir(s, op, s.S, s.J.M, o => { o.Aplicar(s); ok?.Invoke(o); });
+        // (no online o motor tem as fixas: o dialogo mostra as escolhas deste aparelho; os penaltis,
+        // os da regra da sala, e grava a escolha de antes)
+        bool online = s.Online != null || s.Remoto != null;
+        var pref = OpcoesDoJogo.Preferencias;
+        if (online)
+        {
+            op.MostrarChicotadas = pref.MostrarChicotadas;
+            op.VerSorteio = pref.VerSorteio;
+        }
+        OpcoesDoJogo.NoOnline = online;
+        try
+        {
+            Abrir(s, op, s.S, s.J.M, o =>
+            {
+                o.Aplicar(s);
+                if (online) { o.VerPenaltisCPU = pref.VerPenaltisCPU; o.SubstituirNoIntervalo = pref.SubstituirNoIntervalo; }
+                ok?.Invoke(o);
+            });
+        }
+        finally { OpcoesDoJogo.NoOnline = false; }
     }
 
     // sem jogo (s = null): a pagina Controle fica sem inflacao e sem as listas
@@ -208,6 +244,8 @@ public static class TelaOpcoes
         var chic = NovoCombo(geral, 244, 36, 105, Math.Clamp((int)op.MostrarChicotadas, 0, 2), T("Nunca"), T("Dos humanos"), T("Todas"));
         var grav = NovoCombo(geral, 208, 144, 140, Math.Clamp(op.GravarQuando - 1, -1, 2), T("Todas as rodadas"), T("De 3 em 3 rodadas"), T("No início da temporada"));
         var sort = NovoCombo(geral, 208, 88, 140, Math.Clamp((int)op.VerSorteio, -1, 2), T("Nunca"), T("Quando houver humanos"), T("Sempre"));
+        // (no online o sorteio nao aparece)
+        if (OpcoesDoJogo.NoOnline) { sort.IsEnabled = false; ToolTip.SetTip(sort, T("No jogo online o sorteio da copa não aparece.")); }
         var som = NovoCombo(geral, 244, 196, 105, op.Som ? 0 : 1, T("Sim"), T("Não"));
         // Jogo
         nb.Por(jogo, new Rotulo { Texto = T("Tempo de jogo"), Fonte = a11, Auto = true }, 36, 140, 70, 14);
@@ -221,6 +259,9 @@ public static class TelaOpcoes
         var vel = NovoCombo(jogo, 184, 140, 169, vi >= 0 && vi < nPerfis ? vi : 0, nomes);
         var inter = NovoCombo(jogo, 244, 36, 105, op.SubstituirNoIntervalo ? 1 : 0, T("Não"), T("Sim"));
         var pen = NovoCombo(jogo, 244, 88, 105, op.VerPenaltisCPU ? 1 : 0, T("Não"), T("Sim"));
+        // (no online e regra da sala)
+        if (OpcoesDoJogo.NoOnline)
+            foreach (var cb in new[] { inter, pen }) { cb.IsEnabled = false; ToolTip.SetTip(cb, T("No jogo online, vale a regra da sala: o host escolhe.")); }
         // os lances mostrados ao lado do placar na jornada
         nb.Por(jogo, new Rotulo { Texto = T("Mostrar ao lado do placar"), Fonte = a11, Auto = true }, 36, 182, 160, 14);
         var lances = new System.Collections.Generic.List<(int Bit, Marca M)>();

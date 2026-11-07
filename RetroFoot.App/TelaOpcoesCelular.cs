@@ -18,11 +18,16 @@ namespace RetroFoot.App;
 // vale na hora (com o exemplo embaixo do deslizador); o Cancelar volta ao de antes.
 static class OpcoesCelular
 {
+    // (a opcao que no online nao vale: esmaecida)
+    static Control Esmaecido(Control c, bool sim) { if (sim) c.IsEnabled = false; return c; }
+
     public static void Abrir(Dialogos d, OpcoesDoJogo op, Jogo98? save, Mundo? m, Action<OpcoesDoJogo> ok)
     {
         // no Retro, a janela do computador com as abas (TelaOpcoesCelularRetro.cs)
         if (CUi.Retro) { OpcoesCelularRetro.Abrir(d, op, save, m, ok); return; }
         // as escolhas (os mesmos indices das caixas do computador)
+        // (o jogo online: lido agora, as paginas podem ser montadas depois)
+        bool noOnline = OpcoesDoJogo.NoOnline;
         int chic = Math.Clamp((int)op.MostrarChicotadas, 0, 2);
         int sort = Math.Clamp((int)op.VerSorteio, -1, 2);
         int grav = Math.Clamp(op.GravarQuando - 1, -1, 2);
@@ -41,7 +46,7 @@ static class OpcoesCelular
         geral.Children.Add(CUi.Grupo(new[]
         {
             CCfg.LinhaEscolha(T("Mostrar demissões de treinadores"), null, CUi.Escolha(new[] { T("Nunca"), T("Dos humanos"), T("Todas") }, chic, i => chic = i).Painel),
-            CCfg.LinhaEscolha(T("Ver sorteio da copa"), null, CUi.Escolha(new[] { T("Nunca"), T("Quando houver humanos"), T("Sempre") }, sort, i => sort = i).Painel),
+            CCfg.LinhaEscolha(T("Ver sorteio da copa"), noOnline ? T("No jogo online o sorteio da copa não aparece.") : null, Esmaecido(CUi.Escolha(new[] { T("Nunca"), T("Quando houver humanos"), T("Sempre") }, sort, i => sort = i).Painel, noOnline)),
             CCfg.LinhaEscolha(T("Salvar o jogo"), null, CUi.Escolha(new[] { T("Todas as rodadas"), T("De 3 em 3 rodadas"), T("No início da temporada") }, grav, i => grav = i).Painel),
         }));
 
@@ -57,8 +62,8 @@ static class OpcoesCelular
         {
             CCfg.LinhaEscolha(T("Tempo de jogo"), T("A velocidade do relógio da jornada: de 1 (lento) a 6 (ultrassônico)."), new StackPanel { Spacing = 8, Children = { velP, dica } }),
             CCfg.LinhaEscolha(T("Mostrar ao lado do placar"), T("Os lances que aparecem ao lado de cada partida na jornada."), fichas),
-            CUi.Interruptor(T("Substituições no intervalo"), T("Parar no intervalo para mexer na equipa."), inter, v => inter = v),
-            CUi.Interruptor(T("Ver as disputas de pênaltis"), T("Também nos jogos sem treinadores humanos."), pen, v => pen = v),
+            CUi.Interruptor(T("Substituições no intervalo"), noOnline ? T("No jogo online, vale a regra da sala: o host escolhe.") : T("Parar no intervalo para mexer na equipa."), inter, v => inter = v, !noOnline),
+            CUi.Interruptor(T("Ver as disputas de pênaltis"), noOnline ? T("No jogo online, vale a regra da sala: o host escolhe.") : T("Também nos jogos sem treinadores humanos."), pen, v => pen = v, !noOnline),
         }));
 
         // Mercado (fora do original): a forca na pesquisa de jogadores

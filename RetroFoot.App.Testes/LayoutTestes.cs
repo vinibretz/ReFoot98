@@ -20,6 +20,9 @@ public class LayoutTestes
         ("Equipa: jogador", c => c.Equipa("jogador")),
         ("Equipa: finanças", c => c.Equipa("financas")),
         ("Equipa: árbitro", c => c.Equipa("arbitro")),
+        ("Online: entrada", c => c.OnlineEntrada()),
+        ("Online: sala do host", c => c.Sala(true)),
+        ("Online: sala do convidado", c => c.Sala(false)),
     };
 
     // os problemas de uma tela aberta (vazio = tudo certo)

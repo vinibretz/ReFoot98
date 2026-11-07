@@ -27,6 +27,8 @@ static class OpcoesModernas
 {
     public static void Abrir(Dialogos d, OpcoesDoJogo op, Jogo98? save, Mundo? m, Action<OpcoesDoJogo> ok)
     {
+        // (o jogo online: lido agora, as paginas podem ser montadas depois)
+        bool noOnline = OpcoesDoJogo.NoOnline;
         var c = new CaixaModerna(T("Opções"), 620);
         c.Sub(T("Como o jogo corre e o que ele mostra. Valem a partir de já."));
         var abas = new AbasModernas();
@@ -39,7 +41,9 @@ static class OpcoesModernas
         var som = Interruptor(op.Som, T("Sim"), T("Não"));
         var geral = new StackPanel { Spacing = 14 };
         geral.Children.Add(Linha(T("Mostrar demissões de treinadores"), chic));
-        geral.Children.Add(Linha(T("Ver sorteio da copa"), sort));
+        // (no online o sorteio nao aparece)
+        if (noOnline) sort.IsEnabled = false;
+        geral.Children.Add(Linha(T("Ver sorteio da copa"), sort, noOnline ? T("No jogo online o sorteio da copa não aparece.") : null));
         geral.Children.Add(Linha(T("Salvar o jogo"), grav));
 
         // Jogo
@@ -60,9 +64,12 @@ static class OpcoesModernas
         jogo.Children.Add(Separador());
         jogo.Children.Add(Linha(T("Mostrar ao lado do placar"), painelLances, T("Os lances que aparecem ao lado de cada partida na jornada.")));
         jogo.Children.Add(Separador());
-        jogo.Children.Add(LinhaInterruptor(T("Substituições no intervalo"), T("Parar no intervalo para mexer na equipa."), inter));
+        if (noOnline) inter.IsEnabled = false;
+        jogo.Children.Add(LinhaInterruptor(T("Substituições no intervalo"), noOnline ? T("No jogo online, vale a regra da sala: o host escolhe.") : T("Parar no intervalo para mexer na equipa."), inter));
         jogo.Children.Add(Separador());
-        jogo.Children.Add(LinhaInterruptor(T("Ver as disputas de pênaltis"), T("Também nos jogos sem treinadores humanos."), pen));
+        // (no online e regra da sala)
+        if (noOnline) pen.IsEnabled = false;
+        jogo.Children.Add(LinhaInterruptor(T("Ver as disputas de pênaltis"), noOnline ? T("No jogo online, vale a regra da sala: o host escolhe.") : T("Também nos jogos sem treinadores humanos."), pen));
 
         // Mercado (fora do original): a forca na pesquisa de jogadores
         var forca = new EscolhaModerna(new (string, string?)[]

@@ -18,6 +18,70 @@ As versões até a 0.2.6 estão descritas nas [releases do GitHub](https://githu
 
 ### Interno
 
+## [0.2.10] - 2026-11-07
+
+### Novidades
+
+- Online: o nome do técnico passou a ser obrigatório. Sem ele, criar, entrar ou continuar uma
+  sala mostra um aviso e marca o campo do nome.
+- Online: a tela da sala mostra as regras do jogo, com uma explicação de como elas funcionam.
+  O host pode mudar ali, antes de começar ou continuar, as que não atrapalham uma temporada em
+  andamento: cartões amarelos, nota e risco, preço do ingresso, campinho, patrocínios, 5
+  substituições, 9 reservas, premiação ampliada, substituições no intervalo, pênaltis da CPU e
+  estrangeiros. A versão (Retrô ou Atual), os acréscimos, as equipas por divisão e quantas sobem e descem aparecem também, mas não mudam: numa
+  sala nova, a tela avisa que vêm das Configurações (para mudar, saia, ajuste no menu e crie a sala
+  de novo); num jogo continuado, que ficaram fixas na criação. Os convidados veem o resumo.
+- Online: a tela de entrada e a tela da sala usam melhor o espaço: com a janela larga, os
+  cartões ficam em duas colunas (a chave e os técnicos de um lado, as regras do outro); no
+  celular e em janelas estreitas, continuam um embaixo do outro.
+
+### Correções
+
+- Online: com o goleiro expulso e nenhuma troca possível (substituições esgotadas ou banco
+  vazio), o jogo segue direto, sem parar a partida de todos por até 30 segundos.
+- Online: o convidado agora vê o patrocinador na aba Patrocínio (a marca, o logo, o valor e as
+  temporadas) e o logo da marca na proposta. Antes a aba dizia "Sem patrocinador" mesmo com
+  contrato assinado.
+- Online: a lesão de um jogador do convidado sem ninguém no banco que pudesse entrar (por
+  exemplo, só goleiro no banco e saiu um jogador de linha) parava a partida de todos: o
+  convidado fechava a janela sem resposta e o host ficava esperando. Agora a janela nem abre
+  (como já acontecia com o banco vazio), e o convidado sempre responde à janela da lesão.
+- Online: a pausa de substituições do convidado sempre devolve o jogo ao host, mesmo se a
+  internet falhar ao mandar uma troca (antes o jogo ficava parado até o fim do prazo).
+- Online: as janelas que só o host via agora aparecem também para os convidados: as
+  demissões de técnicos (quem foi demitido fica sabendo na hora), o fim de temporada (campeão,
+  copa e artilheiro), a premiação das divisões e as subidas e descidas. Elas não seguram o jogo: se a rodada seguinte chegar com uma delas aberta, ela continua por cima.
+- Online: o convidado demitido vê "Você está sem clube…" em vez de "Aguardando o host dar um
+  time para você…".
+- Online: a janela das demissões de técnicos no host tem o prazo das outras janelas; antes,
+  se o host não fechasse, o jogo ficava parado para todos.
+- Online: o convidado joga com todas as regras do host, não só com as quatro opções da versão
+  Atual: a versão (Retrô ou Atual), 5 substituições, 9 reservas, o desempate por vitórias, os
+  acréscimos, os patrocínios e os estrangeiros. Antes, com Configurações diferentes, a tela do
+  convidado podia deixar escalar ou substituir mais do que o host aceitava.
+- Online: as Opções do host não decidem mais escondido pelos convidados. As demissões de
+  técnicos aparecem em cada aparelho conforme as Opções dele (antes, com o host em "Nunca", o
+  convidado nem ficava sabendo da própria demissão). As substituições no intervalo e os pênaltis
+  dos jogos sem técnico humano viraram regras da sala, que o host escolhe e valem para todos
+  (antes o host podia ficar sem intervalo e o convidado com); nas Opções, durante o jogo online,
+  essas duas ficam esmaecidas.
+- Online: o sorteio da Copa não aparece mais no jogo online. Com o host em "Ver sorteio da copa"
+  (o padrão é "quando houver humanos"), a animação equipa por equipa levava minutos com o jogo
+  parado para todos. Nas Opções, durante o jogo online, essa opção fica esmaecida.
+- Online: as regras de um jogo online ficam fixas desde a criação. Mudar as Configurações entre
+  uma sessão e outra não muda mais as regras do jogo ao reabrir a sala, e o técnico que assume o
+  host continua com as regras do jogo, não com as do aparelho dele.
+
+### Interno
+
+- `CLAUDE.md`, `docs/multiplayer-online.md` e comentários no código: toda opção nova que muda o
+  jogo entra também nas regras do jogo online (o que atualizar junto).
+- `RetroFoot.App.Testes`: a entrada do online e a sala (do host e do convidado, numa sala do
+  banco da memória) entram nos testes de layout; o `Despejo` abre essas telas (`online`, `sala`,
+  `salaconvidado`) e grava a imagem de cada visual com `DESPEJO_PNG=1`.
+- Teste de todas as regras do host pela sala (`OnlineOpcoesDoHostTestes.TodasAsRegrasPelaSala`).
+- SoakOnline: registra as janelas que o host publica para os convidados.
+
 ## [0.2.9] - 2026-11-06
 
 ### Novidades

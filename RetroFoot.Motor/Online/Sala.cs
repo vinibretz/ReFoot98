@@ -218,14 +218,50 @@ public sealed class Sala
     // nao com as das Configuracoes do proprio aparelho (senao a tela mostrava, por exemplo, a
     // previsao com um preco de ingresso que o host nao cobra)
     public Task DefinirOpcoes(Regras.Regras r, CancellationToken ct = default) =>
-        B.Atualizar($"{Raiz}/info", new JsonObject
-        {
-            ["opcoes"] = new JsonObject
-            {
-                ["amarelos"] = r.CartoesAmarelos, ["nota"] = r.NotaERisco,
-                ["ingresso"] = r.PrecoIngresso, ["campinho"] = r.CampinhoArbitro,
-            },
-        }, ct);
+        B.Atualizar($"{Raiz}/info", new JsonObject { ["opcoes"] = OpcoesJson(r) }, ct);
+
+    // todas as regras do jogo (as Opcoes do motor: as regras, os patrocinios e as listas dos
+    // estrangeiros): o convidado e o host que assume jogam com estas, nao com as Configuracoes
+    // do proprio aparelho
+    public Task DefinirOpcoes(Ciclo.Opcoes op, CancellationToken ct = default) =>
+        B.Atualizar($"{Raiz}/info", new JsonObject { ["opcoes"] = OpcoesJson(op) }, ct);
+
+    // (as regras ja em JSON: as que o host escolhe na tela da sala, antes de comecar o jogo)
+    public Task DefinirOpcoes(JsonObject o, CancellationToken ct = default) =>
+        B.Atualizar($"{Raiz}/info", new JsonObject { ["opcoes"] = o.DeepClone() }, ct);
+
+    public async Task<JsonNode?> Opcoes(CancellationToken ct = default) => await B.Ler($"{Raiz}/info/opcoes", ct);
+
+    // o JSON de info/opcoes. O N, o K e a premiacao ficam de fora: vem do save (Regras.DoSave).
+    // Regra nova em Regras ou nas Opcoes: acrescente aqui, em ComOpcoesDoHost, no RegrasOnline
+    // (App) e no teste TodasAsRegrasPelaSala, senao o convidado joga com a do proprio aparelho.
+    // As listas vao como texto ("POR,ESP"): o Firebase apaga as listas vazias
+    public static JsonObject OpcoesJson(Regras.Regras r) => new()
+    {
+        ["amarelos"] = r.CartoesAmarelos, ["nota"] = r.NotaERisco,
+        ["ingresso"] = r.PrecoIngresso, ["campinho"] = r.CampinhoArbitro,
+        ["limite"] = (int)r.LimiteJogadores, ["tatica505"] = r.Tatica505,
+        ["desempate"] = r.DesempateVitorias, ["acrescimos"] = r.Acrescimos,
+        ["reservas"] = r.ReservasEscolhidas, ["substituicoes"] = r.SubstituicoesEscolhidas,
+        // (so para mostrar na sala: vem do save, ComOpcoesDoHost nao aplica)
+        ["equipas"] = r.N, ["sobem"] = r.SobemDescem, ["premiacao"] = r.PremiacaoAmpliada,
+    };
+
+    public static JsonObject OpcoesJson(Ciclo.Opcoes op)
+    {
+        var o = OpcoesJson(op.Regras);
+        o["patrocinios"] = op.Patrocinios;
+        // (os penaltis dos jogos sem humanos: cobrados um a um ou a soma rapida; mudam o resultado)
+        o["penaltisCpu"] = op.VerPenaltisCPU;
+        // (o intervalo: o jogo para em todos os aparelhos, ou em nenhum)
+        o["intervalo"] = op.SubstituirNoIntervalo;
+        if (op.Bosman != null) o["bosman"] = "," + string.Join(",", op.Bosman);
+        if (op.PLOP != null) o["plop"] = "," + string.Join(",", op.PLOP);
+        return o;
+    }
+
+    // as opcoes completas (todas as regras, nao so as 4 da versao Atual das salas da 0.2.9)
+    public static bool OpcoesCompletas(JsonNode? o) => o is JsonObject x && x["limite"] != null && x["patrocinios"] != null;
 
     // as regras r com as opcoes do host (o JSON de info/opcoes); sem elas (null), r
     public static Regras.Regras ComOpcoesDoHost(Regras.Regras r, JsonNode? o) => o is not JsonObject x ? r : r with
@@ -234,7 +270,30 @@ public sealed class Sala
         NotaERisco = (bool?)x["nota"] ?? r.NotaERisco,
         PrecoIngresso = (bool?)x["ingresso"] ?? r.PrecoIngresso,
         CampinhoArbitro = (bool?)x["campinho"] ?? r.CampinhoArbitro,
+        LimiteJogadores = (int?)x["limite"] ?? r.LimiteJogadores,
+        Tatica505 = (bool?)x["tatica505"] ?? r.Tatica505,
+        DesempateVitorias = (bool?)x["desempate"] ?? r.DesempateVitorias,
+        Acrescimos = (bool?)x["acrescimos"] ?? r.Acrescimos,
+        ReservasEscolhidas = (int?)x["reservas"] ?? r.ReservasEscolhidas,
+        SubstituicoesEscolhidas = (int?)x["substituicoes"] ?? r.SubstituicoesEscolhidas,
     };
+
+    // as Opcoes op com as do host: as regras, os patrocinios e as listas dos estrangeiros
+    public static Ciclo.Opcoes ComOpcoesDoHost(Ciclo.Opcoes op, JsonNode? o)
+    {
+        if (o is not JsonObject x) return op;
+        static List<string>? Lista(JsonNode? n) => n is JsonValue v && v.TryGetValue<string>(out var t)
+            ? t.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() : null;
+        return op with
+        {
+            Regras = ComOpcoesDoHost(op.Regras, x),
+            Patrocinios = (bool?)x["patrocinios"] ?? op.Patrocinios,
+            VerPenaltisCPU = (bool?)x["penaltisCpu"] ?? op.VerPenaltisCPU,
+            SubstituirNoIntervalo = (bool?)x["intervalo"] ?? op.SubstituirNoIntervalo,
+            Bosman = x["bosman"] != null ? Lista(x["bosman"]) : op.Bosman,
+            PLOP = x["plop"] != null ? Lista(x["plop"]) : op.PLOP,
+        };
+    }
 
     // o sinal de vida do host (HostOnline de 10 em 10 s; na sala, antes do jogo, a TelaSala)
     public async Task SinalDeVida(CancellationToken ct = default)

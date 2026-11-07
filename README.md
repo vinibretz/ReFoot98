@@ -27,6 +27,9 @@ Roda no Linux, no Windows e (em desenvolvimento) no Android.
 >   liso, para não cansar a vista) e o **Claro** (cinza-claro e verde, bom de dia), no
 >   computador e no celular (Configurações > Aparência > Cores do Moderno). Na rodada, o jogo
 >   do seu time aparece destacado ([docs/tema-verde.md](docs/tema-verde.md)).
+> - **Regras da sala no online:** o host vê e ajusta na sala as regras do jogo, que valem
+>   para todos os técnicos e ficam gravadas com o jogo
+>   ([docs/multiplayer-online.md](docs/multiplayer-online.md)).
 
 <p align="center">
   <img src="RetroFoot.App/Assets/Marca/capa-16x9.jpg" alt="Capa do ReFoot98" width="720">
@@ -39,10 +42,10 @@ Roda no Linux, no Windows e (em desenvolvimento) no Android.
 
 | Sistema | |
 |---|---|
-| 🐧 Linux (x64) | [Baixar v0.2.9 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.9-beta/refoot98-0.2.9-beta-linux-x64.tar.gz) |
-| 🪟 Windows (x64) | [Baixar v0.2.9 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.9-beta/refoot98-0.2.9-beta-windows-x64.zip) |
+| 🐧 Linux (x64) | [Baixar v0.2.10 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.10-beta/refoot98-0.2.10-beta-linux-x64.tar.gz) |
+| 🪟 Windows (x64) | [Baixar v0.2.10 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.10-beta/refoot98-0.2.10-beta-windows-x64.zip) |
 | 🍎 macOS | em breve... |
-| 🤖 Android | [Baixar v0.2.9 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.9-beta/refoot98-0.2.9-beta-android.apk) |
+| 🤖 Android | [Baixar v0.2.10 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.10-beta/refoot98-0.2.10-beta-android.apk) |
 
 ### Como instalar
 

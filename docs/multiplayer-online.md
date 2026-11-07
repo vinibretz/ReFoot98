@@ -45,7 +45,8 @@ prontos ("Jogador 1 PRONTO · Jogador 2 AGUARDANDO…").
   outros serem atendidos enquanto ela está aberta. Acaba quando todos terminam (ou no prazo);
   quem terminou vê "aguardando os outros técnicos…".
 - **Lesão, goleiro expulso, batedor de pênalti:** a janela abre no aparelho do dono do time; os
-  outros aguardam.
+  outros aguardam. Sem troca possível (substituições esgotadas, banco vazio ou, na lesão, ninguém
+  no banco que possa entrar), a janela não abre e o jogo segue (`Sessao`, gancho `Substituicao`).
 - **Pedido de aumento, convite para outro clube, patrocínio:** perguntados ao dono do time. O
   pedido de aumento e os leilões dos times do computador vêm **logo depois da rodada**, antes de
   os técnicos prepararem (`Mundo.Online`: a CPU prepara primeiro, depois os humanos), para nada
@@ -62,6 +63,12 @@ prontos ("Jogador 1 PRONTO · Jogador 2 AGUARDANDO…").
   para o jogo de todos até fechar. Por isso, no online, ela precisa de prazo: as perguntas usam
   `ComPrazo`, e as janelas que só informam (ex.: a premiação ampliada do fim de temporada) usam
   `Sessao.ComPrazoSeOnline`, que fecha sozinha no prazo das perguntas e, no jogo local, espera o OK.
+- **Janelas que só informam, nos convidados:** as demissões de técnicos, o fim de temporada (com a
+  premiação das divisões e as subidas e descidas) vão também para os outros
+  aparelhos: o host publica em `rodada/janela` (`HostOnline.PublicarJanela`: o tipo, os dados e o
+  jogo daquele momento) e cada convidado abre a mesma janela por cima da tela que estiver
+  (`JogoRemoto.MostrarJanela`), uma de cada vez, sem segurar o jogo. Janela nova desse tipo:
+  publique no host e acrescente o tipo em `MostrarJanela`.
 - **Tempo para responder:** cada pergunta tem um prazo (ex.: 45 s) com contagem na tela. Sem
   resposta, vale o padrão do motor: aumento aceito, sem lance, convite e patrocínio recusados,
   substituição automática, melhor batedor.
@@ -88,6 +95,47 @@ prontos ("Jogador 1 PRONTO · Jogador 2 AGUARDANDO…").
   das ferramentas: **Editor de Save, Scout, Árbitros e Importar/Exportar não abrem jogo online.**
 - Durante o jogo online: sem Gerenciar técnicos, sem mudar Opções/Configurações que mexem nas
   regras, sem "Sair sem salvar". As regras ficam fixas na criação.
+- **Regras do jogo, não do aparelho.** Ao abrir o jogo online pela 1ª vez, o host grava as regras
+  num `regras.json` ao lado do `JOGO.e98` (`TelaInicio.RegrasFixasOnline`) e, a cada abertura,
+  joga com elas, mesmo que as Configurações dele tenham mudado. O `HostOnline` as publica em
+  `info/opcoes` (`Sala.OpcoesJson`): a versão Retrô/Atual (limite, 5-0-5), as opções da Atual,
+  o desempate, os acréscimos, as substituições e as reservas, os patrocínios e as listas dos
+  estrangeiros. O convidado (`JogoRemoto.OpcoesDoJogo`) e o host que assume na troca usam essas,
+  nunca as Configurações do próprio aparelho. O N, o K e a premiação vêm do save. Ficam no
+  aparelho só as preferências de tela (idioma, visual, subidas e descidas...).
+- **Mudar uma regra:** só na tela da sala, no cartão "Regras da sala" (`RegrasOnline`), antes de
+  começar ou continuar. O host vê as regras do jogo (as do `regras.json`; num jogo novo, as das
+  Configurações) e pode mudar as que não atrapalham uma temporada em andamento: as opções da
+  versão Atual, os patrocínios, as substituições, as reservas, a premiação (uma marca no save,
+  que `RegrasFixasOnline` troca ao abrir; vale no fim da temporada), o intervalo, os pênaltis da CPU e os estrangeiros. A versão,
+  os acréscimos, as equipas por divisão e quantas sobem e descem não mudam depois da criação:
+  numa sala nova a tela diz que vêm das Configurações (mudar lá e criar a sala de novo); num jogo
+  continuado, que ficaram fixas. A tela publica as regras em `info/opcoes` a cada mudança
+  (os convidados veem o resumo) e as passa ao jogo (`OnlineNovo.Regras`), que as grava. No modo
+  amigo não há editor: o save é do host e segue as Configurações dele.
+- **As Opções do jogo** (o diálogo Opções, `OpcoesDoJogo`) são de cada aparelho, mas o motor só
+  roda no host. Para a escolha do host não valer pelos outros:
+  - **Pênaltis dos jogos sem humanos** (cobrados um a um ou decididos na hora) mudam o resultado:
+    viraram regra da sala (`penaltisCpu` em `info/opcoes`, no editor da sala).
+  - **Substituições no intervalo:** o intervalo para o jogo de todos, então é regra da sala
+    (`intervalo` em `info/opcoes`, no editor da sala): ligado, todos têm a janela das trocas;
+    desligado, o motor nem para no intervalo. Um `regras.json` de antes desta chave usa a escolha
+    do host nas Opções.
+  - Essas duas ficam esmaecidas no diálogo Opções durante o jogo online ("vale a regra da sala").
+  - **Demissões de técnicos:** o motor do online junta todas (`OpcoesDoJogo.NoJogoOnline`). Cada
+    aparelho mostra conforme a própria escolha (`OpcoesDoJogo.Preferencias`): o host no gancho da
+    `Sessao`, o convidado no `JogoRemoto.MostrarJanela` (`JanelasOnline.FiltrarChicotadas`).
+  - **Sorteio da copa:** não aparece no online (`VerSorteio = 0` no motor). A animação equipa por
+    equipa levava minutos com o jogo parado para todos. Nas Opções, durante o jogo online, a
+    opção fica esmaecida.
+  - O resto (salvar, som, lances ao lado do placar, força na pesquisa, acessibilidade, a página
+    Controle) é só deste aparelho.
+- **Opção nova que muda o jogo** (nas Configurações, em `Regras` ou nas `Opcoes` do motor):
+  entra também aqui, senão o convidado joga com a do próprio aparelho e o jogo reaberto não a
+  guarda. Atualize `Sala.OpcoesJson` e `Sala.ComOpcoesDoHost`, o `RegrasOnline` (o resumo e, se
+  puder mudar com a temporada em andamento, o editor; senão, a linha "Não muda"), o teste
+  `OnlineOpcoesDoHostTestes.TodasAsRegrasPelaSala` e esta seção. Preferências só de tela não
+  entram.
 - O cliente nunca muda o estado; só o host. A cada rodada o host publica um hash do save e a
   lista de comandos (auditoria).
 - Limitação: o host tem o arquivo no aparelho; o jogo impede a edição, mas não ferramentas de

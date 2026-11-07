@@ -41,6 +41,22 @@
   online o motor roda no host e fica parado até a janela fechar; sem prazo, se o host não
   clicar, o jogo trava para todos. No jogo local ela continua esperando o OK.
   Exemplo: a "Premiação das divisões" em `TelaFimDeTemporada.Mostrar`.
+- Regras do jogo online: valem as do jogo (gravadas no `regras.json` e publicadas em
+  `info/opcoes`), nunca as Configurações de cada aparelho. Ao criar ou mudar uma opção que
+  altera o jogo (uma regra nova nas Configurações, em `Regras` ou nas `Opcoes` do motor),
+  atualize junto:
+  - `Sala.OpcoesJson` e `Sala.ComOpcoesDoHost` (o que vai para a sala e o que o convidado aplica);
+  - `RegrasOnline` (o resumo dos convidados; o editor do host, se a opção puder mudar com o jogo
+    em andamento, ou a linha "Não muda", se não puder);
+  - o teste `OnlineOpcoesDoHostTestes.TodasAsRegrasPelaSala`;
+  - a seção "Regras" do `docs/multiplayer-online.md`.
+  Preferências só de tela (idioma, visual, o que mostrar) ficam no aparelho e não entram.
+  Vale também para as **Opções do jogo** (`OpcoesDoJogo`, o diálogo Opções): uma opção que muda
+  o resultado ou para o jogo de todos (os pênaltis da CPU, o intervalo) vira regra da sala; uma
+  que só mostra, mas que no motor do host decidiria pelos outros (demissões), fica fixa no motor do
+  online (`OpcoesDoJogo.NoJogoOnline`) e cada aparelho mostra conforme a própria escolha
+  (`OpcoesDoJogo.Preferencias`, os filtros do `JanelasOnline`). O sorteio da copa não aparece
+  no online (a animação parava o jogo de todos).
 - Detalhes do modo online: `docs/multiplayer-online.md`.
 - Testes online (`RetroFoot.Motor.Testes`, filtro `Online`) sem o save do original: copie um
   save criado pelo jogo para `RetroFoot.Motor.Testes/Oraculo/j3-entrada.e98` (ver o

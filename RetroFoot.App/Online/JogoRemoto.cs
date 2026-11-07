@@ -172,6 +172,24 @@ public sealed class JogoRemoto
                 catch (Exception ex) { Console.Error.WriteLine("classificacao: " + ex.Message); }
             });
         });
+        // as janelas que so informam e que o motor so abre no host (as demissoes de tecnicos, o fim
+        // de temporada, o sorteio da Copa): a mesma janela aqui, com o jogo daquele momento
+        // (MostrarJanela); a que ja estava no banco ao entrar, de antes, nao aparece
+        sala.B.Observar($"{sala.Raiz}/rodada/janela", (caminho, v) =>
+        {
+            if (caminho != "/" || v is not JsonObject o || (int?)o["n"] is null) return;
+            var copia = (JsonObject)o.DeepClone();
+            _ = Task.Run(async () =>
+            {
+                if (copia["quando"] is JsonValue jq && jq.TryGetValue<long>(out var quando))
+                {
+                    try { _difRelogio ??= await _sala.DiferencaDoRelogio(); } catch { }
+                    long agora = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + (_difRelogio ?? 0);
+                    if (agora - quando > 3 * 60_000) return;
+                }
+                Dispatcher.UIThread.Post(() => NovaJanela(copia));
+            });
+        });
         // o jogo parado esperando outro tecnico (a janela do host, a pergunta a outro aparelho):
         // o aviso aqui, em vez da tela parada sem explicacao
         sala.B.Observar($"{sala.Raiz}/rodada/espera", (caminho, v) =>
@@ -498,7 +516,9 @@ public sealed class JogoRemoto
                 var reservas = e.Jogadores.Where(p => Memoria.Escalacao(p) == Memoria.EscReserva).Select(p => p.ID).ToHashSet();
                 s.EsperarDialogo<bool>(fim => { var t = new TelaSubstituicaoForcada(e, saiu); t.Fechou += () => fim(true); return t; });
                 var entrou = e.Jogadores.FirstOrDefault(p => reservas.Contains(p.ID) && Memoria.Escalacao(p) == Memoria.EscTitular);
-                return entrou == null ? null : new JsonObject { ["entra"] = (int)entrou.ID };
+                // (sempre responde: sem ninguem que pudesse entrar, entra 0; sem resposta o host
+                // esperava o prazo inteiro, com o jogo parado para todos)
+                return new JsonObject { ["entra"] = (int)(entrou?.ID ?? 0) };
             }
         }
         return null;
@@ -539,6 +559,77 @@ public sealed class JogoRemoto
         _esperaLeilao = null;
     }
 
+    // ---------------------------------------------------------------- as janelas do host
+    // (rodada/janela) uma de cada vez, por cima da tela que estiver; sem segurar o jogo (o host
+    // nao espera). O jogo novo chegou com uma aberta (a Sessao trocou): ela volta por cima da
+    // tela nova. Chamar ProximaJanela quando a tela muda.
+    readonly Queue<JsonObject> _janelas = new();
+    readonly HashSet<string> _janelasVistas = new();
+    JsonObject? _janelaAberta;
+    Sessao? _janelaEm;
+    int _janelaVez;
+
+    Sessao? SessaoNaTela => (_jornada != null ? _sessaoAoVivo : _sessao) ?? _sessaoPergunta;
+
+    void NovaJanela(JsonObject o)
+    {
+        if (!_janelasVistas.Add($"{o["quando"]}/{o["n"]}/{o["tipo"]}")) return;
+        _janelas.Enqueue(o);
+        ProximaJanela();
+    }
+
+    void ProximaJanela()
+    {
+        if (SessaoNaTela is not { } s) return;
+        if (_janelaAberta is { } aberta)
+        {
+            if (_janelaEm != s) AbrirJanela(aberta, s);
+            return;
+        }
+        if (_janelas.Count > 0) AbrirJanela(_janelas.Dequeue(), s);
+    }
+
+    void AbrirJanela(JsonObject o, Sessao s)
+    {
+        _janelaAberta = o; _janelaEm = s;
+        int vez = ++_janelaVez;
+        // (a da Sessao que saiu da tela ainda pode fechar depois, pelo relogio dela: nada)
+        void Fim()
+        {
+            if (vez != _janelaVez) return;
+            _janelaAberta = null; _janelaEm = null;
+            ProximaJanela();
+        }
+        bool abriu = false;
+        try { abriu = MostrarJanela(o, s, Fim); }
+        catch (Exception ex) { Console.Error.WriteLine("janela do host: " + ex.Message); }
+        if (!abriu) Fim();
+    }
+
+    // a janela de um tipo (HostOnline.PublicarJanela) por cima da tela de s, com o jogo que veio
+    // com ela; false = nada a mostrar
+    bool MostrarJanela(JsonObject o, Sessao s, Action fim)
+    {
+        if ((string?)o["save"] is not { } sv) return false;
+        var js = Jogo98.Ler(AoVivo.Descomprimir(sv));
+        var dados = Sessao.SoParaVer(js, OpcoesDoJogo(js));
+        switch ((string?)o["tipo"])
+        {
+            case "chicotadas":
+            {
+                // (o host manda todas: aqui as que a opcao deste aparelho mostra)
+                var l = JanelasOnline.FiltrarChicotadas(js, JanelasOnline.ChicotadasDe(o), global::RetroFoot.App.OpcoesDoJogo.Preferencias.MostrarChicotadas);
+                if (l.Count == 0) return false;
+                TelaListas.Chicotadas(s, dados, l, fim);
+                return true;
+            }
+            case "fimTemporada":
+                TelaFimDeTemporada.MostrarSemMotor(s, dados, JanelasOnline.ResultadoDe(o), fim);
+                return true;
+        }
+        return false;
+    }
+
     void Pausa(JsonObject? p)
     {
         var s = _jornada != null ? _sessaoAoVivo : _sessao;
@@ -553,6 +644,7 @@ public sealed class JogoRemoto
             int seg = (int?)p["segundos"] ?? 30;
             s?.MostrarRelogio(TimeSpan.FromSeconds(seg));
             var meus = (p["equipas"] as JsonArray)?.Select(x => (int?)x ?? 0).ToHashSet() ?? new();
+            // (o intervalo e regra da sala, "intervalo" em info/opcoes: so chega aqui com ela ligada)
             if (_time is { } t && meus.Contains(t.ID)) AbrirTrocas(t.ID, 4, TimeSpan.FromSeconds(seg));
             else s?.MostrarAviso(T("⏸ Intervalo: os técnicos fazem as substituições"));
             return;
@@ -587,15 +679,20 @@ public sealed class JogoRemoto
                 finally { Sessao.PrazoDialogo = null; }
                 var depois = e.Jogadores.Where(x => Memoria.Escalacao(x) == Memoria.EscTitular).Select(x => x.ID).ToList();
                 var sairam = antes.Where(id => !depois.Contains(id)).ToList();
-                foreach (var entra in depois.Where(id => !antes.Contains(id)))
+                try
                 {
-                    var pe = e.Jogadores.First(x => x.ID == entra);
-                    int k = sairam.FindIndex(id => (e.Jogadores.First(x => x.ID == id).Posicao == 0) == (pe.Posicao == 0));
-                    if (sairam.Count == 0) break;
-                    if (k < 0) k = 0;
-                    await _cli.Executar(new Trocar(sairam[k], entra));
-                    sairam.RemoveAt(k);
+                    foreach (var entra in depois.Where(id => !antes.Contains(id)))
+                    {
+                        var pe = e.Jogadores.First(x => x.ID == entra);
+                        int k = sairam.FindIndex(id => (e.Jogadores.First(x => x.ID == id).Posicao == 0) == (pe.Posicao == 0));
+                        if (sairam.Count == 0) break;
+                        if (k < 0) k = 0;
+                        await _cli.Executar(new Trocar(sairam[k], entra));
+                        sairam.RemoveAt(k);
+                    }
                 }
+                catch (Exception ex) { Console.Error.WriteLine("pausa (trocas): " + ex.Message); }
+                // (o Retomar vai sempre: sem ele o host fica parado o prazo inteiro)
                 await _cli.Executar(new Retomar());
                 // (o intervalo de todos: o jogo so volta quando todos terminam; ate la, o aviso)
                 // (na thread da interface, como o fim da pausa: se ele ja chegou, nada)
@@ -627,6 +724,7 @@ public sealed class JogoRemoto
             _sessaoAoVivo = s;
             _pronto = true;
             s.Mostrar(_jornada);
+            ProximaJanela();
         }
         catch (Exception ex) { Console.Error.WriteLine("ao vivo: " + ex.Message); }
     }
@@ -741,12 +839,17 @@ public sealed class JogoRemoto
         _ = MostrarTime(sessao, nova);
     }
 
-    // as opcoes da Sessao de uma copia do jogo: as das Configuracoes, com as opcoes do host
+    // as opcoes da Sessao de uma copia do jogo: as das Configuracoes, com as regras do host por
+    // cima (todas: a versao, o banco, as substituicoes, o desempate, os patrocinios, os estrangeiros).
+    // As marcas dos patrocinadores (nome e logo) sao as da pasta do jogo deste aparelho, como no
+    // host (TelaInicio.Comecar): sem elas a aba Patrocinio e a proposta nao mostram a marca
     RetroFoot.Motor.Ciclo.Opcoes OpcoesDoJogo(Jogo98 s)
     {
-        var op = Configuracoes.Ler().OpcoesDoJogo(s, TelaInicio.PastaDoJogo());
-        return op with { Regras = Sala.ComOpcoesDoHost(op.Regras, _opcoesHost) };
+        var pasta = TelaInicio.PastaDoJogo();
+        _marcas ??= RetroFoot.Motor.Patrocinio.Marcas.Ler(pasta);
+        return Sala.ComOpcoesDoHost(Configuracoes.Ler().OpcoesDoJogo(s, pasta), _opcoesHost) with { Marcas = _marcas };
     }
+    RetroFoot.Motor.Patrocinio.Marcas? _marcas;
 
     async Task MostrarTime(Sessao sessao, bool nova)
     {
@@ -754,10 +857,19 @@ public sealed class JogoRemoto
         var minha = js.FirstOrDefault(x => x.Uid == _sala.Uid);
         if (minha == null || minha.Equipa == 0 || sessao.Equipa(minha.Equipa) is not { } e)
         {
-            Dispatcher.UIThread.Post(() => { if (sessao == _sessao) _mostrar(Mensagem(T("Jogo online"), minha?.Estado == Estados.Espectador
-                ? T("Você entrou como espectador: assiste às rodadas e recebe um time na próxima preparação dos times.")
-                : minha?.Estado == Estados.Pedindo ? T("O jogo já começou: o host precisa permitir sua entrada. Aguarde…")
-                : T("Aguardando o host dar um time para você…"))); });
+            // (na Sessao, e nao no lugar dela: as janelas do host, como as demissoes de tecnicos,
+            // abrem por cima desta espera)
+            // (quem ja tinha time e ficou sem: foi demitido, ou o clube dele mudou)
+            Dispatcher.UIThread.Post(() =>
+            {
+                if (sessao != _sessao) return;
+                sessao.Mostrar(Mensagem(T("Jogo online"), minha?.Estado == Estados.Espectador
+                    ? T("Você entrou como espectador: assiste às rodadas e recebe um time na próxima preparação dos times.")
+                    : minha?.Estado == Estados.Pedindo ? T("O jogo já começou: o host precisa permitir sua entrada. Aguarde…")
+                    : _time != null ? T("Você está sem clube. Os outros técnicos preparam os times; um convite de outro clube pode chegar depois de uma rodada.")
+                    : T("Aguardando o host dar um time para você…")));
+                ProximaJanela();
+            });
             return;
         }
         Dispatcher.UIThread.Post(() =>
@@ -765,6 +877,9 @@ public sealed class JogoRemoto
             // (o jogo de uma rodada pode chegar duas vezes seguidas: a tela do mais velho, montada por
             // ultimo, ficava por cima da do mais novo, e o relogio ia para a escondida)
             if (sessao != _sessao) return;
+            // (uma janela do host aberta na tela que saiu volta por cima desta; as janelas ficam
+            // numa camada acima da tela, que pode mudar depois)
+            ProximaJanela();
             // (o destaque so do meu time, na classificacao e na jornada)
             TelaJornada.SoTime = e.ID;
             // (o sorteio do host ainda na tela: ele passa para dentro da tela do jogo, para as

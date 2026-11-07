@@ -48,26 +48,54 @@ public sealed partial class TelaInicio : UserControl
     // time da 4a divisao; quem cai fica de ferias; quem desiste, e todos quando o host fecha o
     // jogo, saem do save)
     public sealed record OnlineNovo(RetroFoot.Motor.Online.Sala Sala, List<RetroFoot.Motor.Online.JogadorSala> Jogadores, string? Arquivo = null,
-        RetroFoot.Motor.Online.Retrato? Retrato = null, bool ModoAmigo = false);
+        RetroFoot.Motor.Online.Retrato? Retrato = null, bool ModoAmigo = false, System.Text.Json.Nodes.JsonNode? Regras = null);
+    // Regras: as regras do jogo que o host acertou na tela da sala (Online.EditorRegras)
     readonly OnlineNovo? online;
 
     public TelaInicio(Action<Control> mostrar, OnlineNovo online) : this(mostrar, false)
     {
         this.online = online;
-        if (online.Retrato is { } r)
-        {
-            // o host veio para este aparelho: o jogo do retrato, gravado na pasta da sala
-            var arq = online.Arquivo ?? Path.Combine(Online.Pasta(online.Sala.Codigo), "JOGO.e98");
-            try
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(arq)!);
-                File.WriteAllBytes(arq, r.Save);
-                Comecar(Jogo98.Ler(r.Save), arq, false, r);
-            }
-            catch (Exception ex) { Mensagem(T("Erro"), ex.Message, () => mostrar(Inicial())); }
-        }
+        if (online.Retrato is { } r) ComecarDoRetrato(r);
         else if (online.Arquivo != null) ContinuarOnline(online.Arquivo);
         else NovoJogo(Path.Combine(Online.Pasta(online.Sala.Codigo), "JOGO.e98"));
+    }
+
+    // as regras do jogo online publicadas na sala (info/opcoes): o host que assume continua com
+    // as do jogo, nao com as Configuracoes deste aparelho
+    System.Text.Json.Nodes.JsonNode? opcoesDaSala;
+
+    async void ComecarDoRetrato(RetroFoot.Motor.Online.Retrato r)
+    {
+        // o host veio para este aparelho: o jogo do retrato, gravado na pasta da sala
+        var arq = online!.Arquivo ?? Path.Combine(Online.Pasta(online.Sala.Codigo), "JOGO.e98");
+        try { opcoesDaSala = await online.Sala.Opcoes(); } catch { }
+        try
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(arq)!);
+            File.WriteAllBytes(arq, r.Save);
+            Comecar(Jogo98.Ler(r.Save), arq, false, r);
+        }
+        catch (Exception ex) { Mensagem(T("Erro"), ex.Message, () => mostrar(Inicial())); }
+    }
+
+    // as regras fixas de um jogo online (docs/multiplayer-online.md): ficam num regras.json ao lado
+    // do jogo gravado na 1a vez que ele abre e valem dali em diante, mesmo que as Configuracoes
+    // mudem. As da sala (o host que assume) vem antes das do arquivo; sem nenhuma (jogo novo, ou
+    // gravado antes desta versao), as das Configuracoes, que ficam gravadas. A premiacao (que o
+    // host pode trocar na sala) e uma marca no save: muda no save s, que os outros recebem
+    // (no retrato o jogo vem do retrato, com a premiacao dele: nao muda)
+    static RetroFoot.Motor.Ciclo.Opcoes RegrasFixasOnline(RetroFoot.Motor.Ciclo.Opcoes op, Jogo98 s, bool doRetrato, string arquivo, System.Text.Json.Nodes.JsonNode? daSala, bool novo)
+    {
+        var arqRegras = Path.Combine(Path.GetDirectoryName(arquivo)!, "regras.json");
+        System.Text.Json.Nodes.JsonNode? fixas = RetroFoot.Motor.Online.Sala.OpcoesCompletas(daSala) ? daSala : null;
+        if (fixas == null && !novo)
+            try { if (File.Exists(arqRegras)) fixas = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(arqRegras)); } catch { }
+        if (RetroFoot.Motor.Online.Sala.OpcoesCompletas(fixas)) op = RetroFoot.Motor.Online.Sala.ComOpcoesDoHost(op, fixas);
+        if (!doRetrato && fixas?["premiacao"] is System.Text.Json.Nodes.JsonValue pv && pv.TryGetValue<bool>(out var ampliada)
+            && ampliada != op.Regras.PremiacaoAmpliada && op.Regras.Tatica505 && TRegras.MarcarPremiacao(s, ampliada))
+            op = op with { Regras = op.Regras with { PremiacaoAmpliada = ampliada } };
+        try { File.WriteAllText(arqRegras, RetroFoot.Motor.Online.Sala.OpcoesJson(op).ToJsonString()); } catch { }
+        return op;
     }
 
     // o jogo online gravado: quem esta na sala sem time recebe o do tecnico com o nome dele
@@ -916,6 +944,11 @@ public sealed partial class TelaInicio : UserControl
         };
         // as Opcoes (velocidade, sorteio, substituicoes no intervalo...) do arquivo das opcoes
         if (OpcoesDoJogo.Ler() is { } oj) op = oj.Em(op);
+        // (o jogo online: as regras fixas do jogo, nao as Configuracoes de agora; o modo amigo e o
+        // save single player do host, com as regras dele)
+        // (o online: demissoes e sorteio fixos no motor; cada aparelho mostra o seu)
+        if (online != null) op = OpcoesDoJogo.NoJogoOnline(op);
+        if (online != null && !online.ModoAmigo) op = RegrasFixasOnline(op, s, retrato != null, arquivo, online.Regras ?? opcoesDaSala, novo);
         Sessao sessao;
         try
         {

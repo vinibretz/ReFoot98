@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
@@ -118,6 +119,20 @@ public sealed class Cena : IDisposable
     public void Procura() => TelaProcura.Abrir(S, Humano);
     public void Plantel() => TelaPlantel.Abrir(S, Outro, Humano, Jogador.ID);
     public void Leilao() => TelaLeilao.DeTodos.Abrir(S, Outro, Jogador, 1_234_000);
+
+    // o online (numa sala do banco da memoria, sem internet): a entrada e a sala, do host e do
+    // convidado, com dois tecnicos
+    public void OnlineEntrada() => Mostrar(new TelaOnline(Mostrar, () => { }));
+    public void Sala(bool host)
+    {
+        var b = new RetroFoot.Motor.Online.BancoMemoria();
+        var sh = RetroFoot.Motor.Online.Sala.Criar(b, "host", "Juan", "teste", "Sala dos testes").GetAwaiter().GetResult();
+        var sc = RetroFoot.Motor.Online.Sala.Entrar(b, "cli", sh.Codigo, "João").GetAwaiter().GetResult();
+        // (as regras do jogo novo saem das Configuracoes gravadas: as da cena, so enquanto a tela abre)
+        Cfg.Gravar();
+        try { Mostrar(new TelaSala(Mostrar, () => { }, host ? sh : sc, host)); }
+        finally { try { File.Delete(RetroFoot.App.Configuracoes.Arquivo); } catch { } }
+    }
 
     // (os ganchos das telas para abrir numa secao ou pagina sao variaveis de ambiente, lidas no
     // construtor)

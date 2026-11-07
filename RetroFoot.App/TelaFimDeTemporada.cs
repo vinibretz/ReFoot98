@@ -33,11 +33,39 @@ public static class TelaFimDeTemporada
     // na thread do motor: abre e espera fechar
     public static void Mostrar(Sessao s, Resultado r)
     {
+        // (jogo online) as mesmas janelas nos outros aparelhos (MostrarSemMotor)
+        s.Online?.PublicarJanela("fimTemporada", JanelasOnline.FimDeTemporada(r));
         s.EsperarDialogo<bool>(fim => Janela(s, r, () => fim(true)));
         // (sem o relogio da janela acima: no online, o prazo das perguntas fecha sozinha)
         if (r.Premios.Any(p => p.Divisao >= 0))
             s.ComPrazoSeOnline(() => s.EsperarDialogo<bool>(fim => PremiacaoDivisoes(s, r, () => fim(true))));
-        if (MostrarSubidasEDescidas) s.EsperarDialogo<bool>(fim => SubidasEDescidas(s, r, () => fim(true)));
+        if (MostrarSubidasEDescidas) s.ComPrazoSeOnline(() => s.EsperarDialogo<bool>(fim => SubidasEDescidas(s, r, () => fim(true))));
+    }
+
+    // (jogo online, nos outros aparelhos, na thread da interface) as mesmas janelas, uma depois
+    // da outra, sem o motor: d = onde abrem (a tela que estiver), s = o jogo do host naquele
+    // momento; fim depois da ultima
+    internal static void MostrarSemMotor(Dialogos d, Sessao s, Resultado r, Action fim)
+    {
+        var passos = new List<Func<Action, Control>> { f => Janela(s, r, f) };
+        if (r.Premios.Any(p => p.Divisao >= 0)) passos.Add(f => PremiacaoDivisoes(s, r, f));
+        if (MostrarSubidasEDescidas) passos.Add(f => SubidasEDescidas(s, r, f));
+        int i = 0;
+        void Proximo()
+        {
+            if (i >= passos.Count) { fim(); return; }
+            Control? c = null;
+            bool fechou = false;
+            c = passos[i++](() =>
+            {
+                if (fechou) return;
+                fechou = true;
+                if (c != null) d.Fechar(c);
+                Proximo();
+            });
+            d.Abrir(c);
+        }
+        Proximo();
     }
 
     internal static Control Janela(Sessao s, Resultado r, Action fechar)

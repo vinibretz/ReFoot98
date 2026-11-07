@@ -54,7 +54,9 @@ Para ver o que uma tela desenha (e o que o teste vai achar), o `Despejo`:
     dotnet test RetroFoot.App.Testes --filter Despejar
 
 Um arquivo por visual e combinação, com cada texto (`x` = fora da vista), as sobreposições e os
-cortes. As telas novas entram em `Cena` (como abrir) e em `LayoutTestes.Telas`. Os ganchos das
+cortes. Com `$env:DESPEJO_PNG = "1"`, também a imagem de cada um. Telas: `config`, `plantel`,
+`leilao`, `procura`, `jogador`, `financas`, `arbitro` e as do online (`online`, `sala`,
+`salaconvidado`, numa sala do banco da memória, sem internet). As telas novas entram em `Cena` (como abrir) e em `LayoutTestes.Telas`. Os ganchos das
 telas para abrir numa seção ou página são variáveis de ambiente lidas no construtor
 (`RETROFOOT_SECAO` nas Configurações, `RETROFOOT_PAGINA` na tela do time, também no celular), os
 mesmos do `ferramentas/FichasPrint`.

@@ -30,6 +30,9 @@ public sealed class Configuracoes
     // o visual Classico era gravado como "original" (antes do RetroFoot): os dois sao lidos
     public const string VisualClassico = "classico", VisualOriginal = "original", VisualModerno = "moderno";
 
+    // (opcao nova que muda o jogo: entra tambem nas regras do jogo online, que nao seguem estas
+    // Configuracoes. Sala.OpcoesJson/ComOpcoesDoHost, RegrasOnline e o teste TodasAsRegrasPelaSala;
+    // ver "Modo online" no CLAUDE.md e docs/multiplayer-online.md)
     public bool Modificada { get; set; }
     public int EquipasPorDivisao { get; set; } = 8;
     public bool CartoesAmarelos { get; set; }

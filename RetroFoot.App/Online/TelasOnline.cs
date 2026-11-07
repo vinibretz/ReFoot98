@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -304,9 +305,10 @@ public static class Online
         T("Esta sala é da versão {0} e o seu jogo é da versão {1}. Para jogarem juntos, todos precisam da mesma versão: atualize o jogo de quem estiver na versão mais antiga (ou peça ao host para atualizar e reabrir a sala).", daSala, Versao);
 
     // a pagina do kit numa coluna no meio (no computador a tela e larga)
-    public static Control Pagina(string titulo, string? sub, Action? voltar, Control corpo, Control? rodape = null) =>
+    // (largura: a do corpo; as telas de cartoes em DuasColunas pedem mais, para caber as duas)
+    public static Control Pagina(string titulo, string? sub, Action? voltar, Control corpo, Control? rodape = null, double largura = 560) =>
         CUi.Pagina(CUi.BarraTopo(titulo, sub, voltar),
-            new Border { MaxWidth = 560, HorizontalAlignment = HorizontalAlignment.Stretch, Child = corpo },
+            new Border { MaxWidth = largura, HorizontalAlignment = HorizontalAlignment.Stretch, Child = corpo },
             rodape == null ? null : new Border { MaxWidth = 560, Child = rodape });
 }
 
@@ -333,9 +335,28 @@ public sealed class TelaOnline : UserControl
         CUi.Botao criar = null!, entrar = null!;
         void Ocupado(bool o) { criar.Habilitado = entrar.Habilitado = !o; }
         void Erro(string s) { aviso.Text = s; aviso.IsVisible = true; Ocupado(false); }
+        // o nome do tecnico e obrigatorio (e o que os outros veem na sala): vazio, o campo fica
+        // marcado com o aviso embaixo dele e recebe o foco; ao digitar, a marca sai
+        string faltaNome = T("Preencha o seu nome de técnico para continuar.");
+        bool NomeOk()
+        {
+            if (!string.IsNullOrWhiteSpace(nome.Text)) return true;
+            DataValidationErrors.SetErrors(nome, new object[] { faltaNome });
+            Erro(faltaNome);
+            nome.Focus();
+            nome.BringIntoView();
+            return false;
+        }
+        nome.TextChanged += (_, _) =>
+        {
+            if (string.IsNullOrWhiteSpace(nome.Text)) return;
+            DataValidationErrors.ClearErrors(nome);
+            if (aviso.Text == faltaNome) aviso.IsVisible = false;
+        };
         var nomeSala = CUi.Caixa("", 40, T("Nome da sala (opcional)"));
         criar = new CUi.Botao(T("Criar sala"), true, async () =>
         {
+            if (!NomeOk()) return;
             Online.UltimoNome = nome.Text ?? "";
             Ocupado(true); aviso.IsVisible = false;
             try
@@ -350,6 +371,7 @@ public sealed class TelaOnline : UserControl
         });
         async Task EntrarNa(string chave)
         {
+            if (!NomeOk()) return;
             Online.UltimoNome = nome.Text ?? "";
             Ocupado(true); aviso.IsVisible = false;
             try
@@ -395,6 +417,7 @@ public sealed class TelaOnline : UserControl
             if (arq != null)
                 b = new CUi.Botao(T("Continuar"), true, async () =>
                 {
+                    if (!NomeOk()) return;
                     Online.UltimoNome = nome.Text ?? "";
                     Ocupado(true); aviso.IsVisible = false;
                     try
@@ -509,6 +532,8 @@ public sealed class TelaOnline : UserControl
                 catch (Exception ex) { Dispatcher.UIThread.Post(() => detalhe.Text = Curto(ex)); }
             });
         }
+        // (a esquerda o que se faz agora; a direita as salas e os saves, se houver)
+        var direita = new StackPanel { Spacing = 14 };
         var corpo = new StackPanel
         {
             Spacing = 14,
@@ -525,7 +550,7 @@ public sealed class TelaOnline : UserControl
             cartaoSalas = CUi.Cartao_(T("Suas salas"), meus);
             // (so com alguma sala confirmada no banco, ou um jogo deste aparelho como host)
             cartaoSalas.IsVisible = doHost.Count > 0;
-            corpo.Children.Insert(1, cartaoSalas);
+            direita.Children.Add(cartaoSalas);
         }
         // jogar um save seu com um amigo (o amigo assume um time da 4a divisao; depois o save
         // volta a ser so seu)
@@ -554,6 +579,7 @@ public sealed class TelaOnline : UserControl
             amigo.Children.Add(item);
             item.Children.Add(new CUi.Botao(T("Jogar com um amigo"), false, async () =>
             {
+                if (!NomeOk()) return;
                 Online.UltimoNome = nome.Text ?? "";
                 Ocupado(true); aviso.IsVisible = false;
                 try
@@ -568,8 +594,8 @@ public sealed class TelaOnline : UserControl
                 catch (Exception ex) { Erro(T("Não consegui criar a sala: {0}", Curto(ex))); }
             }) { HorizontalAlignment = HorizontalAlignment.Stretch });
         }
-        if (amigo.Children.Count > 1) corpo.Children.Add(CUi.Cartao_(T("Jogar com um amigo"), amigo));
-        Content = Online.Pagina(T("Jogo online"), T("Sem login: só a chave da sala"), _voltar, corpo);
+        if (amigo.Children.Count > 1) direita.Children.Add(CUi.Cartao_(T("Jogar com um amigo"), amigo));
+        Content = Online.Pagina(T("Jogo online"), T("Sem login: só a chave da sala"), _voltar, new DuasColunas(corpo, direita), largura: 1180);
     }
 
     internal static string Curto(Exception ex) => ex is HttpRequestException ? T("sem conexão com a internet") : ex.Message.Split('\n')[0];
@@ -588,12 +614,20 @@ public sealed class TelaSala : UserControl
         IDisposable? obs = null;
         ClienteOnline? cliente = null;
         IDisposable? obsInfo = null;
+        // as regras do jogo (RegrasOnline): o host acerta antes de comecar ou continuar e publica
+        // na sala, para os outros verem; o modo amigo e o save do host, com as regras dele
+        JsonObject? regrasJogo = null;
+        if (host && !modoAmigo)
+        {
+            regrasJogo = RegrasOnline.Iniciais(sala.Codigo, arquivo);
+            _ = sala.DefinirOpcoes(regrasJogo);
+        }
         var comecar = new CUi.Botao(arquivo == null ? T("Começar jogo novo") : T("Continuar o jogo"), true, () =>
         {
             obs?.Dispose();
             obsInfo?.Dispose();
             _ = sala.MarcarFase(arquivo == null ? Fases.Criando : Fases.Continuando);
-            mostrar(new TelaInicio(mostrar, new TelaInicio.OnlineNovo(sala, jogadores.ToList(), arquivo, null, modoAmigo)));
+            mostrar(new TelaInicio(mostrar, new TelaInicio.OnlineNovo(sala, jogadores.ToList(), arquivo, null, modoAmigo, regrasJogo)));
         }) { HorizontalAlignment = HorizontalAlignment.Stretch };
         string hostUid = host ? sala.Uid : "";
         long? difRelogio = null;
@@ -695,6 +729,18 @@ public sealed class TelaSala : UserControl
             };
         }
         else regras = prazoTxt;
+        // as regras do jogo: a explicacao e, no host, o que pode mudar; nos outros, o resumo
+        var resumoRegras = CUi.Txt("…", 13, CUi.Texto, FontWeight.Normal, true);
+        if (!modoAmigo)
+        {
+            var doJogo = new StackPanel { Spacing = 8 };
+            doJogo.Children.Add(CUi.Txt(T("Regras do jogo"), 14, CUi.Texto, FontWeight.SemiBold));
+            doJogo.Children.Add(CUi.Txt(RegrasOnline.Explicacao(host, arquivo == null), 13, CUi.Fraco, FontWeight.Normal, true));
+            if (regrasJogo != null)
+                doJogo.Children.Add(RegrasOnline.Editor(regrasJogo, arquivo == null, () => _ = sala.DefinirOpcoes(regrasJogo)));
+            else doJogo.Children.Add(resumoRegras);
+            regras = new StackPanel { Spacing = 14, Children = { regras, doJogo } };
+        }
         obsInfo = sala.B.Observar($"{sala.Raiz}/info", (c, v) => _ = Task.Run(async () =>
         {
             try
@@ -703,8 +749,10 @@ public sealed class TelaSala : UserControl
                 int prazo = Math.Clamp((int?)info?["prazo"] ?? Sala.PrazoPadrao, 1, 5);
                 int vel = Math.Clamp((int?)info?["velocidade"] ?? Sala.VelocidadePadrao, 1, OpcoesDoJogo.Perfis.Length);
                 string? fase = (string?)info?["fase"];
+                string resumo = host ? "" : RegrasOnline.Resumo(info?["opcoes"]);
                 Dispatcher.UIThread.Post(() =>
                 {
+                    if (!host) resumoRegras.Text = resumo;
                     prazoTxt.Text = T("Tempo para ficar pronto depois do primeiro PRONTO: {0} min.", prazo) + "\n"
                         + T("Velocidade da partida: {0}.", T(OpcoesDoJogo.Perfis[vel - 1].Nome.Trim()));
                     if (host) return;
@@ -721,16 +769,18 @@ public sealed class TelaSala : UserControl
             }
             catch { }
         }));
-        var corpo = new StackPanel
-        {
-            Spacing = 14,
-            Children =
+        // (a chave e os tecnicos a esquerda, as regras a direita; numa coluna so no celular)
+        var corpo = new DuasColunas(
+            new StackPanel
             {
-                CUi.Cartao_(T("Chave da sala"), new StackPanel { Spacing = 8, Children = { chave, copiar, aviso, criando } }),
-                CUi.Cartao_(T("Técnicos"), lista),
-                CUi.Cartao_(T("Regras da sala"), regras),
+                Spacing = 14,
+                Children =
+                {
+                    CUi.Cartao_(T("Chave da sala"), new StackPanel { Spacing = 8, Children = { chave, copiar, aviso, criando } }),
+                    CUi.Cartao_(T("Técnicos"), lista),
+                },
             },
-        };
+            CUi.Cartao_(T("Regras da sala"), regras));
         async void Sair()
         {
             obs?.Dispose();
@@ -754,7 +804,7 @@ public sealed class TelaSala : UserControl
             jogo.Comecou += () => { obs?.Dispose(); obsInfo?.Dispose(); };
         }
         Content = Online.Pagina(sala.Nome.Length > 0 ? sala.Nome : T("Sala {0}", sala.Codigo),
-            (host ? T("Você é o host") + " · " : "") + T("chave {0}", sala.Codigo), Sair, corpo, host ? comecar : null);
+            (host ? T("Você é o host") + " · " : "") + T("chave {0}", sala.Codigo), Sair, corpo, host ? comecar : null, largura: 1180);
     }
 }
 

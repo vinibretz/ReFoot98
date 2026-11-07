@@ -59,7 +59,12 @@ public sealed class Sessao
 
     // retrato: o jogo online continuado de um retrato (Online/Retrato: a semente e o que o save
     // nao guarda; o host novo depois de uma troca); com ele, s nao e usado (o save vem dele)
-    public Sessao(Jogo98 s, Action<Control> mostrar, Opcoes? op = null, string? arquivo = null, RetroFoot.Motor.Online.Retrato? retrato = null)
+    // (jogo online, nos outros aparelhos) uma copia do jogo so para as janelas lerem (o fim de
+    // temporada, as demissoes de tecnicos...): sem ligar as telas nem mexer no que a Sessao em
+    // uso deixou ligado (os planteis abertos das listas, as regras do banco...)
+    internal static Sessao SoParaVer(Jogo98 s, Opcoes op) => new(s, _ => { }, op, ligar: false);
+
+    public Sessao(Jogo98 s, Action<Control> mostrar, Opcoes? op = null, string? arquivo = null, RetroFoot.Motor.Online.Retrato? retrato = null, bool ligar = true)
     {
         host.Children.Add(camadaTela);
         host.Children.Add(camadaDialogo);
@@ -121,6 +126,7 @@ public sealed class Sessao
             Patrocinio = p => EsperarDialogo<bool>(fim => new TelaPatrocinio(p, J.Op.Marcas, Moeda.DoSave(S), fim)),
         };
         J = retrato?.Jogo(op ?? Opcoes.Padrao, h) ?? new JogoEmCurso(s, (uint)Environment.TickCount, op ?? Opcoes.Padrao, h);
+        if (!ligar) return;
         // o banco e as substituicoes das regras deste jogo (5 e 3 = como no classico)
         RetroFoot.Motor.Rodada.Escalacao.MaxReservas = J.M.Regras.MaxReservas;
         RetroFoot.Motor.Rodada.Escalacao.MaxSubstituicoes = J.M.Regras.MaxSubstituicoes;
@@ -140,10 +146,17 @@ public sealed class Sessao
         // penalti, disputa de penaltis)
         // a janela das chicotadas (seg05:025a) depois de cada jornada, da Taca e no fim da
         // temporada
+        // (no online, com o prazo das perguntas: sem ele o jogo de todos ficava parado ate o host
+        // fechar a janela)
         J.M.G.Chicotadas = m =>
         {
             var l = m.Chicotadas.ToList();
-            EsperarNaInterface(fim => TelaListas.Chicotadas(this, this, l, fim));
+            // (no online o motor junta todas: aqui so as que a opcao deste aparelho mostra)
+            if (Online != null) l = global::RetroFoot.App.JanelasOnline.FiltrarChicotadas(S, l, OpcoesDoJogo.Preferencias.MostrarChicotadas);
+            if (l.Count == 0) return;
+            Control? aberta = null;
+            var d = new Dialogos(c => { aberta = c; AbrirDialogo(c); }, c => FecharDialogo(c));
+            EsperarNaInterface(fim => TelaListas.Chicotadas(d, this, l, fim), () => { if (aberta != null) FecharDialogo(aberta); });
         };
         // o save retomado no meio de uma jornada nao e gravado de novo nela (DS:2720)
         if (J.M.Retomar != 0) retomado = (J.M.Ano, J.M.Jornada);
@@ -223,6 +236,13 @@ public sealed class Sessao
             foreach (var (k, v) in c) o[k] = v == null ? null : System.Text.Json.Nodes.JsonNode.Parse(v.ToJsonString());
             return o;
         }
+        // algum reserva pode entrar no lugar do lesionado (as regras da janela da lesao)
+        static bool TemQuemEntre(Equipa e, Jogador saiu)
+        {
+            var res = e.Jogadores.Where(p => Memoria.Escalacao(p) == Memoria.EscReserva).ToList();
+            int goleiros = res.Count(p => p.Posicao == 0);
+            return res.Exists(p => TelaSubstituicaoForcada.Elegivel(saiu, p, goleiros));
+        }
         string intervaloFeito = "";
         h.Substituicao = (jg, lado, saiu, motivo) =>
         {
@@ -235,6 +255,7 @@ public sealed class Sessao
                 intervaloFeito = chave;
                 var prazo = TimeSpan.FromSeconds(30);
                 Action? local = null;
+                // (o intervalo e regra da sala: com ela desligada, o motor nem para aqui)
                 foreach (var g in jn.Jogos)
                     for (int l = 0; l < 2; l++)
                         if (g.Equipa[l] is { } me && me.ID == host.MeuTime && Memoria.Humano(g.Treinador[l]))
@@ -261,10 +282,16 @@ public sealed class Sessao
                 Dispatcher.UIThread.Post(EsconderRelogio);
                 return;
             }
-            // a lesao sem ninguem no banco (ou sem substituicoes): nao ha o que escolher; sem a
-            // janela, o jogo nao para todos por 30 s
+            // a lesao sem ninguem no banco que possa entrar (ou sem substituicoes): nao ha o que
+            // escolher; sem a janela, o jogo nao para todos por 30 s. Ex.: so goleiro no banco e
+            // saiu um jogador de linha (a janela so teria o OK, e o convidado nao respondia)
             if (motivo == 2 && jg.Equipa[lado] is { } el
-                && (Memoria.Substituicoes(el) <= 0 || !el.Jogadores.Any(p => Memoria.Escalacao(p) == Memoria.EscReserva)))
+                && (Memoria.Substituicoes(el) <= 0 || saiu == null || !TemQuemEntre(el, saiu)))
+                return;
+            // o goleiro expulso sem substituicoes ou com o banco vazio: a janela nao teria troca
+            // possivel, e o jogo de todos ficaria parado ate 30 s a toa
+            if (motivo == 3 && jg.Equipa[lado] is { } ex
+                && (Memoria.Substituicoes(ex) <= 0 || !ex.Jogadores.Any(p => Memoria.Escalacao(p) == Memoria.EscReserva)))
                 return;
             if (!host.Remota(jg.Equipa[lado]))
             {
@@ -462,6 +489,16 @@ public sealed class Sessao
         host.JogadoresMudaram += l => Dispatcher.UIThread.Post(() => { jogadoresOnline = l; JogadoresOnline?.Invoke(l); });
         // passou o host: a tela do time fecha (o motor sai e a TelaInicio leva para a sala)
         host.HostPassado += _ => Dispatcher.UIThread.Post(() => { FecharDialogo(); EsconderRelogio(); local?.TrySetResult(true); });
+        // as janelas que so informam e que o motor so abria aqui: tambem nos outros aparelhos
+        // (JogoRemoto.MostrarJanela). As demissoes de tecnicos com o prazo (o fim de temporada
+        // publica em TelaFimDeTemporada.Mostrar)
+        var chicotadas = J.M.G.Chicotadas;
+        J.M.G.Chicotadas = m =>
+        {
+            host.PublicarJanela("chicotadas", global::RetroFoot.App.JanelasOnline.Chicotadas(m.Chicotadas));
+            ComPrazo(() => chicotadas?.Invoke(m));
+        };
+        // (o sorteio da Copa nao aparece no online: OpcoesDoJogo.NoJogoOnline)
         // a disputa de penaltis: a mesma janela nos outros aparelhos
         var desempate = h.Desempate;
         h.Desempate = (jg, d) => { host.TransmitirPenaltis(jg, d); desempate?.Invoke(jg, d); };
@@ -729,10 +766,17 @@ public sealed class Sessao
     }
 
     // na thread do MOTOR: abrir() roda na thread da interface e chama o "fim" quando acabar
-    public void EsperarNaInterface(Action<Action> abrir)
+    // (com PrazoDialogo e esgotou: o que fecha a janela, na thread da interface)
+    public void EsperarNaInterface(Action<Action> abrir, Action? esgotou = null)
     {
         var tcs = new TaskCompletionSource<bool>();
         Dispatcher.UIThread.Post(() => abrir(() => tcs.TrySetResult(true)));
+        if (esgotou != null && PrazoDialogo is { } prazo && !tcs.Task.Wait(prazo))
+        {
+            PrazoEsgotou = true;
+            Dispatcher.UIThread.Post(esgotou);
+            return;
+        }
         tcs.Task.GetAwaiter().GetResult();
     }
 

@@ -72,7 +72,7 @@ public sealed class HostOnline : IDisposable
         // (fora da preparacao e da rodada, so recusa; na rodada, parar/trocar/retomar vao para a
         // fila da rodada, atendida pelo motor entre os minutos)
         _vida = new Timer(_ => _ = Vida(), null, 0, 10_000);
-        // (as opcoes da versao Atual deste jogo, para os outros jogarem com as mesmas)
+        // (as regras deste jogo, para os outros jogarem com as mesmas)
         _ = OpcoesNaSala();
         foreach (var t in j.M.S.Transferencias) _transfVistas.Add(t);
         MapearTimes();
@@ -80,7 +80,7 @@ public sealed class HostOnline : IDisposable
 
     async Task OpcoesNaSala()
     {
-        try { await _sala.DefinirOpcoes(_j.M.Regras); } catch { }
+        try { await _sala.DefinirOpcoes(_j.Op with { Regras = _j.M.Regras }); } catch { }
     }
 
     async Task Vida()
@@ -812,6 +812,23 @@ public sealed class HostOnline : IDisposable
         {
             ["n"] = ++_classificacoes, ["ano"] = (int)_j.M.Ano, ["jornada"] = (int)_j.M.Jornada, ["save"] = save,
         });
+    }
+
+    // uma janela do motor que so informa (as demissoes de tecnicos, o fim de temporada, o sorteio
+    // da Taca), que antes so o host via (rodada/janela): os outros aparelhos a mostram tambem, com
+    // o jogo deste momento; o motor nao espera por eles. "quando" (a hora do servidor): quem entra
+    // depois nao ve a que ja estava no banco
+    int _janelas;
+    public void PublicarJanela(string tipo, JsonObject? dados = null)
+    {
+        string save = "";
+        _naInterface(() => save = AoVivo.Comprimir(_j.M.S.Gravar()));
+        var o = dados ?? new JsonObject();
+        o["n"] = ++_janelas;
+        o["tipo"] = tipo;
+        o["save"] = save;
+        o["quando"] = new JsonObject { [".sv"] = "timestamp" };
+        Enviar($"{_sala.Raiz}/rodada/janela", o);
     }
 
     // o jogo parado esperando um tecnico (rodada/espera): a janela do host (j null) ou a pergunta
