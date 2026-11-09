@@ -78,7 +78,7 @@ public sealed class ClienteOnline : IDisposable
         else if (partes.Length == 1 && v != null) l.Add((partes[0], v));
         foreach (var (chave, r) in l)
         {
-            var resp = new Resposta((bool?)r["ok"] ?? false, (string?)r["motivo"] ?? "");
+            var resp = new Resposta((bool?)r["ok"] ?? false, (string?)r["motivo"] ?? "") { Versao = (int?)r["versao"] ?? 0 };
             _chegaram[chave] = resp;
             if (_esperando.TryRemove(chave, out var t)) t.TrySetResult(resp);
             // (so o host apaga os resultados: as regras recusam o do cliente; o host limpa na barreira)

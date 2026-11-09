@@ -61,6 +61,8 @@ public sealed record Retomar : Comando;
 
 public sealed record Resposta(bool Ok, string Motivo = "")
 {
+    // (no cliente) a versao do retrato que ja traz este comando; 0 = o host nao disse
+    public int Versao { get; init; }
     public static readonly Resposta Feito = new(true);
     public static Resposta Recusado(string motivo) => new(false, motivo);
 }

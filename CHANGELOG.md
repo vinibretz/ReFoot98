@@ -18,6 +18,20 @@ As versões até a 0.2.6 estão descritas nas [releases do GitHub](https://githu
 
 ### Interno
 
+## [0.2.11] - 2026-11-09
+
+### Novidades
+
+### Correções
+
+- Online: o convidado que compra um jogador continua na Lista de Jogadores (e no plantel), como o
+  host, e pode comprar vários de uma vez. Antes a janela fechava a cada compra.
+
+### Interno
+
+- README: como abrir dois jogos no mesmo computador para testar o modo online.
+- Teste da compra do convidado na Lista de Jogadores, numa sala do banco da memória.
+
 ## [0.2.10] - 2026-11-07
 
 ### Novidades

@@ -39,6 +39,7 @@ public static partial class TelaProcura
             public ProcuraCelular(Form f)
             {
                 _f = f;
+                _f.AposCompra = Lista;
                 // (uma compra no plantel aberto pelo Time..., um emprestimo: o caixa muda)
                 void Mudou(RetroFoot.Motor.Save.Equipa x) { if (x == _f._e) AtualizarCaixa(); }
                 AttachedToVisualTree += (_, _) => { TelaDinheiro.Mudou -= Mudou; TelaDinheiro.Mudou += Mudou; };

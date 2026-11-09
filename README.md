@@ -42,10 +42,10 @@ Roda no Linux, no Windows e (em desenvolvimento) no Android.
 
 | Sistema | |
 |---|---|
-| 🐧 Linux (x64) | [Baixar v0.2.10 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.10-beta/refoot98-0.2.10-beta-linux-x64.tar.gz) |
-| 🪟 Windows (x64) | [Baixar v0.2.10 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.10-beta/refoot98-0.2.10-beta-windows-x64.zip) |
+| 🐧 Linux (x64) | [Baixar v0.2.11 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.11-beta/refoot98-0.2.11-beta-linux-x64.tar.gz) |
+| 🪟 Windows (x64) | [Baixar v0.2.11 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.11-beta/refoot98-0.2.11-beta-windows-x64.zip) |
 | 🍎 macOS | em breve... |
-| 🤖 Android | [Baixar v0.2.10 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.10-beta/refoot98-0.2.10-beta-android.apk) |
+| 🤖 Android | [Baixar v0.2.11 beta](https://github.com/vinibretz/ReFoot98/releases/download/v0.2.11-beta/refoot98-0.2.11-beta-android.apk) |
 
 ### Como instalar
 
@@ -113,6 +113,41 @@ executável (modo portátil: dá para levar num pendrive). Se ali não der para 
 pasta do sistema (`~/.local/share/retrofoot` ou `%LOCALAPPDATA%\retrofoot`). O caminho
 aparece no hub, com o botão **Abrir pasta de dados**. Formatos em
 [docs/ferramentas.md](docs/ferramentas.md).
+
+### Testar o modo online no mesmo computador
+
+Dá para abrir dois jogos na mesma máquina, um como host e outro como convidado. A segunda
+janela precisa de pastas próprias de dados e de configuração: é na configuração que fica a
+identidade online, e com a mesma identidade o jogo trataria os dois como o mesmo técnico. As
+duas precisam de internet.
+
+No primeiro terminal, na pasta do projeto, compile e abra o host:
+
+```powershell
+dotnet build RetroFoot.Desktop
+dotnet run --project RetroFoot.Desktop --no-build
+```
+
+Num segundo terminal, também na pasta do projeto, abra o convidado:
+
+```powershell
+$env:RETROFOOT_DADOS = "$env:TEMP\refoot-convidado\dados"
+$env:XDG_CONFIG_HOME = "$env:TEMP\refoot-convidado\config"
+dotnet run --project RetroFoot.Desktop --no-build
+```
+
+No Linux, o segundo terminal fica assim:
+
+```sh
+RETROFOOT_DADOS=/tmp/refoot-convidado/dados XDG_CONFIG_HOME=/tmp/refoot-convidado/config \
+  dotnet run --project RetroFoot.Desktop --no-build
+```
+
+Na primeira janela, crie a sala e copie a chave. Na segunda, entre na sala com essa chave.
+
+O `--no-build` é necessário porque, com o jogo aberto, os arquivos ficam travados e a
+compilação falha. Mudou o código? Feche as duas janelas e repita os comandos. Para um
+terceiro técnico, abra outro terminal com outra pasta no lugar de `refoot-convidado`.
 
 ## Estrutura
 

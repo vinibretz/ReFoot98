@@ -832,6 +832,8 @@ public sealed class Sessao
     }
 
     // fecha o dialogo (o de cima, se for null)
+    public bool TemDialogos => camadaDialogo.Children.Count > 0;
+
     public void FecharDialogo(Control? dialogo = null)
     {
         for (int i = camadaDialogo.Children.Count - 1; i >= 0; i--)

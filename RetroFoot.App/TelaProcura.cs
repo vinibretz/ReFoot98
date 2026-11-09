@@ -303,9 +303,16 @@ public static partial class TelaProcura
         // o Comprar do launcher fica ligado quando o da janela da equipa estaria (UpdateBuyBtn)
         int PrecoDoEscolhido()
         {
+            if (_comprando) return 0;
             var p = Escolhido(out var eq);
             return p == null || eq == null ? 0 : S.Mercado.PrecoParaComprar(_e, eq, p);
         }
+
+        // (jogo online, no convidado) a compra foi para o host e a resposta ainda nao veio: o
+        // Comprar fica desligado, para o mesmo jogador nao ser comprado duas vezes
+        bool _comprando;
+        // a resposta veio (o celular refaz a lista)
+        Action? AposCompra;
 
         // ------------------------------------------------------------ botoes
         // findBtnClick (10:34f5): os jogadores da lista global (DS:26FE) do fim para o comeco
@@ -419,11 +426,23 @@ public static partial class TelaProcura
         // registado (Opcoes.Registrado, sempre true: o RetroFoot nao tem registo).
         void Comprar()
         {
+            if (_comprando) return;
             var p = Escolhido(out var eq);
             if (p == null || eq == null) return;
             int preco = S.Mercado.PrecoParaComprar(_e, eq, p);
             if (preco <= 0) return;
-            if (S.Remoto is { } rm) { rm.Executar(new RetroFoot.Motor.Online.Comprar(eq.ID, p.ID, preco)); return; }
+            if (S.Remoto is { } rm)
+            {
+                _comprando = true;
+                Redesenhar();
+                rm.ComprarSemFechar(S, _e, eq, p, preco, () =>
+                {
+                    _comprando = false;
+                    Redesenhar();
+                    AposCompra?.Invoke();
+                });
+                return;
+            }
             S.Mercado.Comprar(_e, eq, eq.Jogadores.IndexOf(p), preco, registado: S.J.Op.Registrado);
             TelaDinheiro.Avisar(_e);
             Redesenhar();

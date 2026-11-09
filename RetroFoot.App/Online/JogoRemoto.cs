@@ -40,7 +40,7 @@ public sealed class JogoRemoto
     public JogoRemoto(Action<Control> mostrar, Action voltar, Sala sala, ClienteOnline cli)
     {
         _mostrar = mostrar; _voltar = voltar; _sala = sala; _cli = cli;
-        cli.NovoRetrato += (r, rodada, versao, instancia) => Dispatcher.UIThread.Post(() => Novo(r, rodada, instancia));
+        cli.NovoRetrato += (r, rodada, versao, instancia) => Dispatcher.UIThread.Post(() => Novo(r, rodada, versao, instancia));
         sala.B.Observar($"{sala.Raiz}/info/opcoes", (caminho, v) =>
         {
             if (caminho != "/") return;
@@ -813,7 +813,7 @@ public sealed class JogoRemoto
 
     string _instancia = "";
 
-    void Novo(Retrato r, string rodada, string instancia)
+    void Novo(Retrato r, string rodada, int versao, string instancia)
     {
         FecharEsperaClassif();
         _aoVivo = null; _jornada = null;
@@ -824,6 +824,9 @@ public sealed class JogoRemoto
         // outros seguem mexendo no time sem a tela recarregar no meio)
         // (sem time ainda, o espectador: o jogo novo da mesma rodada traz o time dele)
         if (!nova && !_esperandoRetrato && _sessao != null && _time != null) return;
+        if (nova) PararDeSegurar();
+        // (comprando numa janela: a tela so se refaz quando ela fechar; ComprarSemFechar)
+        else if (_segurandoEm != null && _segurandoEm == _sessao) { _retratoGuardado = (r, rodada, versao, instancia); return; }
         _esperandoRetrato = false;
         if (!nova && _pronto) return;   // (ja mandou o Preparo desta rodada)
         if (_rodada.Length == 0) Comecou?.Invoke();
@@ -966,9 +969,14 @@ public sealed class JogoRemoto
     public void Executar(Comando c, Action<Resposta>? depois = null)
     {
         if (c is not (Parar or Trocar or Retomar)) _esperandoRetrato = true;
+        // (outra acao com a janela da compra aberta, como um emprestimo: o retrato dela refaz a
+        // tela, como sempre)
+        if (c is not (Parar or Trocar or Retomar or Comprar)) PararDeSegurar();
         _ = Task.Run(async () =>
         {
-            var r = await _cli.Executar(c);
+            Resposta r;
+            try { r = await _cli.Executar(c); }
+            catch (Exception ex) { r = Resposta.Recusado(ex.Message); }
             Dispatcher.UIThread.Post(() =>
             {
                 depois?.Invoke(r);
@@ -979,6 +987,57 @@ public sealed class JogoRemoto
                 }
             });
         });
+    }
+
+    // O Comprar da Lista de Jogadores e do plantel: no host a janela continua aberta, para comprar
+    // outro. Aqui o retrato que a compra provoca refazia a Sessao e a tela, e a janela sumia. Entao
+    // a compra aceita vale tambem nesta copia (a janela mostra o jogador sem preco e o dinheiro novo,
+    // como no host) e o retrato fica guardado ate a ultima janela fechar. fim: o host respondeu.
+    Sessao? _segurandoEm;
+    (Retrato R, string Rodada, int Versao, string Instancia)? _retratoGuardado;
+    int _comprasNoAr, _versaoDaCompra;
+
+    public void ComprarSemFechar(Sessao s, Equipa c, Equipa v, Jogador p, int preco, Action fim)
+    {
+        if (_segurandoEm != s)
+        {
+            PararDeSegurar();
+            _segurandoEm = s;
+            _versaoDaCompra = 0;
+            s.SemDialogos += Soltar;
+        }
+        _comprasNoAr++;
+        Executar(new Comprar(v.ID, p.ID, preco), r =>
+        {
+            _comprasNoAr--;
+            if (r.Ok)
+            {
+                _versaoDaCompra = Math.Max(_versaoDaCompra, r.Versao);
+                int k = v.Jogadores.FindIndex(x => x.ID == p.ID);
+                if (k >= 0 && v.Jogadores[k].W36 == 0) s.Mercado.Comprar(c, v, k, preco, s.J.Op.Registrado);
+                TelaDinheiro.Avisar(c);
+            }
+            fim();
+            Soltar();
+        });
+    }
+
+    // as janelas fecharam e nenhuma compra esta sem resposta: a tela se refaz com o retrato guardado
+    // (o guardado pode ser de antes da ultima compra: o que traz a compra refaz a tela ao chegar;
+    // a resposta e o retrato vem por caminhos separados, em qualquer ordem)
+    void Soltar()
+    {
+        if (_segurandoEm is not { TemDialogos: false } || _comprasNoAr > 0) return;
+        var guardado = _retratoGuardado;
+        PararDeSegurar();
+        if (guardado is { } g && g.Versao >= _versaoDaCompra) Novo(g.R, g.Rodada, g.Versao, g.Instancia);
+    }
+
+    void PararDeSegurar()
+    {
+        if (_segurandoEm is { } s) s.SemDialogos -= Soltar;
+        _segurandoEm = null;
+        _retratoGuardado = null;
     }
 
     // sai do jogo: a vaga e o time ficam (volta em Jogo online > Entrar, com a mesma chave)

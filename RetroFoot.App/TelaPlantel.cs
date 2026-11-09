@@ -227,6 +227,8 @@ public static partial class TelaPlantel
             _preco = p == null || e == null ? 0 : S.Mercado.PrecoParaComprar(c, e, p);
         }
 
+        bool _comprando;
+
         // buyBtnClick (10:1d66): MercadoJogo.Comprar e Update. A compra direta exige o jogo
         // registado (Opcoes.Registrado, sempre true: o RetroFoot nao tem registo).
         void Comprar()
@@ -234,8 +236,23 @@ public static partial class TelaPlantel
             var (p, k) = Escolhido();
             var e = Mostrada();
             var c = Compradora();
-            if (p == null || e == null || c == null || _preco <= 0) return;
-            if (S.Remoto is { } rm) { rm.Executar(new RetroFoot.Motor.Online.Comprar(e.ID, p.ID, _preco)); return; }
+            if (p == null || e == null || c == null || _preco <= 0 || _comprando) return;
+            if (S.Remoto is { } rm)
+            {
+                // (jogo online, no convidado: a janela continua aberta, como no host; o Comprar
+                // fica desligado ate o host responder)
+                _comprando = true;
+                int preco = _preco;
+                _preco = 0;
+                Redesenhar();
+                rm.ComprarSemFechar(S, c, e, p, preco, () =>
+                {
+                    _comprando = false;
+                    _inicial = 0;
+                    Atualizar();
+                });
+                return;
+            }
             S.Mercado.Comprar(c, e, k, _preco, registado: S.J.Op.Registrado);
             // (as janelas que mostram o dinheiro em caixa se refazem: a Lista de Jogadores
             // aberta por baixo, a tela da equipa)
